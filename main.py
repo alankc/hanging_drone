@@ -10,7 +10,7 @@ from threading import Event
 from easydrone import EasyDrone
 from vision import Vision
 from stereo import Stereo
-
+from laning_pipeline import LandingPipeline
 
 select_rect = []
 
@@ -45,6 +45,7 @@ if __name__ == "__main__":
             
     
     ed = EasyDrone(True)
+    ed.connect()
     ed.start()
     
     v = Vision()
@@ -66,8 +67,8 @@ if __name__ == "__main__":
     s = Stereo()
     s.set_camera_params(fx, fy, -13, cx, cy)
 
-    kp_ref = None
-    dsc_ref = None
+    k_ref = None
+    d_ref = None
 
     ed.takeoff()
     #td.manual_takeoff()
@@ -96,12 +97,14 @@ if __name__ == "__main__":
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
-            ed.stop()
+            ed.land()
+            time.sleep(5)
+            ed.quit()
             select_rect = []
-            break
+            exit(0)
 
         if key == ord("1"):
-            kp_ref, dsc_ref = v.detect_features_in_polygon(image, np.array(select_rect))
+            k_ref, d_ref = v.detect_features_in_polygon(image, np.array(select_rect))
             break
 
         if key == ord("2"):
@@ -112,8 +115,8 @@ if __name__ == "__main__":
     #(cx, cy) = np.mean([x.pt for x in kp_ref], axis=0)
     cx = int(round(cx, 0))
     cy = int(round(cy, 0))
-    #print((cx, cy))
-    ut.stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, ed, v, s, out_file)
-
-    ed.land()
-    ed.quit()
+    
+    if len(select_rect) > 2:
+        lp = LandingPipeline(ed, s, v, k_ref, d_ref, cx, cy)
+        lp.PID_setup()
+        lp.run()
