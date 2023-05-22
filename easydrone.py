@@ -33,11 +33,11 @@ class EasyDrone(Thread):
     def land(self):
         self.__drone.land()
 
-    def rc_control(self, pitch:float = 0, roll:float = 0, yaw:float = 0, throttle:float = 0):
+    def rc_control(self, throttle:float = 0, pitch:float = 0, roll:float = 0, yaw:float = 0):
+        self.__drone.set_throttle(throttle)
         self.__drone.set_pitch(pitch)
         self.__drone.set_roll(roll)
         self.__drone.set_yaw(yaw)
-        self.__drone.set_throttle(throttle)
 
     def quit(self):
         self.__event.set()
