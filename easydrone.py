@@ -39,6 +39,18 @@ class EasyDrone(Thread):
         self.__drone.set_roll(roll)
         self.__drone.set_yaw(yaw)
 
+    def set_throttle(self, throttle:float):
+        self.__drone.set_throttle(throttle)
+
+    def set_pitch(self, pitch:float):
+        self.__drone.set_pitch(pitch)
+
+    def set_roll(self, roll:float):
+        self.__drone.set_roll(roll)
+
+    def set_yaw(self, yaw:float):
+        self.__drone.set_yaw(yaw)
+
     def quit(self):
         self.__event.set()
         self.__drone.quit()

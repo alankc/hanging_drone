@@ -42,7 +42,7 @@ def draw_rectangle(image, start_point, end_point):
     thickness = 2
     cv2.rectangle(image, start_point, end_point, color, thickness)
 
-def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:Vision, s:Stereo, out_file):
+def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, ed:EasyDrone, v:Vision, s:Stereo, out_file):
 
     if kp_ref is None:
         return
@@ -155,8 +155,7 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
                 #error ok, so stop and save keypoints and descriptors
                 if (abs(error_cy) < 10) and (abs(error_cx) < 10) and abs(ctrl_screen_yaw) < 0.1 and abs(ctrl_screen_height) < 0.1:
                     #stop the drone
-                    td.set_yaw(0)
-                    td.set_throttle(0)
+                    ed.rc_control()
                     pid_screen_yaw.set_auto_mode(enabled=True, last_output=0)
                     pid_screen_height.set_auto_mode(enabled=True, last_output=0)
 
@@ -175,13 +174,13 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
                     #break #remove after put another state
                     continue
 
-                td.set_yaw(ctrl_screen_yaw)
-                td.set_throttle(ctrl_screen_height)
+                ed.set_yaw(ctrl_screen_yaw)
+                ed.set_throttle(ctrl_screen_height)
             else:
-                td.set_yaw(0)
+                ed.set_yaw(0)
                 pid_screen_yaw.set_auto_mode(enabled=True, last_output=0)
                 
-                td.set_throttle(0)
+                ed.set_throttle(0)
                 pid_screen_height.set_auto_mode(enabled=True, last_output=0)
 
         #state 1: center cx and move up
@@ -189,7 +188,7 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
 
             error_cy = pid_height.setpoint - ed.get_curr_pos()[2] 
             ctrl_height = np.round(pid_height(ed.get_curr_pos()[2]), 2)
-            td.set_throttle(ctrl_height)
+            ed.set_throttle(ctrl_height)
 
             if abs(error_cy) < 2 and abs(ctrl_height) < 0.1:
                 k2, d2 = v.detect_features(image)
@@ -207,8 +206,7 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
                     #error ok, so stop and save keypoints and descriptors
                     if (abs(error_cy) < 2) and (abs(error_cx) < 10) and abs(ctrl_height) < 0.05 and abs(ctrl_screen_yaw) < 0.1:
                         #stop the drone
-                        td.set_yaw(0)
-                        td.set_throttle(0)
+                        ed.rc_control()
                         pid_screen_yaw.set_auto_mode(enabled=True, last_output=0)
                         pid_height.set_auto_mode(enabled=True, last_output=0)
 
@@ -228,14 +226,14 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
                         #break #remove after put another state
                         continue
 
-                    td.set_yaw(ctrl_screen_yaw)
+                    ed.set_yaw(ctrl_screen_yaw)
 
                 else: # YES, it is necessary, do not remove!
-                    td.set_yaw(0)
+                    ed.set_yaw(0)
                     pid_screen_yaw.set_auto_mode(enabled=True, last_output=0)
             
             else: # YES, it is also necessary, do not remove!
-                td.set_yaw(0)
+                ed.set_yaw(0)
                 pid_screen_yaw.set_auto_mode(enabled=True, last_output=0)
         
         #state 2: compute landing site position
@@ -324,19 +322,18 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
             #################
 
             ctrl_height = np.round(pid_height(height), 2)
-            td.set_throttle(ctrl_height)
+            ed.set_throttle(ctrl_height)
 
             ctrl_roll = np.round(pid_roll(x), 2)
-            td.set_roll(ctrl_roll)
-
+            ed.set_roll(ctrl_roll)
+            
             error_cy = pid_height.setpoint - height
             error_cx = pid_roll.setpoint - x
             draw_text(image_s, f"error_x={np.round(error_cx, 1)}", 0)
             draw_text(image_s, f"error_y={np.round(error_cy, 1)}", 1)
             if abs(error_cy) < 2 and abs(ctrl_height) < 0.1 and abs(error_cx) < 1 and abs(ctrl_roll) < 0.1:
-                td.set_throttle(0)
+                ed.rc_control()
                 pid_height.set_auto_mode(enabled=True, last_output=0)
-                td.set_roll(0)
                 pid_roll.set_auto_mode(enabled=True, last_output=0)
                 state = 4
 
@@ -351,13 +348,10 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
             #################
 
             ctrl_height = np.round(pid_height(height), 2)
-            td.set_throttle(ctrl_height)
-
             ctrl_pitch = np.round(pid_forward(depth), 2)
-            td.set_pitch(ctrl_pitch)
-
             ctrl_roll = np.round(pid_roll(x), 2)
-            td.set_roll(ctrl_roll)
+
+            ed.rc_control(throttle=ctrl_height, pitch=ctrl_pitch, roll=ctrl_roll)
 
             time.sleep(0.5)
             state = 5
@@ -378,16 +372,11 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
             #################
 
             ctrl_height = np.round(pid_height(height), 2)
-            td.set_throttle(ctrl_height)
-
             ctrl_pitch = np.round(pid_forward(depth), 2)
-            td.set_pitch(ctrl_pitch)
-
             ctrl_roll = np.round(pid_roll(x), 2)
-            td.set_roll(ctrl_roll)
-
             ctrl_yaw = np.round(pid_yaw(curr_yaw), 2)
-            td.set_yaw(ctrl_yaw)
+            
+            ed.rc_control(ctrl_height, ctrl_pitch, ctrl_roll, ctrl_yaw)
 
             speed_x = ed.get_curr_speed_corrected()[0]
             if speed_x > max_speed_x:
@@ -398,9 +387,9 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
             #this 20% is just to ensure because sometimes the drone moves a little back
             if (ed.get_curr_speed_corrected()[0] < 0.01 * max_speed_x and pid_error_test):
                 state = 6
-                td.set_pitch(0.5)
+                ed.set_pitch(0.5)
                 time.sleep(1)
-                td.set_throttle(-0.5)
+                ed.set_throttle(-0.5)
                 time.sleep(0.5)
                 break
 
@@ -433,13 +422,9 @@ def stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td:Tello, ed:EasyDrone, v:V
             extra_print = True
 
 
-    td.set_pitch(0)
-    td.set_yaw(0)
-    td.set_throttle(0)
-    td.set_roll(0)
-    td.land()
-    ed.stop()
-    td.quit()
+    ed.rc_control()
+    ed.land()
+    ed.quit()
 
     if state == 6:
         print("*************************************************")
