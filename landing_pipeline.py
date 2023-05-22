@@ -9,7 +9,7 @@ from stereo import Stereo
 from vision import Vision
 
 class LandingPipeline:
-    def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, k_ref, d_ref, cx, cy, odom:bool = False) -> None:
+    def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, k_ref, d_ref, cx, cy, odom_file = None) -> None:
         self.__ed = ed
         self.__s = s
         self.__v = v
@@ -17,7 +17,7 @@ class LandingPipeline:
         self.__d_ref = d_ref
         self.__cx = cx
         self.__cy = cy
-        self.__odom = odom
+        self.__odom_file = odom_file
         self.__state = 0
 
 
@@ -187,12 +187,12 @@ class LandingPipeline:
             
     #state 1: center cx and move up
     def state_1(self):
-        error_cy = self.__pid_throttle.setpoint - self.__ed.get_curr_pos()[2]
+        error_cz = self.__pid_throttle.setpoint - self.__ed.get_curr_pos()[2]
         #computing control output based on height
         ctrl_throttle = np.round(self.__pid_throttle(self.__ed.get_curr_pos()[2]), 2)
         self.__ed.set_throttle(ctrl_throttle)
 
-        if abs(error_cy) < 2 and abs(ctrl_throttle) < 0.1:
+        if abs(error_cz) < 2 and abs(ctrl_throttle) < 0.1:
             k, d = self.__v.detect_features(self.__image)
             
             #get list of matched features
@@ -209,7 +209,7 @@ class LandingPipeline:
                 self.__ed.set_yaw(ctrl_s_yaw)
 
                 #drawing the point in image that must be in the center
-                ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy + error_cy)))
+                ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy)))
 
                 #stop criteria of esate 1
                 if (abs(error_cx) < 10) and (abs(ctrl_throttle) < 0.05) and (abs(ctrl_s_yaw) < 0.1):
@@ -272,7 +272,6 @@ class LandingPipeline:
         (drone_y, drone_x, drone_z) = self.__ed.rotate_pos(self.__p_end)
         drone_yaw = self.__ed.get_curr_yaw()
 
-
         #Adjust constants in in world's coordinates
         y_adjust = 20 + np.abs(self.__p_start[0] - self.__p_end[0])
         t_adjust = -8
@@ -287,7 +286,7 @@ class LandingPipeline:
         min_pos = ("min", np.min(x_out) + drone_x, np.min(depth_out) + drone_y + y_adjust, np.min(y_out) + drone_z - t_adjust)
         max_pos = ("max", np.max(x_out) + drone_x, np.max(depth_out) + drone_y + y_adjust, np.max(y_out) + drone_z - t_adjust)
         dlp     = ("dlp", self.__pid_roll.setpoint, self.__pid_pitch.setpoint, self.__pid_throttle.setpoint, self.__pid_yaw.setpoint)
-        if self.__odom:
+        if not (self.__odom_file is None):
             self.__odom_start_time = time.time()
             self.__odometry = []
             self.__odometry.append(min_pos)
@@ -302,10 +301,48 @@ class LandingPipeline:
         print(f"{max_pos}")
         print(f"{dlp}")
         print("-----------------------------------------------")
-        self.__state = 7
+        self.__state = 3
 
     def state_3(self):
-        pass
+        (y, x, z) = self.__ed.get_curr_pos_corrected()
+
+        ### ODOM DATA ###
+        if not (self.__odom_file is None):
+            curr_time = time.time() - self.__odom_start_time
+            self.__odometry.append((curr_time, x, y, z, self.__ed.get_curr_yaw()))
+        #################
+
+        #computing errors in x and z
+        error_cz = self.__pid_throttle.setpoint - z
+        error_cx = self.__pid_roll.setpoint - x
+
+        #computing throttle output
+        ctrl_throttle = np.round(self.__pid_throttle(z), 2)
+        self.__ed.set_throttle(ctrl_throttle)
+
+        #if height is good enought, adjust the x position
+        if (abs(error_cz) < 2) and (abs(ctrl_throttle) < 0.1):
+            ctrl_roll = np.round(self.__pid_roll(x), 2)
+            self.__ed.set_roll(ctrl_roll)
+
+            #stop condition state 3
+            if (abs(error_cx) < 1) and (abs(ctrl_roll) < 0.1):
+                self.__ed.rc_control()
+                self.__pid_throttle.set_auto_mode(enabled=True, last_output=0)
+                self.__pid_roll.set_auto_mode(enabled=True, last_output=0)
+                print("-----------------------------------------------")
+                print( " STATE 3 END")
+                print(f"error_x={np.round(error_cx, 1)}")
+                print(f"error_z={np.round(error_cz, 1)}")
+                print("-----------------------------------------------")
+                self.__state = 7
+
+        else:
+            self.__ed.set_roll(0)
+            self.__pid_roll.set_auto_mode(enabled=True, last_output=0)
+
+        ut.draw_text(self.__image_s, f"error_x={np.round(error_cx, 1)}", 0)
+        ut.draw_text(self.__image_s, f"error_z={np.round(error_cz, 1)}", 1)
 
     def state_4(self):
         pass

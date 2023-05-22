@@ -27,21 +27,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-f', '--folder_path',
-                        required=True,
+                        required=False,
+                        default=None,
                         help='Folder path to save the images'
                         )
     
     args = parser.parse_args()
 
-    if os.path.exists(args.folder_path):
-        print("======================================================")
-        print("================ File already exists =================")
-        print("======================================================")
-        exit(0)
-    else:
-        if not os.path.exists(os.path.dirname(args.folder_path)):
-            os.makedirs(os.path.dirname(args.folder_path))
-        out_file = open(args.folder_path, "w")
+    out_file = None
+    if not (args.folder_path is None):
+        if os.path.exists(args.folder_path):
+            print("======================================================")
+            print("================ File already exists =================")
+            print("======================================================")
+            exit(0)
+        else:
+            if not os.path.exists(os.path.dirname(args.folder_path)):
+                os.makedirs(os.path.dirname(args.folder_path))
+            out_file = open(args.folder_path, "w")
             
     
     ed = EasyDrone(True)
@@ -117,6 +120,6 @@ if __name__ == "__main__":
     cy = int(round(cy, 0))
     
     if len(select_rect) > 2:
-        lp = LandingPipeline(ed, s, v, k_ref, d_ref, cx, cy)
+        lp = LandingPipeline(ed, s, v, k_ref, d_ref, cx, cy, out_file)
         lp.PID_setup()
         lp.run()
