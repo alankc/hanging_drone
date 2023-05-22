@@ -44,11 +44,7 @@ if __name__ == "__main__":
         out_file = open(args.folder_path, "w")
             
     
-    td = tellopy.Tello()
-    td.connect()
-    td.wait_for_connection(60.0)
-
-    ed = EasyDrone(td, True)
+    ed = EasyDrone(True)
     ed.start()
     
     v = Vision()
@@ -73,7 +69,7 @@ if __name__ == "__main__":
     kp_ref = None
     dsc_ref = None
 
-    td.takeoff()
+    ed.takeoff()
     #td.manual_takeoff()
 
     cv2.namedWindow("Camera")
@@ -117,8 +113,7 @@ if __name__ == "__main__":
     cx = int(round(cx, 0))
     cy = int(round(cy, 0))
     #print((cx, cy))
-    ut.stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, td, ed, v, s, out_file)
+    ut.stereo_landing_pipeline(cx, cy, kp_ref, dsc_ref, ed, v, s, out_file)
 
-    td.land()
-    ed.stop()
-    td.quit()
+    ed.land()
+    ed.quit()
