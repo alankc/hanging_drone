@@ -9,11 +9,11 @@ import numpy as np
 from pyquaternion import Quaternion
 
 class EasyDrone(Thread):
-    def __init__(self, drone:tellopy.Tello, get_log_data:bool = True) -> None:
+    def __init__(self, get_log_data:bool = True) -> None:
         
         super(EasyDrone, self).__init__()
 
-        self.__drone = drone
+        self.__drone = None
         self.__curr_frame = None
         self.__event = Event()
         self.mvo = None
@@ -22,8 +22,26 @@ class EasyDrone(Thread):
         self.__q = Quaternion(1,0,0,0) #No rotation
         self.__start_yaw = 0
     
-    def stop(self):
+    def connect(self):
+        self.__drone = tellopy.Tello()
+        self.__drone.connect()
+        self.__drone.wait_for_connection(60.0)
+
+    def takeoff(self):
+        self.__drone.takeoff()
+
+    def land(self):
+        self.__drone.land()
+
+    def rc_control(self, pitch:float = 0, roll:float = 0, yaw:float = 0, throttle:float = 0):
+        self.__drone.set_pitch(pitch)
+        self.__drone.set_roll(roll)
+        self.__drone.set_yaw(yaw)
+        self.__drone.set_throttle(throttle)
+
+    def quit(self):
         self.__event.set()
+        self.__drone.quit()
 
     def handler_log_data(self, event, sender, data, **args):
         drone = sender
