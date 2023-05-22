@@ -10,7 +10,7 @@ from threading import Event
 from easydrone import EasyDrone
 from vision import Vision
 from stereo import Stereo
-from laning_pipeline import LandingPipeline
+from landing_pipeline import LandingPipeline
 
 select_rect = []
 
