@@ -9,7 +9,7 @@ from stereo import Stereo
 from vision import Vision
 
 class LandingPipeline:
-    def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, k_ref, d_ref, cx, cy) -> None:
+    def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, k_ref, d_ref, cx, cy, odom:bool = False) -> None:
         self.__ed = ed
         self.__s = s
         self.__v = v
@@ -17,7 +17,7 @@ class LandingPipeline:
         self.__d_ref = d_ref
         self.__cx = cx
         self.__cy = cy
-
+        self.__odom = odom
         self.__state = 0
 
 
@@ -130,6 +130,7 @@ class LandingPipeline:
         time.sleep(5)
         self.__ed.quit()
 
+    #state 0: the drone has to center a region of interest with cx and cy
     def state_0(self):
         #detect features in the current image
         k, d = self.__v.detect_features(self.__image)
@@ -184,7 +185,7 @@ class LandingPipeline:
             self.__ed.set_throttle(0)
             self.__pid_s_throttle.set_auto_mode(enabled=True, last_output=0)     
             
-
+    #state 1: center cx and move up
     def state_1(self):
         error_cy = self.__pid_throttle.setpoint - self.__ed.get_curr_pos()[2]
         #computing control output based on height
@@ -218,8 +219,8 @@ class LandingPipeline:
                     self.__pid_throttle.set_auto_mode(enabled=True, last_output=0)
 
                     #save keypoints, descriptors and good matches
-                    self.__k_end = k_curr
-                    self.__d_end = d_curr
+                    self.__k_end = k
+                    self.__d_end = d
                     self.__good_matches = matches
 
                     #save current pose
@@ -230,7 +231,7 @@ class LandingPipeline:
                     print( " STATE 1 END")
                     print(f" End Position: {self.__p_end} ")
                     print("-----------------------------------------------")
-                    self.__state = 7   
+                    self.__state = 2   
 
             else: # YES, it is necessary, do not remove!
                 self.__ed.set_yaw(0)
@@ -240,9 +241,68 @@ class LandingPipeline:
             self.__ed.set_yaw(0)
             self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
 
-
+    #state 2: compute landing site position
     def state_2(self):
-        pass
+        #compute relative position
+        ty = self.__p_end[2] - self.__p_start[2]
+        # x, y in the image and depth 
+        x_out, y_out, depth_out, yaw_out, roll_out  = self.__s.compute_relative_depth(ty, self.__k_start, self.__k_end, self.__good_matches)
+
+        if abs(roll_out) > 15: #cant land
+            print("*************************************************")
+            print("*************************************************")
+            print("************** ROLL ANGLE TOO BIG ***************")
+            print("*************************************************")
+            print("*************************************************")
+            state = 7
+
+        #choose as landing site the detect feature neares the mean
+        # 1 - Compute mean
+        depth_mean = np.mean(depth_out)
+        # 2 - Calculate the difference array
+        difference_array = np.absolute(depth_out-depth_mean)
+        # 3 - Find the index of minimum element from the array
+        index = difference_array.argmin()
+        # 4 - Get the nearest position of the mean in world's coordinates
+        y_pos = depth_mean
+        x_pos = x_out[index]
+        z_pos = y_out[index]
+
+        #Getting drone pose adjusted
+        (drone_y, drone_x, drone_z) = self.__ed.rotate_pos(self.__p_end)
+        drone_yaw = self.__ed.get_curr_yaw()
+
+
+        #Adjust constants in in world's coordinates
+        y_adjust = 20 + np.abs(self.__p_start[0] - self.__p_end[0])
+        t_adjust = -8
+
+        #Setting PID's setpoints in world's coordinates
+        self.__pid_pitch.setpoint     = drone_y + y_pos + y_adjust
+        self.__pid_roll.setpoint      = drone_x + x_pos
+        self.__pid_throttle.setpoint  = drone_z + t_adjust
+        self.__pid_yaw.setpoint       = drone_yaw - yaw_out
+
+        ### ODOM DATA ###
+        min_pos = ("min", np.min(x_out) + drone_x, np.min(depth_out) + drone_y + y_adjust, np.min(y_out) + drone_z - t_adjust)
+        max_pos = ("max", np.max(x_out) + drone_x, np.max(depth_out) + drone_y + y_adjust, np.max(y_out) + drone_z - t_adjust)
+        dlp     = ("dlp", self.__pid_roll.setpoint, self.__pid_pitch.setpoint, self.__pid_throttle.setpoint, self.__pid_yaw.setpoint)
+        if self.__odom:
+            self.__odom_start_time = time.time()
+            self.__odometry = []
+            self.__odometry.append(min_pos)
+            self.__odometry.append(max_pos)
+            self.__odometry.append(dlp)
+            self.__odometry.append((0, drone_x, drone_y, drone_z, drone_yaw))
+        #################
+
+        print("-----------------------------------------------")
+        print( " STATE 2 END")
+        print(f"{min_pos}")
+        print(f"{max_pos}")
+        print(f"{dlp}")
+        print("-----------------------------------------------")
+        self.__state = 7
 
     def state_3(self):
         pass
