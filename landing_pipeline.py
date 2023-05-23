@@ -66,7 +66,7 @@ class LandingPipeline:
         time_start = time.time()
         alpha = 0.1
         fps = 0
-        while self.__state < 6:
+        while self.__state < 7:
 
             image = self.__ed.get_curr_frame()
             if image is None:
@@ -106,7 +106,7 @@ class LandingPipeline:
 
             if loop_state == 6:
                 self.state_6()
-            
+           
             if time.time() - time_start > 0:
                 fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
                 time_start = time.time()
@@ -123,12 +123,14 @@ class LandingPipeline:
                 self.__ed.land()
                 time.sleep(5)
                 self.__ed.quit()
+                print("*************************************************")
+                print("*************************************************")
+                print("*************** LAND CANCELED *******************")
+                print("*************************************************")
+                print("*************************************************")
                 break
-
-        print("STATE 7")
-        self.__ed.land()
-        time.sleep(5)
-        self.__ed.quit()
+        
+        cv2.destroyAllWindows()
 
     #state 0: the drone has to center a region of interest with cx and cy
     def state_0(self):
@@ -279,13 +281,15 @@ class LandingPipeline:
         #Setting PID's setpoints in world's coordinates
         self.__pid_pitch.setpoint     = drone_y + y_pos + y_adjust
         self.__pid_roll.setpoint      = drone_x + x_pos
-        self.__pid_throttle.setpoint  = drone_z + t_adjust
+        self.__pid_throttle.setpoint  = drone_z + z_pos + t_adjust
         self.__pid_yaw.setpoint       = drone_yaw - yaw_out
 
         ### ODOM DATA ###
-        min_pos = ("min", np.min(x_out) + drone_x, np.min(depth_out) + drone_y + y_adjust, np.min(y_out) + drone_z - t_adjust)
-        max_pos = ("max", np.max(x_out) + drone_x, np.max(depth_out) + drone_y + y_adjust, np.max(y_out) + drone_z - t_adjust)
-        dlp     = ("dlp", self.__pid_roll.setpoint, self.__pid_pitch.setpoint, self.__pid_throttle.setpoint, self.__pid_yaw.setpoint)
+        min_pos    = ("min", np.min(x_out) + drone_x, np.min(depth_out) + drone_y + y_adjust, np.min(y_out) + drone_z - t_adjust)
+        max_pos    = ("max", np.max(x_out) + drone_x, np.max(depth_out) + drone_y + y_adjust, np.max(y_out) + drone_z - t_adjust)
+        dlp        = ("dlp", self.__pid_roll.setpoint, self.__pid_pitch.setpoint, self.__pid_throttle.setpoint, self.__pid_yaw.setpoint)
+        self.__dlp =  (self.__pid_roll.setpoint, self.__pid_pitch.setpoint, self.__pid_throttle.setpoint, self.__pid_yaw.setpoint)
+
         if not (self.__odom_file is None):
             self.__odom_start_time = time.time()
             self.__odometry = []
@@ -326,7 +330,7 @@ class LandingPipeline:
             self.__ed.set_roll(ctrl_roll)
 
             #stop condition state 3
-            if (abs(error_cx) < 1) and (abs(ctrl_roll) < 0.1):
+            if (abs(error_cz) < 1) and (abs(error_cx) < 1) and (abs(ctrl_roll) < 0.1):
                 self.__ed.rc_control()
                 self.__pid_throttle.set_auto_mode(enabled=True, last_output=0)
                 self.__pid_roll.set_auto_mode(enabled=True, last_output=0)
@@ -335,7 +339,7 @@ class LandingPipeline:
                 print(f"error_x={np.round(error_cx, 1)}")
                 print(f"error_z={np.round(error_cz, 1)}")
                 print("-----------------------------------------------")
-                self.__state = 7
+                self.__state = 4
 
         else:
             self.__ed.set_roll(0)
@@ -345,10 +349,91 @@ class LandingPipeline:
         ut.draw_text(self.__image_s, f"error_z={np.round(error_cz, 1)}", 1)
 
     def state_4(self):
-        pass
+        #ensure drone stoped
+        time.sleep(0.5)
+        (y, x, z) = self.__ed.get_curr_pos_corrected()
+
+        ### ODOM DATA ###
+        if not (self.__odom_file is None):
+            curr_time = time.time() - self.__odom_start_time
+            self.__odometry.append((curr_time, x, y, z, self.__ed.get_curr_yaw()))
+        #################
+
+        #computing controllers output
+        ctrl_throttle = np.round(self.__pid_throttle(z), 2)
+        ctrl_pitch    = np.round(self.__pid_pitch(y), 2)
+        ctrl_roll     = np.round(self.__pid_roll(x), 2)
+
+        self.__ed.rc_control(throttle=ctrl_throttle, pitch=ctrl_pitch, roll=ctrl_roll)
+
+        #ensure initial movement
+        time.sleep(0.5)
+
+        self.__state = 5
+        self.__max_speed_y = self.__ed.get_curr_speed_corrected()[0]
 
     def state_5(self):
-        pass
+        (y, x, z) = self.__ed.get_curr_pos_corrected()
+        yaw = self.__ed.get_curr_yaw()
+
+        ### ODOM DATA ###
+        if not (self.__odom_file is None):
+            curr_time = time.time() - self.__odom_start_time
+            self.__odometry.append((curr_time, x, y, z, yaw))
+        #################
+
+        ctrl_throttle = np.round(self.__pid_throttle(z), 2)
+        ctrl_pitch    = np.round(self.__pid_pitch(y), 2)
+        ctrl_roll     = np.round(self.__pid_roll(x), 2)
+        ctrl_yaw      = np.round(self.__pid_yaw(yaw), 2)
+            
+        self.__ed.rc_control(ctrl_throttle, ctrl_pitch, ctrl_roll, ctrl_yaw)
+
+        speed_y = self.__ed.get_curr_speed_corrected()[0]
+        if speed_y > self.__max_speed_y :
+            self.__max_speed_y  = speed_y
+
+        pid_error_test = abs(y - self.__pid_pitch.setpoint) < 0.8 * abs(self.__pid_pitch.setpoint)
+        #current speed < 1% of the maximum speed and the drone have moved at lest 20% forward
+        #this 20% is just to ensure because sometimes the drone moves a little back
+        if (speed_y < (0.01 * self.__max_speed_y))  and pid_error_test:
+            self.__ed.rc_control(pitch=0.5)
+            time.sleep(1)
+            self.__ed.set_throttle(-1)
+            time.sleep(0.5)
+            print("-----------------------------------------------")
+            print( " STATE 5 END")
+            print("-----------------------------------------------")
+            self.__state = 6
+
+        ut.draw_text(self.__image_s, f"landing_pos = {np.round(self.__dlp, 1)}", 0)
+        ut.draw_text(self.__image_s, f"curr_pos    = {np.round((x, y, z, yaw), 1)}", 1)
+        ut.draw_text(self.__image_s, f"max_speed   = {np.round(self.__max_speed_y, 1)}", 2)
+        ut.draw_text(self.__image_s, f"curr_speed  = {np.round(speed_y, 1)}", 3)
 
     def state_6(self):
-        pass
+        print("*************************************************")
+        print("*************************************************")
+        print("*************** LAND COMPLETE *******************")
+        print("*************************************************")
+        print("*************************************************")
+        self.__ed.land()
+        self.__ed.quit()
+        time.sleep(5)
+
+        if not (self.__odom_file is None):
+            f = self.__odom_file
+            
+            f.write("====================== HEADER ======================\n")
+            f.write("Odometry data will folow format (time, x, y, z, yaw)\n")
+            f.write("Landing site: (-1, x, y, z, yaw)\n")
+            f.write("X = left and right\n")
+            f.write("Y = foraward backward\n")
+            f.write("Z = height\n")
+            f.write("=====================================================\n")
+
+            for i in range(len(self.__odometry)):
+                f.write(f"{self.__odometry[i]}\n")
+            f.close()
+
+        self.__state = 7
