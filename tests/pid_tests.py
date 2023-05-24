@@ -41,8 +41,7 @@ def controller():
             data = system_get_out()
             ctrl = pid(data)
             system_set_ctrl(ctrl)
-            y_read.pop()
-            y_read.appendleft(data)
+            y_read.append(data)
         time.sleep(1/15)
 
 if __name__ == "__main__":
