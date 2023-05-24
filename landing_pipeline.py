@@ -42,21 +42,33 @@ class LandingPipeline:
         self.__pid_throttle.setpoint = 0
         self.__pid_throttle.sample_time = None
         self.__pid_throttle.set_auto_mode(True, last_output=0)
-
-        self.__pid_pitch = PID(Kp=1/30, Ki=0, Kd=0.25/25)
+        
+        KP = 1/150
+        TI = 8
+        TD = 1 
+        self.__pid_pitch = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
+        #self.__pid_pitch = PID(Kp=1/30, Ki=0, Kd=0.25/25)
         self.__pid_pitch.output_limits = (-0.2, 0.2) 
         self.__pid_pitch.setpoint = 0
         self.__pid_pitch.sample_time = None
         self.__pid_pitch.set_auto_mode(True, last_output=0)
 
+        KP = 1/150
+        TI = 5
+        TD = 2
+        self.__pid_roll = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
         #self.__pid_roll = PID(Kp=1/100, Ki=1/800, Kd=1/1100)
-        self.__pid_roll = PID(Kp=1/50, Ki=1/40, Kd=1/80) 
+        #self.__pid_roll = PID(Kp=1/50, Ki=1/40, Kd=1/80) #good one
         self.__pid_roll.output_limits = (-0.2, 0.2) 
         self.__pid_roll.setpoint = 0
         self.__pid_roll.sample_time = None
         self.__pid_roll.set_auto_mode(True, last_output=0)
-
-        self.__pid_yaw = PID(Kp=1/15, Ki=0, Kd=0.25/20)
+        
+        KP = 1/10
+        TI = 1
+        TD = 0.1
+        self.__pid_yaw = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
+        #self.__pid_yaw = PID(Kp=1/15, Ki=0, Kd=0.25/20)
         self.__pid_yaw.output_limits = (-0.5, 0.5) 
         self.__pid_yaw.setpoint = 0
         self.__pid_yaw.sample_time = None
