@@ -18,20 +18,59 @@ def nothing(x):
 
 x_time = collections.deque(maxlen=300)
 for t in range(300):
-    x_time.append(t * 0.2)
+    x_time.append(t * 0.05)
 y_setpoint = collections.deque(np.zeros(300))
 y_read = collections.deque(np.zeros(300))
 
-pid = PID(Kp=1/80, Ki=1/80, Kd=0)
-pid.output_limits = (-0.5, 0.5) 
+
+"""
+throttle
+KP = 1/80
+TI = 2
+TD = 2
+pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
+"""
+
+"""
+yaw
+
+KP = 1/10
+TI = 1
+TD = 0.1
+"""
+
+"""
+pitch
+KP = 1/150
+TI = 8
+TD = 1
+pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
+pid.output_limits = (-1, 0.2) 
+
+"""
+
+"""
+roll
+
+KP = 1/150
+TI = 5
+TD = 2
+"""
+
+
+KP = 1/150
+TI = 5
+TD = 2
+pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
+pid.output_limits = (-0.2, 0.2) 
 pid.setpoint = 0
 pid.sample_time = None
 pid.set_auto_mode(True, last_output=0)
 
 run_control = False
 ed = EasyDrone(True)
-system_set_ctrl = lambda ctrl: ed.rc_control(throttle=ctrl)
-system_get_out =  lambda : ed.get_curr_pos_corrected()[2]
+system_set_ctrl = lambda ctrl: ed.rc_control(roll=ctrl)
+system_get_out =  lambda : ed.get_curr_pos_corrected()[1]
 e = Event()
 
 def controller():
@@ -42,7 +81,7 @@ def controller():
             ctrl = pid(data)
             system_set_ctrl(ctrl)
             y_read.append(data)
-        time.sleep(1/15)
+        time.sleep(1/20)
 
 if __name__ == "__main__":
 
@@ -52,9 +91,9 @@ if __name__ == "__main__":
     ed.takeoff()
 
     cv2.namedWindow('Camera')
-    cv2.createTrackbar('Variation', 'Camera', 0, 20, nothing)
-    cv2.setTrackbarMin('Variation', 'Camera', -20)
-    cv2.setTrackbarPos('Variation', 'Camera', 20)
+    cv2.createTrackbar('Variation', 'Camera', 0, 40, nothing)
+    cv2.setTrackbarMin('Variation', 'Camera', -40)
+    cv2.setTrackbarPos('Variation', 'Camera', 40)
     
     time_start = time.time()
     alpha = 0.1
