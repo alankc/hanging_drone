@@ -269,7 +269,7 @@ class LandingPipeline:
             print("************** ROLL ANGLE TOO BIG ***************")
             print("*************************************************")
             print("*************************************************")
-            state = 7
+            self.__state = 7
 
         #choose as landing site the detect feature neares the mean
         # 1 - Compute mean
