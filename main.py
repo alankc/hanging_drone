@@ -1,6 +1,5 @@
 import cv2
 import pickle
-import tellopy
 import numpy as np
 import time
 import utils as ut
@@ -74,7 +73,7 @@ if __name__ == "__main__":
     d_ref = None
 
     ed.takeoff()
-    #td.manual_takeoff()
+    #ed.manual_takeoff()
 
     cv2.namedWindow("Camera")
     cv2.setMouseCallback("Camera", mouse_click)

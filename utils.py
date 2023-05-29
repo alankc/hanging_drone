@@ -44,35 +44,35 @@ def draw_rectangle(image, start_point, end_point):
 
 def rc_control(key, ed:EasyDrone):
     
-    if key == 82: #up
+    if key == ord("w"): #up
         ed.rc_control(throttle=0.25)
         return
 
-    if key == 84: #down
+    if key == ord("s"): #down
         ed.rc_control(throttle=-0.25)
         return
 
-    if key == 83: #cwr
+    if key == ord("d"): #cwr
         ed.rc_control(yaw=0.25)
         return
 
-    if key == 81: #ccwr
+    if key == ord("a"): #ccwr
         ed.rc_control(yaw=-0.5)
         return
 
-    if key == 151: #forward
+    if key == ord("i"): #forward
         ed.rc_control(pitch=0.5)
         return
 
-    if key == 153: #backward
+    if key == ord("k"): #backward
         ed.rc_control(pitch=-0.25)
         return
 
-    if key == 150: #left
+    if key == ord("j"): #left
         ed.rc_control(roll=-0.25)
         return
 
-    if key == 152: #right
+    if key == ord("l"): #right
         ed.rc_control(roll=0.25)
         return
 
