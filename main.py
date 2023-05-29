@@ -109,9 +109,10 @@ if __name__ == "__main__":
         if key == ord("1"):
             k_ref, d_ref = v.detect_features_in_polygon(image, np.array(select_rect))
             break
-
-        if key == ord("2"):
+        elif key == ord("2"):
             select_rect = []
+        else:
+            ut.rc_control(key, ed)
 
         #print(ed.get_curr_speed_corrected())
 

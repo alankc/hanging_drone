@@ -57,11 +57,11 @@ def rc_control(key, ed:EasyDrone):
         return
 
     if key == 81: #ccwr
-        ed.rc_control(yaw=-0.25)
+        ed.rc_control(yaw=-0.5)
         return
 
     if key == 151: #forward
-        ed.rc_control(pitch=0.25)
+        ed.rc_control(pitch=0.5)
         return
 
     if key == 153: #backward
