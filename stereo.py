@@ -2,6 +2,10 @@ import numpy as np
 import cv2
 from scipy.optimize import curve_fit
 
+from collections import deque
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
 """
 class stereo, computes distance using features in diferent photos
 """ 
@@ -57,6 +61,47 @@ class Stereo:
                 depth.append((pos_x, pos_y, depth_z))
         
         return depth
+    
+    def __k_means_filter(self, x, y, z):
+        data = []
+        for i in range(len(x)):
+            data.append([x[i], y[i]])
+        
+        data = np.array(data)
+
+        max_n_cluster = 2
+        max_derivate = 0
+        sil_coeff = deque(maxlen=3)
+        best_model = None
+
+        #selecting the number of clusters
+        for n_cluster in range(2, 8):
+            curr_kmeans = KMeans(n_init=500, n_clusters=n_cluster, algorithm='elkan', max_iter=500).fit(data)
+            curr_label  = curr_kmeans.labels_
+
+            if len(sil_coeff) < 2: #At least 3 elements in the deque to compute second derivate
+                sil_coeff.append(silhouette_score(data, curr_label, metric='euclidean'))
+                continue
+
+            sil_coeff.append(silhouette_score(data, curr_label, metric='euclidean'))
+
+            derivate = sil_coeff[2] + sil_coeff[0] - 2 * sil_coeff[1]
+            if derivate > max_derivate:
+                max_n_cluster = n_cluster - 1
+                max_derivate = derivate
+                best_model = curr_kmeans
+        
+
+        pred = best_model.labels_
+        data_by_cluster = [[] for j in range(max_n_cluster)] 
+        mean_by_cluster = [0 for j in range(max_n_cluster)] 
+        j = 0
+        for i in pred:
+            data_by_cluster[i].append(data[j][1])
+            j = j + 1
+
+
+
     """
     Return x, y (camera like) position, the depth from the second image, and
     the angle theta formed considerend x = x and y = depth
