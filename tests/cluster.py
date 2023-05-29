@@ -93,7 +93,8 @@ if __name__ == "__main__":
             k_curr_match, d_curr_match, error, good_matches = v.bf_matching_descriptors(d1, k2, d2, 0.7, (cx, cy)) #0.7 maibe??
             x_out, y_out, depth_out, yaw_out, roll_out  = s.compute_relative_depth(15, k1, k2, good_matches)
             frame = cv2.drawKeypoints(frame, k_curr_match, 0, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
-
+            
+            plt.ion()
             fig = plt.figure()
             ax = fig.add_subplot()
             if run_cluster:
