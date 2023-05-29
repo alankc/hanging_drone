@@ -62,11 +62,8 @@ class Stereo:
         
         return depth
     
-    def __k_means_filter(self, x, y, z):
-        data = []
-        for i in range(len(x)):
-            data.append([x[i], y[i]])
-        
+    def __k_means_filter(self, depth, x, y):
+        data = [[x[i], depth[i]] for i in range(len(x))]
         data = np.array(data)
 
         max_n_cluster = 2
@@ -94,13 +91,24 @@ class Stereo:
 
         pred = best_model.labels_
         data_by_cluster = [[] for j in range(max_n_cluster)] 
-        mean_by_cluster = [0 for j in range(max_n_cluster)] 
-        j = 0
-        for i in pred:
-            data_by_cluster[i].append(data[j][1])
-            j = j + 1
+        
+        #selecting the cluster with the smallest depth (y coordinate of real world) distance
+        for i in range(len(pred)):
+            data_by_cluster[pred[i]].append(data[i][1])
 
+        mean_by_cluster = np.mean(data_by_cluster, axis=1)
+        index = mean_by_cluster.argmin()
 
+        depth_out = []
+        x_out = []
+        y_out = []
+        for i in range(len(pred)):
+            if index == pred[i]:
+                depth_out.append(depth[i])
+                x_out.append(x[i])
+                y_out.append(y[i])
+        
+        return depth_out, x_out, y_out
 
     """
     Return x, y (camera like) position, the depth from the second image, and
