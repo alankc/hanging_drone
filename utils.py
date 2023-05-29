@@ -42,3 +42,38 @@ def draw_rectangle(image, start_point, end_point):
     thickness = 2
     cv2.rectangle(image, start_point, end_point, color, thickness)
 
+def rc_control(key, ed:EasyDrone):
+    
+    if key == 82: #up
+        ed.rc_control(throttle=0.25)
+        return
+
+    if key == 84: #down
+        ed.rc_control(throttle=-0.25)
+        return
+
+    if key == 83: #cwr
+        ed.rc_control(yaw=0.25)
+        return
+
+    if key == 81: #ccwr
+        ed.rc_control(yaw=-0.25)
+        return
+
+    if key == 151: #forward
+        ed.rc_control(pitch=0.25)
+        return
+
+    if key == 153: #backward
+        ed.rc_control(pitch=-0.25)
+        return
+
+    if key == 150: #left
+        ed.rc_control(roll=-0.25)
+        return
+
+    if key == 152: #right
+        ed.rc_control(roll=0.25)
+        return
+
+    ed.rc_control()
