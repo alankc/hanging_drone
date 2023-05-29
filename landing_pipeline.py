@@ -142,6 +142,15 @@ class LandingPipeline:
                 print("*************************************************")
                 print("*************************************************")
                 break
+            elif key == ord(" "):
+                if self.__state == -1:
+                    self.__state = 0 #OFF - RC CONTROL
+                    self.__ed.rc_control()
+                else:
+                    self.__state = -1 #ON - RC CONTROL
+                    self.__ed.rc_control()
+            elif loop_state == -1:
+                ut.rc_control(key, self.__ed)
         
         cv2.destroyAllWindows()
 
