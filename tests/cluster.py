@@ -129,7 +129,6 @@ if __name__ == "__main__":
                         best_model = kmeans
 
 
-                pred = best_model.predict(data)
                 ax.scatter(x_out, depth_out, s=300, c=best_model.labels_)
                 print("number of cluster found: {}".format(len(set(best_model.labels_))))
                 print('cluster for each point: ', best_model.labels_)
