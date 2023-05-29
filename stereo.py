@@ -70,9 +70,11 @@ class Stereo:
         max_derivate = 0
         sil_coeff = deque(maxlen=3)
         best_model = None
-
+        curr_kmeans = None
+        prev_kmeans = None
         #selecting the number of clusters
         for n_cluster in range(2, 8):
+            prev_kmeans = curr_kmeans
             curr_kmeans = KMeans(n_init=500, n_clusters=n_cluster, algorithm='elkan', max_iter=500).fit(data)
             curr_label  = curr_kmeans.labels_
 
@@ -86,7 +88,7 @@ class Stereo:
             if derivate > max_derivate:
                 max_n_cluster = n_cluster - 1
                 max_derivate = derivate
-                best_model = curr_kmeans
+                best_model = prev_kmeans
         
 
         pred = best_model.labels_
