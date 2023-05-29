@@ -107,8 +107,9 @@ if __name__ == "__main__":
                 max_derivate = 0
                 from collections import deque
                 sil_coeff = deque(maxlen=3)
-                for n_cluster in range(2, 10):
-                    kmeans = KMeans(n_init=1000, n_clusters=n_cluster, algorithm='elkan', max_iter=1000).fit(data)
+                best_model = None
+                for n_cluster in range(2, 8):
+                    kmeans = KMeans(n_init=500, n_clusters=n_cluster, algorithm='elkan', max_iter=500).fit(data)
                     label = kmeans.labels_
 
                     if len(sil_coeff) < 2:
@@ -125,15 +126,13 @@ if __name__ == "__main__":
                     if d > max_derivate:
                         max_n_cluster = n
                         max_derivate = d
+                        best_model = kmeans
 
 
-    
-                model = KMeans(n_init=100, n_clusters=max_n_cluster, algorithm='elkan', max_iter=1000)
-                model.fit_predict(data)
-                pred = model.fit_predict(data)
-                ax.scatter(x_out, depth_out, s=300, c=model.labels_)
-                print("number of cluster found: {}".format(len(set(model.labels_))))
-                print('cluster for each point: ', model.labels_)
+                pred = best_model.predict(data)
+                ax.scatter(x_out, depth_out, s=300, c=best_model.labels_)
+                print("number of cluster found: {}".format(len(set(best_model.labels_))))
+                print('cluster for each point: ', best_model.labels_)
             else:
                 ax.scatter(x_out, depth_out, s=300)
                 
