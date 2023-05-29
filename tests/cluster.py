@@ -91,10 +91,10 @@ if __name__ == "__main__":
             frame = s.rotateImage(cv2.imread(f"{folder_path}/2.png"))
             k2, d2 = v.detect_features(frame)
             k_curr_match, d_curr_match, error, good_matches = v.bf_matching_descriptors(d1, k2, d2, 0.7, (cx, cy)) #0.7 maibe??
-            x_out, y_out, depth_out, yaw_out, roll_out  = s.compute_relative_depth(15, k1, k2, good_matches)
+            x_out, y_out, depth_out, yaw_out, roll_out  = s.compute_relative_depth(15, k1, k2, good_matches, False)
             frame = cv2.drawKeypoints(frame, k_curr_match, 0, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
             
-            plt.ion()
+            #plt.ion()
             fig = plt.figure()
             ax = fig.add_subplot()
             if run_cluster:
@@ -109,9 +109,12 @@ if __name__ == "__main__":
                 from collections import deque
                 sil_coeff = deque(maxlen=3)
                 best_model = None
+                kmeans_curr = None
+                kmeans_prev = None
                 for n_cluster in range(2, 8):
-                    kmeans = KMeans(n_init=500, n_clusters=n_cluster, algorithm='elkan', max_iter=500).fit(data)
-                    label = kmeans.labels_
+                    kmeans_prev = kmeans_curr
+                    kmeans_curr = KMeans(n_init=1000, n_clusters=n_cluster, algorithm='elkan', max_iter=500).fit(data)
+                    label = kmeans_curr.labels_
 
                     if len(sil_coeff) < 2:
                         sil_coeff.append(silhouette_score(data, label, metric='euclidean'))
@@ -120,14 +123,14 @@ if __name__ == "__main__":
                     sil_coeff.append(silhouette_score(data, label, metric='euclidean'))
 
                     n = n_cluster - 1
-                    print(f"n={n}")
                     d = sil_coeff[2] + sil_coeff[0] - 2 * sil_coeff[1]
+                    print(f"n={n}")
                     print(f"d={d}")
                     print(f"--------")
                     if d > max_derivate:
                         max_n_cluster = n
                         max_derivate = d
-                        best_model = kmeans
+                        best_model = kmeans_prev
 
 
                 ax.scatter(x_out, depth_out, s=300, c=best_model.labels_)
