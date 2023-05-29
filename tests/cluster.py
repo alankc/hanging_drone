@@ -113,7 +113,7 @@ if __name__ == "__main__":
                 kmeans_prev = None
                 for n_cluster in range(2, 8):
                     kmeans_prev = kmeans_curr
-                    kmeans_curr = KMeans(n_init=1000, n_clusters=n_cluster, algorithm='elkan', max_iter=500).fit(data)
+                    kmeans_curr = KMeans(n_init=1000, n_clusters=n_cluster, algorithm='elkan', max_iter=1000).fit(data)
                     label = kmeans_curr.labels_
 
                     if len(sil_coeff) < 2:
