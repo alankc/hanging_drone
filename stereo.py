@@ -90,14 +90,14 @@ class Stereo:
         
 
         pred = best_model.labels_
-        data_by_cluster = [[] for j in range(max_n_cluster)] 
+        data_by_cluster = [[] for j in range(max_n_cluster + 1)] 
         
         #selecting the cluster with the smallest depth (y coordinate of real world) distance
         for i in range(len(pred)):
             data_by_cluster[pred[i]].append(data[i][1])
 
-        mean_by_cluster = np.mean(data_by_cluster, axis=1)
-        index = mean_by_cluster.argmin()
+        mean_by_cluster = [np.mean(i) for i in data_by_cluster]
+        index = np.argmin(mean_by_cluster)
 
         depth_out = []
         x_out = []
@@ -115,7 +115,7 @@ class Stereo:
     the angle theta formed considerend x = x and y = depth
     Theta is used to define the drone's yaw
     """
-    def compute_relative_depth(self, ty, kp1, kp2, matches):
+    def compute_relative_depth(self, ty, kp1, kp2, matches, kfilter = True, kdist = 50):
         # For each match compute the disparity, and 3D position
         depth_out = []
         x_out = []
@@ -150,6 +150,9 @@ class Stereo:
             depth_out.append(depth_z)
             x_out.append(pos_x)
             y_out.append(pos_y)
+
+        if kfilter and np.abs(max(depth_out) - min(depth_out)) > kdist:
+            depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out)
 
         #compute the yaw
         try:
