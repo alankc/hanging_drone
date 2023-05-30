@@ -15,9 +15,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 #%matplotlib inline
 from mpl_toolkits.mplot3d import Axes3D
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, BisectingKMeans
 from sklearn.metrics import silhouette_score
-
+#good: BisectingKMeans
 select_rect = []
 
 def mouse_click(event, x, y, flags, param):
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     intrinsics_path = "../drone/intrinsics.pkl"
     dist_path = "../drone/dist.pkl"
-    folder_path = "../exp1/images/140cm_y45_r0/"
+    folder_path = "../exp1/images/140cm_y0_r0/"
 
     camera_pitch = -13
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
             if run_cluster:
                 data = []
                 for i in range(len(x_out)):
-                    data.append([x_out[i], depth_out[i]])
+                    data.append([x_out[i], depth_out[i], y_out[i]])
                 
                 data = np.array(data)
 
@@ -111,9 +111,11 @@ if __name__ == "__main__":
                 best_model = None
                 kmeans_curr = None
                 kmeans_prev = None
+                sil_coeff.append(0)
                 for n_cluster in range(2, 8):
                     kmeans_prev = kmeans_curr
-                    kmeans_curr = KMeans(n_init=1000, n_clusters=n_cluster, algorithm='elkan', max_iter=1000).fit(data)
+                    #kmeans_curr = KMeans(n_init=1000, n_clusters=n_cluster, algorithm='lloyd', max_iter=1000).fit(data)
+                    kmeans_curr = BisectingKMeans(n_init=1000, n_clusters=n_cluster, algorithm='lloyd',bisecting_strategy='biggest_inertia').fit(data)
                     label = kmeans_curr.labels_
 
                     if len(sil_coeff) < 2:
