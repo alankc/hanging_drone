@@ -8,8 +8,16 @@ import cv2
 import numpy as np
 from pyquaternion import Quaternion
 
+#To use the Fakewebcam use:
+# sudo depmod -a
+# sudo modprobe -r v4l2loopback
+# sudo modprobe v4l2loopback  or sudo modprobe v4l2loopback video_nr=28
+# sudo v4l2-ctl --list-device
+
+from pyfakewebcam import FakeWebcam
+
 class EasyDrone(Thread):
-    def __init__(self, get_log_data:bool = True) -> None:
+    def __init__(self, get_log_data:bool = True, pub_video_stream:str = None) -> None:
         
         super(EasyDrone, self).__init__()
 
@@ -21,6 +29,11 @@ class EasyDrone(Thread):
         self.__get_log_data = get_log_data
         self.__q = Quaternion(1,0,0,0) #No rotation
         self.__start_yaw = 0
+
+        if not (pub_video_stream is None):
+            self.__camera = FakeWebcam(pub_video_stream, 960, 720)
+        else:
+            self.__camera = None
     
     def connect(self):
         self.__drone = tellopy.Tello()
@@ -152,6 +165,10 @@ class EasyDrone(Thread):
                     ############# END #############
                     ###############################
                     #"""
+                    
+                    #publishing video
+                    if not (self.__camera is None):
+                        self.__camera.schedule_frame(cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB))
                     
                     if frame.time_base < 1.0/60:
                         time_base = 1.0/60

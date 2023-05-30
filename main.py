@@ -31,6 +31,19 @@ if __name__ == "__main__":
                         help='Folder path to save the images'
                         )
     
+    parser.add_argument('-t', '--takeoff',
+                        action="store_true",
+                        required=False,
+                        default=False,
+                        help='Define if the drone takeoff'
+                        )
+    
+    parser.add_argument('-v', '--video_stream',
+                        required=False,
+                        default=None,
+                        help='Video stream'
+                        )
+    
     args = parser.parse_args()
 
     out_file = None
@@ -46,7 +59,7 @@ if __name__ == "__main__":
             out_file = open(args.folder_path, "w")
             
     
-    ed = EasyDrone(True)
+    ed = EasyDrone(True, args.video_stream)
     ed.connect()
     ed.start()
     
@@ -72,7 +85,8 @@ if __name__ == "__main__":
     k_ref = None
     d_ref = None
 
-    ed.takeoff()
+    if args.takeoff:
+        ed.takeoff()
     #ed.manual_takeoff()
 
     cv2.namedWindow("Camera")
