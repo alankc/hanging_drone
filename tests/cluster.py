@@ -100,7 +100,7 @@ if __name__ == "__main__":
             if run_cluster:
                 data = []
                 for i in range(len(x_out)):
-                    data.append([x_out[i], depth_out[i], y_out[i]])
+                    data.append([x_out[i], depth_out[i]])
                 
                 data = np.array(data)
 
