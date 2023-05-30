@@ -87,6 +87,8 @@ if __name__ == "__main__":
 
     if args.takeoff:
         ed.takeoff()
+    else:
+        ed.cooler_on()
     #ed.manual_takeoff()
 
     cv2.namedWindow("Camera")

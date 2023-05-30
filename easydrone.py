@@ -43,6 +43,9 @@ class EasyDrone(Thread):
     def takeoff(self):
         self.__drone.takeoff()
 
+    def cooler_on(self):
+        self.__drone.manual_takeoff()
+
     def land(self):
         self.__drone.land()
 
