@@ -3,7 +3,7 @@ import cv2
 from scipy.optimize import curve_fit
 
 from collections import deque
-from sklearn.cluster import BisectingKMeans
+from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
 """
@@ -76,7 +76,7 @@ class Stereo:
         #selecting the number of clusters
         for n_cluster in range(2, 8):
             prev_kmeans = curr_kmeans
-            curr_kmeans = BisectingKMeans(n_init=1000, n_clusters=n_cluster, algorithm='lloyd',bisecting_strategy='biggest_inertia').fit(data)
+            curr_kmeans = KMeans(n_init=1000, n_clusters=n_cluster, max_iter=1000, algorithm='lloyd').fit(data)
             curr_label  = curr_kmeans.labels_
 
             if len(sil_coeff) < 2: #At least 3 elements in the deque to compute second derivate
