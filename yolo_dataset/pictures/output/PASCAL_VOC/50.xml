@@ -1,0 +1,14 @@
+<annotation>
+  <folder>/home/x/Documents/landing_pipeline/yolo_dataset/pictures/out</folder>
+  <filename>50.png</filename>
+  <path>/home/x/Documents/landing_pipeline/yolo_dataset/pictures/out/50.png</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>960</width>
+    <height>720</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+</annotation>
