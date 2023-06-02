@@ -191,4 +191,52 @@
       <ymax>205</ymax>
     </bndbox>
   </object>
+  <object>
+    <name>branch</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>232</xmin>
+      <ymin>258</ymin>
+      <xmax>295</xmax>
+      <ymax>273</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>branch</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>281</xmin>
+      <ymin>563</ymin>
+      <xmax>312</xmax>
+      <ymax>589</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>branch</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>150</xmin>
+      <ymin>398</ymin>
+      <xmax>222</xmax>
+      <ymax>443</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>branch</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>527</xmin>
+      <ymin>267</ymin>
+      <xmax>578</xmax>
+      <ymax>311</ymax>
+    </bndbox>
+  </object>
 </annotation>
