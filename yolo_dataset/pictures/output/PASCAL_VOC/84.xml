@@ -11,4 +11,52 @@
     <depth>3</depth>
   </size>
   <segmented>0</segmented>
+  <object>
+    <name>trunk</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>604</xmin>
+      <ymin>19</ymin>
+      <xmax>728</xmax>
+      <ymax>350</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>trunk</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>626</xmin>
+      <ymin>334</ymin>
+      <xmax>756</xmax>
+      <ymax>600</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>trunk</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>653</xmin>
+      <ymin>565</ymin>
+      <xmax>782</xmax>
+      <ymax>718</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>branch</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>468</xmin>
+      <ymin>184</ymin>
+      <xmax>647</xmax>
+      <ymax>233</ymax>
+    </bndbox>
+  </object>
 </annotation>
