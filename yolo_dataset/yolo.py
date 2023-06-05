@@ -32,12 +32,13 @@ if __name__ == "__main__":
             cv2.imshow('Camera', frame)
             key = cv2.waitKey(1) & 0xFF
             continue
-
+        
+        image = image.copy()
         if time.time() - time_start > 0:
             fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
             time_start = time.time()
 
-        results = model(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), conf=0.8, classes=0)  # predict on an image
+        results = model(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), conf=0.6, classes=0)  # predict on an image
 
         for r in results:
             
