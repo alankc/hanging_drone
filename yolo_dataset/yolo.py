@@ -18,7 +18,7 @@ if __name__ == "__main__":
     ed = EasyDrone(True)
     ed.connect()
     ed.start()
-    ed.cooler_on()
+    #ed.cooler_on()
 
     time_start = time.time()
     fps = 0
@@ -37,7 +37,7 @@ if __name__ == "__main__":
             fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
             time_start = time.time()
 
-        results = model(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), conf=0.7)  # predict on an image
+        results = model(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), conf=0.8, classes=0)  # predict on an image
 
         for r in results:
             
@@ -48,7 +48,11 @@ if __name__ == "__main__":
                 
                 b = box.xyxy[0]  # get box coordinates in (top, left, bottom, right) format
                 c = box.cls
-                annotator.box_label(b, model.names[int(c)], (255,0,0))
+                #annotator.box_label(b, f"{model.names[int(c)]} {box.conf[0]} {b}", (255,0,0))
+                out = box.xyxy[0]
+                pt1 = (out[0].cpu().numpy(), out[1].cpu().numpy())
+                pt2 = (out[2].cpu().numpy(), out[3].cpu().numpy())
+                annotator.box_label(b, f"{pt1[0]:.0f} {pt1[1]:.0f} {pt2[0]:.0f} {pt2[1]:.0f}", (255,0,0))
             
         image = annotator.result() 
 
