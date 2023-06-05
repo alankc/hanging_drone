@@ -1,0 +1,8 @@
+path: /home/x/Documents/landing_pipeline/yolo_dataset/data/  # dataset root dir
+train: images/train  # train images (relative to 'path')
+val: images/valid/  # val images (relative to 'path')
+
+# Classes
+names:
+  0: branch
+  1: trunk
