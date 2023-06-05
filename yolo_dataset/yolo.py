@@ -50,9 +50,10 @@ if __name__ == "__main__":
                 c = box.cls
                 #annotator.box_label(b, f"{model.names[int(c)]} {box.conf[0]} {b}", (255,0,0))
                 out = box.xyxy[0]
-                pt1 = (out[0].cpu().numpy(), out[1].cpu().numpy())
-                pt2 = (out[2].cpu().numpy(), out[3].cpu().numpy())
-                annotator.box_label(b, f"{pt1[0]:.0f} {pt1[1]:.0f} {pt2[0]:.0f} {pt2[1]:.0f}", (255,0,0))
+                pt1 = np.int32((out[0].cpu().numpy(), out[1].cpu().numpy()))
+                pt2 = np.int32((out[2].cpu().numpy(), out[3].cpu().numpy()))
+                conf = box.conf.cpu().numpy()[0]
+                annotator.box_label(b, f"{conf:.2f} == {pt1[0]:.0f} {pt1[1]:.0f} {pt2[0]:.0f} {pt2[1]:.0f}", (255,0,0))
             
         image = annotator.result() 
 
