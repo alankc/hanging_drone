@@ -200,7 +200,7 @@ class LandingPipeline:
                 print( " STATE 0 END")
                 print(f" Start Position: {self.__p_start} ")
                 print("-----------------------------------------------")
-                self.__state = 1   
+                self.__state = self.__state + 1   
 
         else:
             self.__ed.set_yaw(0)
@@ -255,7 +255,7 @@ class LandingPipeline:
                     print( " STATE 1 END")
                     print(f" End Position: {self.__p_end} ")
                     print("-----------------------------------------------")
-                    self.__state = 2   
+                    self.__state = self.__state + 1   
 
             else: # YES, it is necessary, do not remove!
                 self.__ed.set_yaw(0)
@@ -327,7 +327,7 @@ class LandingPipeline:
         print(f"{max_pos}")
         print(f"{dlp}")
         print("-----------------------------------------------")
-        self.__state = 3
+        self.__state = self.__state + 1
 
     def state_3(self):
         (y, x, z) = self.__ed.get_curr_pos_corrected()
@@ -361,7 +361,7 @@ class LandingPipeline:
                 print(f"error_x={np.round(error_cx, 1)}")
                 print(f"error_z={np.round(error_cz, 1)}")
                 print("-----------------------------------------------")
-                self.__state = 4
+                self.__state = self.__state + 1
 
         else:
             self.__ed.set_roll(0)
@@ -391,7 +391,7 @@ class LandingPipeline:
         #ensure initial movement
         time.sleep(0.5)
 
-        self.__state = 5
+        self.__state = self.__state + 1
         self.__max_speed_y = self.__ed.get_curr_speed_corrected()[0]
 
     def state_5(self):
@@ -426,7 +426,7 @@ class LandingPipeline:
             print("-----------------------------------------------")
             print( " STATE 5 END")
             print("-----------------------------------------------")
-            self.__state = 6
+            self.__state = self.__state + 1
 
         ut.draw_text(self.__image_s, f"landing_pos = {np.round(self.__dlp, 1)}", 0)
         ut.draw_text(self.__image_s, f"curr_pos    = {np.round((x, y, z, yaw), 1)}", 1)
@@ -458,4 +458,4 @@ class LandingPipeline:
                 f.write(f"{self.__odometry[i]}\n")
             f.close()
 
-        self.__state = 7
+        self.__state = self.__state + 1
