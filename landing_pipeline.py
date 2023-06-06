@@ -182,9 +182,6 @@ class LandingPipeline:
             self.__ed.set_yaw(ctrl_s_yaw)
             self.__ed.set_throttle(ctrl_s_throttle)
 
-            #drawing the point in image that must be in the center
-            ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy + error_cy)))
-
             #error in y and x < 10 pixels and control output for yaw and throttle < 0.1
             if (abs(error_cy) < 10) and (abs(error_cx) < 10) and (abs(ctrl_s_yaw) < 0.1) and (abs(ctrl_s_throttle) < 0.1):
                 #stop the drone
@@ -198,7 +195,12 @@ class LandingPipeline:
                 self.__k_ref = k_ref
                 self.__d_ref = d_ref
 
-                self.__state = self.__state + 1 
+                self.__state = self.__state + 1
+
+            #drawing the point in image that must be in the center
+            ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy + error_cy)))
+            ut.draw_rectangle(self.__image, pt1, pt2)
+
         else:
             self.__ed.set_yaw(0)
             self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
