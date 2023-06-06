@@ -168,6 +168,43 @@ class LandingPipeline:
 
         if not ((self.__k_ref is None) and (self.__d_ref is None)):
             self.__state = self.__state + 1
+            return
+
+        pt1, pt2 = self.__yd.detect_best(self.__image)
+        if not ((pt1 is None) and (pt2 is None)):
+            #computing error
+            error_cx = (pt1[0] + pt2[0]) * 0.5 - self.__cx
+            error_cy = (pt1[1] + pt2[1]) * 0.5 - self.__cy
+
+            #computing control output based on features matched
+            ctrl_s_yaw = np.round(self.__pid_s_yaw(error_cx), 2)
+            ctrl_s_throttle = np.round(self.__pid_s_throttle(error_cy), 2)
+            self.__ed.set_yaw(ctrl_s_yaw)
+            self.__ed.set_throttle(ctrl_s_throttle)
+
+            #drawing the point in image that must be in the center
+            ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy + error_cy)))
+
+            #error in y and x < 10 pixels and control output for yaw and throttle < 0.1
+            if (abs(error_cy) < 10) and (abs(error_cx) < 10) and (abs(ctrl_s_yaw) < 0.1) and (abs(ctrl_s_throttle) < 0.1):
+                #stop the drone
+                self.__ed.rc_control()
+                self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
+                self.__pid_s_throttle.set_auto_mode(enabled=True, last_output=0)
+
+                #save keypoints and descriptors
+                k_ref, d_ref = self.__v.detect_features_in_rect(self.__image, [pt1, pt2])
+
+                self.__k_ref = k_ref
+                self.__d_ref = d_ref
+
+                self.__state = self.__state + 1 
+        else:
+            self.__ed.set_yaw(0)
+            self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
+                
+            self.__ed.set_throttle(0)
+            self.__pid_s_throttle.set_auto_mode(enabled=True, last_output=0)   
 
     #state 1: the drone has to center a region of interest with cx and cy
     def state_1(self):
