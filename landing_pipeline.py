@@ -79,7 +79,7 @@ class LandingPipeline:
         time_start = time.time()
         alpha = 0.1
         fps = 0
-        while self.__state < 7:
+        while self.__state < 8:
 
             image = self.__ed.get_curr_frame()
             if image is None:
@@ -119,6 +119,9 @@ class LandingPipeline:
 
             if loop_state == 6:
                 self.state_6()
+            
+            if loop_state == 7:
+                self.state_7()
            
             if time.time() - time_start > 0:
                 fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
@@ -153,9 +156,17 @@ class LandingPipeline:
                 ut.rc_control(key, self.__ed)
         
         cv2.destroyAllWindows()
+        if self.__state == 9: #fail due roll
+                self.__ed.land()
+                time.sleep(5)
+                self.__ed.quit()
 
-    #state 0: the drone has to center a region of interest with cx and cy
+    #state 0: using yolo to detect branch
     def state_0(self):
+        self.__state = self.__state + 1
+        
+    #state 1: the drone has to center a region of interest with cx and cy
+    def state_1(self):
         #detect features in the current image
         k, d = self.__v.detect_features(self.__image)
 
@@ -209,8 +220,8 @@ class LandingPipeline:
             self.__ed.set_throttle(0)
             self.__pid_s_throttle.set_auto_mode(enabled=True, last_output=0)     
             
-    #state 1: center cx and move up
-    def state_1(self):
+    #state 2: center cx and move up
+    def state_2(self):
         error_cz = self.__pid_throttle.setpoint - self.__ed.get_curr_pos()[2]
         #computing control output based on height
         ctrl_throttle = np.round(self.__pid_throttle(self.__ed.get_curr_pos()[2]), 2)
@@ -265,8 +276,8 @@ class LandingPipeline:
             self.__ed.set_yaw(0)
             self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
 
-    #state 2: compute landing site position
-    def state_2(self):
+    #state 3: compute landing site position
+    def state_3(self):
         #compute relative position
         ty = self.__p_end[2] - self.__p_start[2]
         # x, y in the image and depth 
@@ -278,7 +289,7 @@ class LandingPipeline:
             print("************** ROLL ANGLE TOO BIG ***************")
             print("*************************************************")
             print("*************************************************")
-            self.__state = 7
+            self.__state = 9
 
         #choose as landing site the detect feature neares the mean
         # 1 - Compute mean
@@ -329,7 +340,7 @@ class LandingPipeline:
         print("-----------------------------------------------")
         self.__state = self.__state + 1
 
-    def state_3(self):
+    def state_4(self):
         (y, x, z) = self.__ed.get_curr_pos_corrected()
 
         ### ODOM DATA ###
@@ -370,7 +381,7 @@ class LandingPipeline:
         ut.draw_text(self.__image_s, f"error_x={np.round(error_cx, 1)}", 0)
         ut.draw_text(self.__image_s, f"error_z={np.round(error_cz, 1)}", 1)
 
-    def state_4(self):
+    def state_5(self):
         #ensure drone stoped
         time.sleep(0.5)
         (y, x, z) = self.__ed.get_curr_pos_corrected()
@@ -394,7 +405,7 @@ class LandingPipeline:
         self.__state = self.__state + 1
         self.__max_speed_y = self.__ed.get_curr_speed_corrected()[0]
 
-    def state_5(self):
+    def state_6(self):
         (y, x, z) = self.__ed.get_curr_pos_corrected()
         yaw = self.__ed.get_curr_yaw()
 
@@ -433,7 +444,7 @@ class LandingPipeline:
         ut.draw_text(self.__image_s, f"max_speed   = {np.round(self.__max_speed_y, 1)}", 2)
         ut.draw_text(self.__image_s, f"curr_speed  = {np.round(speed_y, 1)}", 3)
 
-    def state_6(self):
+    def state_7(self):
         print("*************************************************")
         print("*************************************************")
         print("*************** LAND COMPLETE *******************")
