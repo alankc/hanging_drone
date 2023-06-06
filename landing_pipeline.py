@@ -199,7 +199,7 @@ class LandingPipeline:
 
             #drawing the point in image that must be in the center
             ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy + error_cy)))
-            ut.draw_rectangle(self.__image, pt1, pt2)
+            ut.draw_rectangle(self.__image_s, pt1, pt2)
 
         else:
             self.__ed.set_yaw(0)
