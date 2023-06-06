@@ -7,12 +7,14 @@ from simple_pid import PID
 from easydrone import EasyDrone
 from stereo import Stereo
 from vision import Vision
+from yolo_detector import YOLODetector
 
 class LandingPipeline:
-    def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, k_ref, d_ref, cx, cy, odom_file = None) -> None:
+    def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, yd:YOLODetector, k_ref, d_ref, cx, cy, odom_file = None) -> None:
         self.__ed = ed
         self.__s = s
         self.__v = v
+        self.__yd = yd
         self.__k_ref = k_ref
         self.__d_ref = d_ref
         self.__cx = cx
@@ -163,8 +165,10 @@ class LandingPipeline:
 
     #state 0: using yolo to detect branch
     def state_0(self):
-        self.__state = self.__state + 1
-        
+
+        if not ((self.__k_ref is None) and (self.__d_ref is None)):
+            self.__state = self.__state + 1
+
     #state 1: the drone has to center a region of interest with cx and cy
     def state_1(self):
         #detect features in the current image

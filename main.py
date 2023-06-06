@@ -10,6 +10,7 @@ from easydrone import EasyDrone
 from vision import Vision
 from stereo import Stereo
 from landing_pipeline import LandingPipeline
+from yolo_detector import YOLODetector
 
 select_rect = []
 
@@ -82,6 +83,8 @@ if __name__ == "__main__":
     s = Stereo()
     s.set_camera_params(fx, fy, -13, cx, cy)
 
+    yd = YOLODetector("best.pt")
+
     k_ref = None
     d_ref = None
 
@@ -121,10 +124,12 @@ if __name__ == "__main__":
             select_rect = []
             exit(0)
 
-        if key == ord("1"):
+        if key == ord("1"): # Use YOLO
+            break
+        elif key == ord("2"): # USe selected rectangle
             k_ref, d_ref = v.detect_features_in_polygon(image, np.array(select_rect))
             break
-        elif key == ord("2"):
+        elif key == ord("3"):# Clear selected rectangle
             select_rect = []
         else:
             ut.rc_control(key, ed)
@@ -136,6 +141,6 @@ if __name__ == "__main__":
     cy = int(round(cy, 0))
     
     if len(select_rect) > 2:
-        lp = LandingPipeline(ed, s, v, k_ref, d_ref, cx, cy, out_file)
+        lp = LandingPipeline(ed, s, v, yd, k_ref, d_ref, cx, cy, out_file)
         lp.PID_setup()
         lp.run()
