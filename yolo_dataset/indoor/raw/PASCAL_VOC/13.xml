@@ -1,0 +1,26 @@
+<annotation>
+  <folder>/home/x/Documents/landing_pipeline/yolo_dataset/indoor/images/train</folder>
+  <filename>13.png</filename>
+  <path>/home/x/Documents/landing_pipeline/yolo_dataset/indoor/images/train/13.png</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>960</width>
+    <height>720</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+  <object>
+    <name>branch</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>252</xmin>
+      <ymin>339</ymin>
+      <xmax>824</xmax>
+      <ymax>473</ymax>
+    </bndbox>
+  </object>
+</annotation>
