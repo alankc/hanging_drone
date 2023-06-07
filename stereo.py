@@ -155,7 +155,7 @@ class Stereo:
             y_out.append(pos_y)
 
         #if the filter is required and the variation in depth is bigger than 50 cm
-        if kfilter and np.abs(max(depth_out) - min(depth_out)) > kdist:
+        if kfilter and np.abs(max(depth_out) - min(depth_out)) > kdist and len(depth_out) > 10:
             depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out)
 
         #compute the yaw
