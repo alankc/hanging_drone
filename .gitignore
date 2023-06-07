@@ -1,3 +1,4 @@
 __pycache__/*
+yolo_dataset/runs/*
 *.cache
 *.pt
