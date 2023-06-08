@@ -40,6 +40,7 @@ def draw_polylines(image, points):
 def draw_rectangle(image, start_point, end_point):
     color = (255, 0, 0)
     thickness = 2
+    cv2.putText(image, 'YOLO', (start_point[0], start_point[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
     cv2.rectangle(image, start_point, end_point, color, thickness)
 
 def rc_control(key, ed:EasyDrone):
