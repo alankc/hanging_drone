@@ -65,7 +65,7 @@ if __name__ == "__main__":
     ed.start()
     
     v = Vision()
-    v.set_fast_detector(nonmaxSuppression=1, type=2, threshold=15)
+    v.set_fast_detector(nonmaxSuppression=1, type=2, threshold=5)
     #v.set_sift_detector()
     #v.set_orb_detector()
     v.set_bf_matcher()
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     s = Stereo()
     s.set_camera_params(fx, fy, -13, cx, cy)
 
-    yd = YOLODetector("best.pt")
+    yd = YOLODetector("best_indoor.pt")
 
     k_ref = None
     d_ref = None
