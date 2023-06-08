@@ -65,7 +65,7 @@ if __name__ == "__main__":
     ed.start()
     
     v = Vision()
-    v.set_fast_detector(nonmaxSuppression=0, type=2, threshold=10)
+    v.set_fast_detector(nonmaxSuppression=1, type=2, threshold=5)
     #v.set_sift_detector()
     #v.set_orb_detector()
     v.set_bf_matcher()
