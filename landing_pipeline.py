@@ -249,7 +249,7 @@ class LandingPipeline:
                 self.__p_start = self.__ed.get_curr_pos()
 
                 #setthe pid throttle to the current height + 15cm
-                self.__pid_throttle.setpoint = self.__p_start[2] + 15
+                self.__pid_throttle.setpoint = self.__p_start[2] + 10
 
                 print("-----------------------------------------------")
                 print( " STATE 0 END")
