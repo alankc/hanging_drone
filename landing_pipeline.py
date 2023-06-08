@@ -151,6 +151,7 @@ class LandingPipeline:
                 if self.__state == -1:
                     self.__state = 0 #OFF - RC CONTROL
                     self.__ed.rc_control()
+                    self.PID_setup()
                 else:
                     self.__state = -1 #ON - RC CONTROL
                     self.__ed.rc_control()
