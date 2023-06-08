@@ -83,7 +83,7 @@ if __name__ == "__main__":
     s = Stereo()
     s.set_camera_params(fx, fy, -13, cx, cy)
 
-    yd = YOLODetector("best_indoor.pt")
+    yd = YOLODetector("best_indoor_3.pt")
 
     k_ref = None
     d_ref = None
