@@ -124,7 +124,7 @@ if __name__ == "__main__":
         print(str(os.getpid()) + "done")
 
     if "s" in running:
-        s = Server("", 2810) #beginning
+        s = Server("0.0.0.0", 2810) #beginning
         for i in range(20):
             print(f"Round{i}")
             s.wait_conn() #wait for a connection
