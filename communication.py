@@ -130,14 +130,14 @@ if __name__ == "__main__":
         print(str(os.getpid()) + "done")
 
     if "s" in running:
-        s = Server("", 2810)
+        s = Server("", 2810) #beginning
         for i in range(20):
             print(f"Round{i}")
-            s.wait_conn()
-            print(s.receive_msg(LAND_REQUEST))
-            print(s.send_msg(READY))
-            print(s.receive_msg(READY))
-            time.sleep(0.5)
-            print(s.send_msg(TAKEOFF))
-            print(s.receive_msg(READY))
+            s.wait_conn() #wait for a connection
+            print(s.receive_msg(LAND_REQUEST)) #get msg of land request
+            print(s.send_msg(READY)) #send ready only when the drone is allowed to land
+            print(s.receive_msg(READY)) #receive a ready only when the drone has landed
+            time.sleep(0.5) #change battery
+            print(s.send_msg(TAKEOFF)) #send takeoff to drone
+            print(s.receive_msg(READY)) #receive ready after drone being flying
         s.close()
