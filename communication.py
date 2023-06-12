@@ -18,6 +18,14 @@ class Server:
 
     #None timeout = Infinitum time, loop = 1, runs only once
     def wait_conn(self, timeout = None, loop = 1):
+        """
+        timeout = seconds e.g., 0.5.
+        When timeout=None, waits for message indefinitely
+        
+        loop = numbers of attemps with timeout
+
+        combining timeout with loop might be interesting when the system has several threads runnning
+        """
         self.__s.settimeout(timeout)
         while loop > 0:
             loop = loop - 1
@@ -33,6 +41,14 @@ class Server:
         return True
 
     def receive_msg(self, type=None, timeout=None):
+        """
+        type = LAND_REQUEST, READY, TAKEOFF, FAIL, None.
+        When type=None, returns the actual data received.
+        When type=e.g., TAKEOFF, returns True if data is a TAKEOFF message.
+
+        timeout = seconds e.g., 0.5.
+        When timeout=None, waits for message indefinitely
+        """
         self.__curr_conn.settimeout(timeout)
         try:
             data = self.__curr_conn.recv(1024).decode()
@@ -89,6 +105,14 @@ class Client:
             return False       
 
     def receive_msg(self, type=None, timeout=None):
+        """
+        type = LAND_REQUEST, READY, TAKEOFF, FAIL, None.
+        When type=None, returns the actual data received.
+        When type=e.g., TAKEOFF, returns True if data is a TAKEOFF message.
+
+        timeout = seconds e.g., 0.5.
+        When timeout=None, waits for message indefinitely
+        """
         self.__s.settimeout(timeout)
         try:
             data = self.__s.recv(1024).decode()
@@ -140,4 +164,5 @@ if __name__ == "__main__":
             time.sleep(0.5) #change battery
             print(s.send_msg(TAKEOFF)) #send takeoff to drone
             print(s.receive_msg(READY)) #receive ready after drone being flying
+            s.close_curr()
         s.close()
