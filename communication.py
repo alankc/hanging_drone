@@ -12,7 +12,7 @@ class Server:
             self.__s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.__s.bind((host, port))
             self.__s.listen()
-            
+
         except Exception as e:
             print("Error initializing the server: " + str(e))
 
@@ -35,7 +35,7 @@ class Server:
     def receive_msg(self, type = None):
         try:
             data = self.__curr_conn.recv(1024).decode()
-            if not type: 
+            if type is None: 
                 return data
             else:
                 return type in data
@@ -90,7 +90,7 @@ class Client:
         try:
             data = self.__s.recv(1024).decode()
 
-            if not type: 
+            if type is None: 
                 return data
             else:
                 return type in data
