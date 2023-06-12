@@ -9,10 +9,11 @@ class Server:
     def __init__(self, host, port) -> None:
         try:
             self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.__s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.__s.bind((host, port))
             self.__s.listen()
         except Exception as e:
-            print("Error initializing the server: " + e)
+            print("Error initializing the server: " + str(e))
             self.__s.close()
 
     #None timeout = Infinitum time, loop = 1, runs only once
@@ -29,16 +30,13 @@ class Server:
                     conn.close()
                     self.__curr_conn = None
                     self.__curr_addr = None
-                    print("Error getting message" + e)
+                    print("Error connection " + str(e))
+                    return False
+        return True
 
     def receive_msg(self, type = None):
         try:
-            data = ""
-            while True:
-                d = self.__curr_conn.recv(1024)
-                if not d: break
-                data = data + str(d)
-
+            data = self.__curr_conn.recv(1024).decode()
             if not type: 
                 return data
             else:
@@ -48,15 +46,16 @@ class Server:
             self.__curr_conn.close()
             self.__curr_conn = None
             self.__curr_addr = None
-            print("Error getting message" + e)
+            print("Error getting message " + str(e))
+            return False
 
     def send_msg(self, msg = READY):
         try:
-            self.__curr_conn.sendall(msg)
+            self.__curr_conn.sendall(msg.encode())
+            return True
         except Exception as e:
-            print("Error sending message" + e)
-        finally:
-            self.__curr_conn.close()
+            print("Error sending message " + str(e))
+            return False
 
     def close_curr(self):
         self.__curr_conn.close()
@@ -75,25 +74,25 @@ class Client:
     def conn(self):
         try:
             self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.__s.connect(self.__host, self.__port)
+            self.__s.connect((self.__host, self.__port))
+            return True
         except Exception as e:
-            print("Error sending message" + e)
-            self.__s.close()     
+            print("Error connecting " + str(e))
+            self.__s.close()
+            return False
 
     def send_msg(self, msg = LAND_REQUEST):
         try:
-            self.__s.sendall(msg)
+            self.__s.sendall(msg.encode())
+            return True
         except Exception as e:
-            print("Error sending message" + e)
-            self.__s.close()              
+            print("Error sending message " + str(e))
+            self.__s.close()
+            return False       
 
     def receive_msg(self, type = None):
         try:
-            data = ""
-            while True:
-                d = self.__s.recv(1024)
-                if not d: break
-                data = data + str(d)
+            data = self.__s.recv(1024).decode()
 
             if not type: 
                 return data
@@ -103,14 +102,34 @@ class Client:
         except Exception as e:
             self.__s.close()
             self.__s = None
-            print("Error getting message" + e)
+            print("Error getting message " + str(e))
+            return False
     
     def close(self):
         self.__s.close()
 
-    def is_type(self, data, type = [LAND_REQUEST, READY, TAKEOFF, FAIL]):
-        return type in data
-
 if __name__ == "__main__":
-    c = Client("", 2810)
-    c.is_type("asdadsa", LAND_REQUEST)
+    import sys
+
+    if len(sys.argv) == 2:
+        running = sys.argv[1]
+
+    if "c" in running:
+        c = Client("", 2810)
+        c.conn()
+        print(c.send_msg(LAND_REQUEST))
+        print(c.receive_msg(READY))
+        print(c.send_msg(READY))
+        print(c.receive_msg(TAKEOFF))
+        print(c.send_msg(READY))
+        c.close()
+
+    if "s" in running:
+        s = Server("", 2810)
+        s.wait_conn()
+        print(s.receive_msg(LAND_REQUEST))
+        print(s.send_msg(READY))
+        print(s.receive_msg(READY))
+        print(s.send_msg(TAKEOFF))
+        print(s.receive_msg(READY))
+        s.close()
