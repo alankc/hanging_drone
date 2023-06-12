@@ -32,7 +32,8 @@ class Server:
                     return False
         return True
 
-    def receive_msg(self, type = None):
+    def receive_msg(self, type=None, timeout=None):
+        self.__curr_conn.settimeout(timeout)
         try:
             data = self.__curr_conn.recv(1024).decode()
             if type is None: 
@@ -41,7 +42,8 @@ class Server:
                 return type in data
 
         except Exception as e:
-            print("Error getting message " + str(e))
+            if not isinstance(e, TimeoutError):
+                print("Error getting message " + str(e))
             return False
 
     def send_msg(self, msg = READY):
@@ -86,7 +88,8 @@ class Client:
             print("Error sending message " + str(e))
             return False       
 
-    def receive_msg(self, type = None):
+    def receive_msg(self, type=None, timeout=None):
+        self.__s.settimeout(timeout)
         try:
             data = self.__s.recv(1024).decode()
 
@@ -96,7 +99,8 @@ class Client:
                 return type in data
             
         except Exception as e:
-            print("Error getting message " + str(e))
+            if not isinstance(e, TimeoutError):
+                print("Error getting message " + str(e))
             return False
     
     def close(self):
@@ -115,7 +119,8 @@ if __name__ == "__main__":
         c = Client("", 2810)
         c.conn()
         print(str(os.getpid()) + str(c.send_msg(LAND_REQUEST)))
-        print(str(os.getpid()) + str(c.receive_msg(READY)))
+        while not c.receive_msg(READY, timeout=0.1) : pass
+        print(str(os.getpid()) + str(True))
         time.sleep(0.1)
         print(str(os.getpid()) + str(c.send_msg(READY)))
         print(str(os.getpid()) + str(c.receive_msg(TAKEOFF)))
@@ -129,6 +134,7 @@ if __name__ == "__main__":
             print(f"Round{i}")
             s.wait_conn() #wait for a connection
             print(s.receive_msg(LAND_REQUEST)) #get msg of land request
+            time.sleep(2)
             print(s.send_msg(READY)) #send ready only when the drone is allowed to land
             print(s.receive_msg(READY)) #receive a ready only when the drone has landed
             time.sleep(0.5) #change battery
