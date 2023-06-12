@@ -111,6 +111,8 @@ class Client:
 if __name__ == "__main__":
     import sys
     import time
+    import os
+
     if len(sys.argv) == 2:
         running = sys.argv[1]
 
@@ -118,23 +120,24 @@ if __name__ == "__main__":
         time.sleep(2)
         c = Client("", 2810)
         c.conn()
-        print(c.send_msg(LAND_REQUEST))
-        print(c.receive_msg(READY))
-        time.sleep(10)
-        print(c.send_msg(READY))
-        print(c.receive_msg(TAKEOFF))
-        print(c.send_msg(READY))
+        print(str(os.getpid()) + str(c.send_msg(LAND_REQUEST)))
+        print(str(os.getpid()) + str(c.receive_msg(READY)))
+        time.sleep(0.1)
+        print(str(os.getpid()) + str(c.send_msg(READY)))
+        print(str(os.getpid()) + str(c.receive_msg(TAKEOFF)))
+        print(str(os.getpid()) + str(c.send_msg(READY)))
         c.close()
+        print(str(os.getpid()) + "done")
 
     if "s" in running:
         s = Server("", 2810)
-        for i in range(2):
+        for i in range(20):
             print(f"Round{i}")
             s.wait_conn()
             print(s.receive_msg(LAND_REQUEST))
             print(s.send_msg(READY))
             print(s.receive_msg(READY))
-            time.sleep(10)
+            time.sleep(0.5)
             print(s.send_msg(TAKEOFF))
             print(s.receive_msg(READY))
         s.close()
