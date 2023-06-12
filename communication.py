@@ -10,6 +10,7 @@ class Server:
     READY = G_READY
     TAKEOFF = G_TAKEOFF
     FAIL = G_FAIL
+    
     def __init__(self, host, port) -> None:
         try:
             self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -89,6 +90,7 @@ class Client:
     READY = G_READY
     TAKEOFF = G_TAKEOFF
     FAIL = G_FAIL
+
     def __init__(self, host:str, port:int) -> None:
         self.__host = host
         self.__port = port
