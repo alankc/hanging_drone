@@ -171,7 +171,7 @@ class LandingPipeline:
             self.__state = self.__state + 1
             return
 
-        pt1, pt2 = self.__yd.detect_best(self.__image, confidence=0.6)
+        pt1, pt2 = self.__yd.detect_best(self.__image, confidence=0.4)
         if not ((pt1 is None) and (pt2 is None)):
             #computing error
             error_cx = (pt1[0] + pt2[0]) * 0.5 - self.__cx
