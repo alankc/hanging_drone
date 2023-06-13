@@ -63,7 +63,7 @@ class Stereo:
         return depth
     
     def __k_means_filter(self, depth, x, y):
-        data = [[x[i], depth[i]] for i in range(len(x))]
+        data = [[x[i], depth[i], y[i]] for i in range(len(x))]
         data = np.array(data)
 
         max_n_cluster = 2
