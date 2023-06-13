@@ -1,4 +1,5 @@
 import socket
+import logging
 
 G_LAND_REQUEST = "LANDR"
 G_READY = "READY"
@@ -19,7 +20,7 @@ class Server:
             self.__s.listen()
 
         except Exception as e:
-            print("Error initializing the server: " + str(e))
+            logging.error("Error initializing the server: " + str(e), exc_info=True)
 
     #None timeout = Infinitum time, loop = 1, runs only once
     def wait_conn(self, timeout = None, loop = 1):
@@ -41,7 +42,7 @@ class Server:
 
             except Exception as e:
                 if not isinstance(e, TimeoutError):
-                    print("Error connection " + str(e))
+                    logging.error("Error connection " + str(e), exc_info=True)
                     return False
         return True
 
@@ -64,7 +65,7 @@ class Server:
 
         except Exception as e:
             if not isinstance(e, TimeoutError):
-                print("Error getting message " + str(e))
+                logging.error("Error getting message " + str(e), exc_info=True)
             return False
 
     def send_msg(self, msg = READY):
@@ -73,7 +74,7 @@ class Server:
             return True
         
         except Exception as e:
-            print("Error sending message " + str(e))
+            logging.error("Error sending message " + str(e), exc_info=True)
             return False
 
     def close_curr(self):
@@ -102,7 +103,7 @@ class Client:
             return True
         
         except Exception as e:
-            print("Error connecting " + str(e))
+            logging.error("Error connecting " + str(e), exc_info=True)
             return False
 
     def send_msg(self, msg = LAND_REQUEST):
@@ -111,7 +112,7 @@ class Client:
             return True
         
         except Exception as e:
-            print("Error sending message " + str(e))
+            logging.error("Error sending message " + str(e), exc_info=True)
             return False       
 
     def receive_msg(self, type=None, timeout=None):
@@ -134,7 +135,7 @@ class Client:
             
         except Exception as e:
             if not isinstance(e, TimeoutError):
-                print("Error getting message " + str(e))
+                logging.error("Error getting message " + str(e), exc_info=True)
             return False
     
     def close(self):
@@ -151,16 +152,16 @@ if __name__ == "__main__":
     if "c" in running:
         time.sleep(2)
         c = Client("", 2810)
-        c.conn()
-        print(str(os.getpid()) + str(c.send_msg(c.LAND_REQUEST)))
-        while not c.receive_msg(c.READY, timeout=0.1) : pass
-        print(str(os.getpid()) + str(True))
-        time.sleep(0.1)
-        print(str(os.getpid()) + str(c.send_msg(c.READY)))
-        print(str(os.getpid()) + str(c.receive_msg(c.TAKEOFF)))
-        print(str(os.getpid()) + str(c.send_msg(c.READY)))
-        c.close()
-        print(str(os.getpid()) + "done")
+        if(c.conn()):
+            print(str(os.getpid()) + str(c.send_msg(c.LAND_REQUEST)))
+            while not c.receive_msg(c.READY, timeout=0.1) : pass
+            print(str(os.getpid()) + str(True))
+            time.sleep(0.1)
+            print(str(os.getpid()) + str(c.send_msg(c.READY)))
+            print(str(os.getpid()) + str(c.receive_msg(c.TAKEOFF)))
+            print(str(os.getpid()) + str(c.send_msg(c.READY)))
+            c.close()
+            print(str(os.getpid()) + "done")
 
     if "s" in running:
         s = Server("0.0.0.0", 2810) #beginning
