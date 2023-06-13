@@ -15,8 +15,8 @@ class LandingPipeline:
         self.__s = s
         self.__v = v
         self.__yd = yd
-        self.__k_ref = k_ref
-        self.__d_ref = d_ref
+        self.__k_ref_i = k_ref
+        self.__d_ref_i = d_ref
         self.__cx = cx
         self.__cy = cy
         self.__odom_file = odom_file
@@ -167,7 +167,9 @@ class LandingPipeline:
     #state 0: using yolo to detect branch
     def state_0(self):
 
-        if not ((self.__k_ref is None) and (self.__d_ref is None)):
+        if not ((self.__k_ref_i is None) and (self.__d_ref_i is None)):
+            self.__k_ref = self.__k_ref_i
+            self.__d_ref = self.__k_ref_i
             self.__state = self.__state + 1
             return
 
