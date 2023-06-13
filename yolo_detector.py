@@ -18,8 +18,8 @@ class YOLODetector:
                 b = box.xyxy[0]  #coordinates in (top, left, bottom, right)
                 pt1 = np.int32((b[0].cpu().numpy(), b[1].cpu().numpy()))
                 pt2 = np.int32((b[2].cpu().numpy(), b[3].cpu().numpy()))
-                #func = box.conf.cpu().numpy()[0] * abs(pt2[0] - pt1[0]) / abs(pt2[1] - pt1[1]) #confidence * rectangle_width / rectangle_height
-                func = abs(pt2[0] - pt1[0]) / abs(pt2[1] - pt1[1])
+                func = box.conf.cpu().numpy()[0] * abs(pt2[0] - pt1[0]) / abs(pt2[1] - pt1[1]) #confidence * rectangle_width / rectangle_height
+                #func = abs(pt2[0] - pt1[0]) / abs(pt2[1] - pt1[1])
                 if func > best_func:
                     best_func = func 
                     best_pt1 = pt1
