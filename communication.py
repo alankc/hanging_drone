@@ -52,11 +52,11 @@ class Server:
                     return False
         return True
 
-    def receive_msg(self, type=None, timeout=None):
+    def receive_msg(self, msg=None, timeout=None):
         """
-        type = LAND_REQUEST, READY, TAKEOFF, FAIL, None.
-        When type=None, returns the actual data received.
-        When type=e.g., TAKEOFF, returns True if data is a TAKEOFF message.
+        msg = LAND_REQUEST, READY, TAKEOFF, FAIL, None.
+        When msg=None, returns the actual data received.
+        When msg=e.g., TAKEOFF, returns True if data is a TAKEOFF message.
 
         timeout = seconds e.g., 0.5.
         When timeout=None, waits for message indefinitely
@@ -64,10 +64,10 @@ class Server:
         self.__curr_conn.settimeout(timeout)
         try:
             data = self.__curr_conn.recv(1024).decode()
-            if type is None: 
+            if msg is None: 
                 return data
             else:
-                return type in data
+                return msg in data
 
         except Exception as e:
             if not isinstance(e, TimeoutError):
@@ -121,11 +121,11 @@ class Client:
             logging.error("Error sending message " + str(e), exc_info=True)
             return False       
 
-    def receive_msg(self, type=None, timeout=None):
+    def receive_msg(self, msg=None, timeout=None):
         """
-        type = LAND_REQUEST, READY, TAKEOFF, FAIL, None.
-        When type=None, returns the actual data received.
-        When type=e.g., TAKEOFF, returns True if data is a TAKEOFF message.
+        msg = LAND_REQUEST, READY, TAKEOFF, FAIL, None.
+        When msg=None, returns the actual data received.
+        When msg=e.g., TAKEOFF, returns True if data is a TAKEOFF message.
 
         timeout = seconds e.g., 0.5.
         When timeout=None, waits for message indefinitely
@@ -134,10 +134,10 @@ class Client:
         try:
             data = self.__s.recv(1024).decode()
 
-            if type is None: 
+            if msg is None: 
                 return data
             else:
-                return type in data
+                return msg in data
             
         except Exception as e:
             if not isinstance(e, TimeoutError):
