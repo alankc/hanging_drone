@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
         if key == ord("1"): # Use YOLO
             break
-        elif key == ord("2"): # USe selected rectangle
+        elif key == ord("2") and len(select_rect) > 2: # USe selected rectangle
             k_ref, d_ref = v.detect_features_in_polygon(image, np.array(select_rect))
             break
         elif key == ord("3"):# Clear selected rectangle
