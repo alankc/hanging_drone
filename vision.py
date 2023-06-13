@@ -42,7 +42,7 @@ class Vision:
         self.__detector_type = Vision.__DETECTOR_TYPE_SIFT
 
         #SIFT detector
-        self.__detector = cv2.SIFT_create(nfeatures=0, nOctaveLayers=3, contrastThreshold=0.02, edgeThreshold=15, sigma=1.6)
+        self.__detector = cv2.SIFT_create(nfeatures=0, nOctaveLayers=3, contrastThreshold=0.02, edgeThreshold=25, sigma=1)
 
         #detect and compute using SIFT
         self.__detec_and_compute = lambda img: self.__detector.detectAndCompute(img, None)
