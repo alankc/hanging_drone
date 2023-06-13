@@ -93,7 +93,7 @@ class Stereo:
         
 
         pred = best_model.labels_
-        data_by_cluster = [[] for j in range(max_n_cluster + 1)] 
+        data_by_cluster = [[] for i in range(max_n_cluster)] 
         
         #selecting the cluster with the smallest depth (y coordinate of real world) distance
         for i in range(len(pred)):
