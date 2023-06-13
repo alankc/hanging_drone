@@ -13,14 +13,20 @@ class Server:
     FAIL = G_FAIL
     
     def __init__(self, host, port) -> None:
+        self.__host = host
+        self.__port = port
+
+    def conn(self):
         try:
             self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.__s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.__s.bind((host, port))
+            self.__s.bind((self.__host, self.__port))
             self.__s.listen()
-
+            return True
+        
         except Exception as e:
-            logging.error("Error initializing the server: " + str(e), exc_info=True)
+            logging.error("Error creating socket " + str(e), exc_info=True)
+            return False 
 
     #None timeout = Infinitum time, loop = 1, runs only once
     def wait_conn(self, timeout = None, loop = 1):
@@ -165,15 +171,16 @@ if __name__ == "__main__":
 
     if "s" in running:
         s = Server("0.0.0.0", 2810) #beginning
-        for i in range(20):
-            print(f"Round{i}")
-            s.wait_conn() #wait for a connection
-            print(s.receive_msg(s.LAND_REQUEST)) #get msg of land request
-            time.sleep(2)
-            print(s.send_msg(s.READY)) #send ready only when the drone is allowed to land
-            print(s.receive_msg(s.READY)) #receive a ready only when the drone has landed
-            time.sleep(0.5) #change battery
-            print(s.send_msg(s.TAKEOFF)) #send takeoff to drone
-            print(s.receive_msg(s.READY)) #receive ready after drone being flying
-            s.close_curr()
-        s.close()
+        if (s.conn()):
+            for i in range(20):
+                print(f"Round{i}")
+                s.wait_conn() #wait for a connection
+                print(s.receive_msg(s.LAND_REQUEST)) #get msg of land request
+                time.sleep(2)
+                print(s.send_msg(s.READY)) #send ready only when the drone is allowed to land
+                print(s.receive_msg(s.READY)) #receive a ready only when the drone has landed
+                time.sleep(0.5) #change battery
+                print(s.send_msg(s.TAKEOFF)) #send takeoff to drone
+                print(s.receive_msg(s.READY)) #receive ready after drone being flying
+                s.close_curr()
+            s.close()
