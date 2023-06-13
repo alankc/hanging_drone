@@ -83,7 +83,8 @@ if __name__ == "__main__":
     s = Stereo()
     s.set_camera_params(fx, fy, -13, cx, cy)
 
-    yd = YOLODetector("best_indoor_3.pt")
+    path_yolo = "yolo_dataset/runs/detect/train6/weights/best.pt"
+    yd = YOLODetector(path_yolo)
 
     k_ref = None
     d_ref = None
