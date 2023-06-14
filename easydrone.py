@@ -86,7 +86,15 @@ class EasyDrone(Thread):
         self.pid_yaw.setpoint = 0
         self.pid_yaw.sample_time = None
         self.pid_yaw.set_auto_mode(True, last_output=0)
-    
+
+    def PID_reset(self):
+        self.pid_s_yaw.set_auto_mode(True, last_output=0)
+        self.pid_s_throttle.set_auto_mode(True, last_output=0)
+        self.pid_throttle.set_auto_mode(True, last_output=0)
+        self.pid_pitch.set_auto_mode(True, last_output=0)
+        self.pid_roll.set_auto_mode(True, last_output=0)
+        self.pid_yaw.set_auto_mode(True, last_output=0)
+
     def connect(self):
         self.__drone = tellopy.Tello()
         self.__drone.connect()
