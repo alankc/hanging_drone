@@ -61,7 +61,7 @@ class LandingPipeline:
         self.__pid_roll = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
         #self.__pid_roll = PID(Kp=1/100, Ki=1/800, Kd=1/1100)
         #self.__pid_roll = PID(Kp=1/50, Ki=1/40, Kd=1/80) #good one
-        self.__pid_roll.output_limits = (-0.2, 0.2) 
+        self.__pid_roll.output_limits = (-0.7, 0.7) 
         self.__pid_roll.setpoint = 0
         self.__pid_roll.sample_time = None
         self.__pid_roll.set_auto_mode(True, last_output=0)
