@@ -129,7 +129,7 @@ class LandingPipeline:
                 fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
                 time_start = time.time()
 
-            ut.draw_text(self.__image_s, f"FPS={fps}", -1)
+            ut.draw_text(self.__image_s, f"FPS={fps:.1f}", -1)
             ut.draw_text(self.__image_s, f"State={loop_state}", -2)
             height, width, _ = self.__image_s.shape
             ut.draw_line(self.__image_s, (self.__cx, 0), (self.__cx, height))
@@ -370,7 +370,7 @@ class LandingPipeline:
 
         #Adjust constants in in world's coordinates
         y_adjust = 20 + np.abs(self.__p_start[0] - self.__p_end[0])
-        t_adjust = -8
+        t_adjust = -8 + 1.5
 
         #Setting PID's setpoints in world's coordinates
         self.__pid_pitch.setpoint     = drone_y + y_pos + y_adjust
@@ -500,8 +500,8 @@ class LandingPipeline:
             print("-----------------------------------------------")
             self.__state = self.__state + 1
 
-        ut.draw_text(self.__image_s, f"landing_pos = {np.round(self.__dlp, 1)}", 0)
-        ut.draw_text(self.__image_s, f"curr_pos    = {np.round((x, y, z, yaw), 1)}", 1)
+        ut.draw_text(self.__image_s, f"landing_pos = {self.__dlp[0]:.1f} {self.__dlp[1]:.1f} {self.__dlp[2]:.1f} {self.__dlp[3]:.1f}", 0)
+        ut.draw_text(self.__image_s, f"curr_pos    = {x:.1f} {y:.1f} {z:.1f} {yaw:.1f}", 1)
         ut.draw_text(self.__image_s, f"max_speed   = {np.round(self.__max_speed_y, 1)}", 2)
         ut.draw_text(self.__image_s, f"curr_speed  = {np.round(speed_y, 1)}", 3)
 
