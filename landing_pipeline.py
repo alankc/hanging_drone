@@ -173,7 +173,7 @@ class LandingPipeline:
             self.__state = self.__state + 1
             return
 
-        pt1, pt2 = self.__yd.detect_best(self.__image, confidence=0.4)
+        pt1, pt2, conf = self.__yd.detect_best(self.__image, confidence=0.4)
         if not ((pt1 is None) and (pt2 is None)):
             #computing error
             error_cx = (pt1[0] + pt2[0]) * 0.5 - self.__cx
@@ -202,7 +202,7 @@ class LandingPipeline:
 
             #drawing the point in image that must be in the center
             ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy + error_cy)))
-            ut.draw_rectangle(self.__image_s, pt1, pt2)
+            ut.draw_yolo_rectangle(self.__image_s, pt1, pt2, conf)
 
         else:
             self.__ed.set_yaw(0)

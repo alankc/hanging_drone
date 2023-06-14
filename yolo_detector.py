@@ -9,6 +9,7 @@ class YOLODetector:
     def detect_best(self, image, confidence = 0.7, classes_to_detect=[0]):
         results = self.__model(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), conf=confidence, classes=classes_to_detect)
         best_func = 0
+        best_conf = 0
         best_pt1 = None
         best_pt2 = None
         for r in results:
@@ -18,14 +19,16 @@ class YOLODetector:
                 b = box.xyxy[0]  #coordinates in (top, left, bottom, right)
                 pt1 = np.int32((b[0].cpu().numpy(), b[1].cpu().numpy()))
                 pt2 = np.int32((b[2].cpu().numpy(), b[3].cpu().numpy()))
-                func = box.conf.cpu().numpy()[0] * abs(pt2[0] - pt1[0]) / abs(pt2[1] - pt1[1]) #confidence * rectangle_width / rectangle_height
+                conf = np.float32(box.conf.cpu().numpy()[0])
+                func =  conf * abs(pt2[0] - pt1[0]) / abs(pt2[1] - pt1[1]) #confidence * rectangle_width / rectangle_height
                 #func = abs(pt2[0] - pt1[0]) / abs(pt2[1] - pt1[1])
                 if func > best_func:
-                    best_func = func 
                     best_pt1 = pt1
                     best_pt2 = pt2
+                    best_func = func 
+                    best_conf = conf
 
-        return best_pt1, best_pt2
+        return best_pt1, best_pt2, best_conf
 
 if __name__ == "__main__":
     import utils as ut
