@@ -370,7 +370,7 @@ class LandingPipeline:
 
         #Adjust constants in in world's coordinates
         y_adjust = 20 + np.abs(self.__p_start[0] - self.__p_end[0])
-        t_adjust = -8 + 1.5
+        t_adjust = -8 + 3
 
         #Setting PID's setpoints in world's coordinates
         self.__pid_pitch.setpoint     = drone_y + y_pos + y_adjust
