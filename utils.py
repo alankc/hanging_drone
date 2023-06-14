@@ -12,7 +12,7 @@ def draw_text(image, text, row):
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 1
     font_size = 50
-    font_color = (255,255,255)
+    font_color = (66,203,245)
     bg_color = (0,0,0)
     height, width = image.shape[:2]
     left_mergin = 10
@@ -38,7 +38,8 @@ def draw_polylines(image, points):
     cv2.polylines(image, points, True, color, thickness)
 
 def draw_yolo_rectangle(image, start_point, end_point, conf):
-    cv2.putText(image, f"BRANCH ({conf:.2f})", (start_point[0], start_point[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (66, 203, 245), 2)
+    cv2.putText(image, f"BRANCH ({conf:.2f})", (start_point[0], start_point[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 6)
+    cv2.putText(image, f"BRANCH ({conf:.2f})", (start_point[0], start_point[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (66, 203, 245), 1)
     cv2.rectangle(image, start_point, end_point, (60, 176, 48), 2)
 
 def draw_rectangle(image, start_point, end_point):
