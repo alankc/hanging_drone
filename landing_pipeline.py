@@ -27,19 +27,19 @@ class LandingPipeline:
         """
         This function must be configured in the class
         """
-        self.__pid_s_yaw = PID(Kp=-1/960, Ki=-0.2/960, Kd=-0.1/960)
+        self.__pid_s_yaw = PID(Kp=-1/960, Ki=-0.2/960, Kd=-0.1/960, proportional_on_measurement=False, differential_on_measurement=False)
         self.__pid_s_yaw.output_limits = (-0.3, 0.3) 
         self.__pid_s_yaw.setpoint = 0
         self.__pid_s_yaw.sample_time = None
         self.__pid_s_yaw.set_auto_mode(True, last_output=0)
 
-        self.__pid_s_throttle = PID(Kp=1/240, Ki=0.25/240, Kd=0.3/240)
+        self.__pid_s_throttle = PID(Kp=1/240, Ki=0.25/240, Kd=0.3/240, proportional_on_measurement=False, differential_on_measurement=False)
         self.__pid_s_throttle.output_limits = (-0.3, 0.3) 
         self.__pid_s_throttle.setpoint = 0
         self.__pid_s_throttle.sample_time = None
         self.__pid_s_throttle.set_auto_mode(True, last_output=0)
 
-        self.__pid_throttle = PID(Kp=1/30, Ki=1/40, Kd=1/60)
+        self.__pid_throttle = PID(Kp=1/30, Ki=1/40, Kd=1/60, proportional_on_measurement=False, differential_on_measurement=False)
         self.__pid_throttle.output_limits = (-0.3, 0.3) 
         self.__pid_throttle.setpoint = 0
         self.__pid_throttle.sample_time = None
@@ -48,7 +48,7 @@ class LandingPipeline:
         KP = 1/150
         TI = 8
         TD = 1 
-        self.__pid_pitch = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
+        self.__pid_pitch = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
         #self.__pid_pitch = PID(Kp=1/30, Ki=0, Kd=0.25/25)
         self.__pid_pitch.output_limits = (-0.2, 0.2) 
         self.__pid_pitch.setpoint = 0
@@ -58,7 +58,7 @@ class LandingPipeline:
         KP = 1/150
         TI = 5
         TD = 2
-        self.__pid_roll = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
+        self.__pid_roll = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
         #self.__pid_roll = PID(Kp=1/100, Ki=1/800, Kd=1/1100)
         #self.__pid_roll = PID(Kp=1/50, Ki=1/40, Kd=1/80) #good one
         self.__pid_roll.output_limits = (-0.2, 0.2) 
@@ -69,7 +69,7 @@ class LandingPipeline:
         KP = 1/10
         TI = 1
         TD = 0.1
-        self.__pid_yaw = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
+        self.__pid_yaw = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
         #self.__pid_yaw = PID(Kp=1/15, Ki=0, Kd=0.25/20)
         self.__pid_yaw.output_limits = (-0.5, 0.5) 
         self.__pid_yaw.setpoint = 0
@@ -336,7 +336,8 @@ class LandingPipeline:
             print("*************************************************")
             print("*************************************************")
             self.__state = 9
-
+        
+        """ V1
         #choose as landing site the detect feature neares the mean
         # 1 - Compute mean
         depth_mean = np.mean(depth_out)
@@ -347,6 +348,20 @@ class LandingPipeline:
         # 4 - Get the nearest position of the mean in world's coordinates
         y_pos = depth_mean
         x_pos = x_out[index]
+        z_pos = y_out[index]
+        """
+
+        #choose as landing site the detect feature neares the mean
+        # 1 - Compute mean
+        depth_mean = np.mean(depth_out)
+        x_mean = np.mean(x_out)
+        # 2 - Calculate the difference array
+        difference_array = np.absolute(x_out-x_mean)
+        # 3 - Find the index of minimum element from the array
+        index = difference_array.argmin()
+        # 4 - Get the nearest position of the mean in world's coordinates
+        y_pos = depth_mean
+        x_pos = x_mean
         z_pos = y_out[index]
 
         #Getting drone pose adjusted
