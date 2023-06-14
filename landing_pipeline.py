@@ -3,7 +3,6 @@ import time
 import cv2
 import utils as ut
 
-from simple_pid import PID
 from easydrone import EasyDrone
 from stereo import Stereo
 from vision import Vision
@@ -21,60 +20,6 @@ class LandingPipeline:
         self.__cy = cy
         self.__odom_file = odom_file
         self.__state = 0
-
-
-    def PID_setup(self):
-        """
-        This function must be configured in the class
-        """
-        self.__pid_s_yaw = PID(Kp=-1/960, Ki=-0.2/960, Kd=-0.1/960, proportional_on_measurement=False, differential_on_measurement=False)
-        self.__pid_s_yaw.output_limits = (-0.3, 0.3) 
-        self.__pid_s_yaw.setpoint = 0
-        self.__pid_s_yaw.sample_time = None
-        self.__pid_s_yaw.set_auto_mode(True, last_output=0)
-
-        self.__pid_s_throttle = PID(Kp=1/240, Ki=0.25/240, Kd=0.3/240, proportional_on_measurement=False, differential_on_measurement=False)
-        self.__pid_s_throttle.output_limits = (-0.3, 0.3) 
-        self.__pid_s_throttle.setpoint = 0
-        self.__pid_s_throttle.sample_time = None
-        self.__pid_s_throttle.set_auto_mode(True, last_output=0)
-
-        self.__pid_throttle = PID(Kp=1/30, Ki=1/40, Kd=1/60, proportional_on_measurement=False, differential_on_measurement=False)
-        self.__pid_throttle.output_limits = (-0.3, 0.3) 
-        self.__pid_throttle.setpoint = 0
-        self.__pid_throttle.sample_time = None
-        self.__pid_throttle.set_auto_mode(True, last_output=0)
-        
-        KP = 1/150
-        TI = 8
-        TD = 1 
-        self.__pid_pitch = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
-        #self.__pid_pitch = PID(Kp=1/30, Ki=0, Kd=0.25/25)
-        self.__pid_pitch.output_limits = (-0.2, 0.2) 
-        self.__pid_pitch.setpoint = 0
-        self.__pid_pitch.sample_time = None
-        self.__pid_pitch.set_auto_mode(True, last_output=0)
-
-        KP = 1/150
-        TI = 5
-        TD = 2
-        self.__pid_roll = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
-        #self.__pid_roll = PID(Kp=1/100, Ki=1/800, Kd=1/1100)
-        #self.__pid_roll = PID(Kp=1/50, Ki=1/40, Kd=1/80) #good one
-        self.__pid_roll.output_limits = (-0.7, 0.7) 
-        self.__pid_roll.setpoint = 0
-        self.__pid_roll.sample_time = None
-        self.__pid_roll.set_auto_mode(True, last_output=0)
-        
-        KP = 1/10
-        TI = 1
-        TD = 0.1
-        self.__pid_yaw = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
-        #self.__pid_yaw = PID(Kp=1/15, Ki=0, Kd=0.25/20)
-        self.__pid_yaw.output_limits = (-0.5, 0.5) 
-        self.__pid_yaw.setpoint = 0
-        self.__pid_yaw.sample_time = None
-        self.__pid_yaw.set_auto_mode(True, last_output=0)
 
     def run(self):
 
@@ -180,8 +125,8 @@ class LandingPipeline:
             error_cy = (pt1[1] + pt2[1]) * 0.5 - self.__cy
 
             #computing control output based on features matched
-            ctrl_s_yaw = np.round(self.__pid_s_yaw(error_cx), 2)
-            ctrl_s_throttle = np.round(self.__pid_s_throttle(error_cy), 2)
+            ctrl_s_yaw = np.round(self.__ed.pid_s_yaw(error_cx), 2)
+            ctrl_s_throttle = np.round(self.__ed.pid_s_throttle(error_cy), 2)
             self.__ed.set_yaw(ctrl_s_yaw)
             self.__ed.set_throttle(ctrl_s_throttle)
 
@@ -189,8 +134,8 @@ class LandingPipeline:
             if (abs(error_cy) < 10) and (abs(error_cx) < 10) and (abs(ctrl_s_yaw) < 0.1) and (abs(ctrl_s_throttle) < 0.1):
                 #stop the drone
                 self.__ed.rc_control()
-                self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
-                self.__pid_s_throttle.set_auto_mode(enabled=True, last_output=0)
+                self.__ed.pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
+                self.__ed.pid_s_throttle.set_auto_mode(enabled=True, last_output=0)
 
                 #save keypoints and descriptors
                 k_ref, d_ref = self.__v.detect_features_in_rect(self.__image, [pt1, pt2])
@@ -206,10 +151,10 @@ class LandingPipeline:
 
         else:
             self.__ed.set_yaw(0)
-            self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
+            self.__ed.pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
                 
             self.__ed.set_throttle(0)
-            self.__pid_s_throttle.set_auto_mode(enabled=True, last_output=0)   
+            self.__ed.pid_s_throttle.set_auto_mode(enabled=True, last_output=0)   
 
     #state 1: the drone has to center a region of interest with cx and cy
     def state_1(self):
@@ -228,8 +173,8 @@ class LandingPipeline:
             error_cy = mean_error[1]
 
             #computing control output based on features matched
-            ctrl_s_yaw = np.round(self.__pid_s_yaw(error_cx), 2)
-            ctrl_s_throttle = np.round(self.__pid_s_throttle(error_cy), 2)
+            ctrl_s_yaw = np.round(self.__ed.pid_s_yaw(error_cx), 2)
+            ctrl_s_throttle = np.round(self.__ed.pid_s_throttle(error_cy), 2)
             self.__ed.set_yaw(ctrl_s_yaw)
             self.__ed.set_throttle(ctrl_s_throttle)
 
@@ -240,8 +185,8 @@ class LandingPipeline:
             if (abs(error_cy) < 10) and (abs(error_cx) < 10) and (abs(ctrl_s_yaw) < 0.1) and (abs(ctrl_s_throttle) < 0.1):
                 #stop the drone
                 self.__ed.rc_control()
-                self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
-                self.__pid_s_throttle.set_auto_mode(enabled=True, last_output=0)
+                self.__ed.pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
+                self.__ed.pid_s_throttle.set_auto_mode(enabled=True, last_output=0)
 
                 #save keypoints and descriptors
                 self.__k_start = k_curr
@@ -251,7 +196,7 @@ class LandingPipeline:
                 self.__p_start = self.__ed.get_curr_pos()
 
                 #setthe pid throttle to the current height + 15cm
-                self.__pid_throttle.setpoint = self.__p_start[2] + 10
+                self.__ed.pid_throttle.setpoint = self.__p_start[2] + 10
 
                 print("-----------------------------------------------")
                 print( " STATE 0 END")
@@ -261,16 +206,16 @@ class LandingPipeline:
 
         else:
             self.__ed.set_yaw(0)
-            self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
+            self.__ed.pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
                 
             self.__ed.set_throttle(0)
-            self.__pid_s_throttle.set_auto_mode(enabled=True, last_output=0)     
+            self.__ed.pid_s_throttle.set_auto_mode(enabled=True, last_output=0)     
             
     #state 2: center cx and move up
     def state_2(self):
-        error_cz = self.__pid_throttle.setpoint - self.__ed.get_curr_pos()[2]
+        error_cz = self.__ed.pid_throttle.setpoint - self.__ed.get_curr_pos()[2]
         #computing control output based on height
-        ctrl_throttle = np.round(self.__pid_throttle(self.__ed.get_curr_pos()[2]), 2)
+        ctrl_throttle = np.round(self.__ed.pid_throttle(self.__ed.get_curr_pos()[2]), 2)
         self.__ed.set_throttle(ctrl_throttle)
 
         if abs(error_cz) < 2 and abs(ctrl_throttle) < 0.1:
@@ -286,7 +231,7 @@ class LandingPipeline:
                 error_cx = mean_error[0]
 
                 #computing control output based on features matched
-                ctrl_s_yaw = np.round(self.__pid_s_yaw(error_cx), 2)
+                ctrl_s_yaw = np.round(self.__ed.pid_s_yaw(error_cx), 2)
                 self.__ed.set_yaw(ctrl_s_yaw)
 
                 #drawing the point in image that must be in the center
@@ -296,8 +241,8 @@ class LandingPipeline:
                 if (abs(error_cx) < 10) and (abs(ctrl_throttle) < 0.05) and (abs(ctrl_s_yaw) < 0.1):
                     #stop the drone
                     self.__ed.rc_control()
-                    self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
-                    self.__pid_throttle.set_auto_mode(enabled=True, last_output=0)
+                    self.__ed.pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
+                    self.__ed.pid_throttle.set_auto_mode(enabled=True, last_output=0)
 
                     #save keypoints, descriptors and good matches
                     self.__k_end = k
@@ -316,11 +261,11 @@ class LandingPipeline:
 
             else: # YES, it is necessary, do not remove!
                 self.__ed.set_yaw(0)
-                self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
+                self.__ed.pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
             
         else: # YES, it is also necessary, do not remove!
             self.__ed.set_yaw(0)
-            self.__pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
+            self.__ed.pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
 
     #state 3: compute landing site position
     def state_3(self):
@@ -373,16 +318,16 @@ class LandingPipeline:
         t_adjust = -8 + 3
 
         #Setting PID's setpoints in world's coordinates
-        self.__pid_pitch.setpoint     = drone_y + y_pos + y_adjust
-        self.__pid_roll.setpoint      = drone_x + x_pos
-        self.__pid_throttle.setpoint  = drone_z + z_pos + t_adjust
-        self.__pid_yaw.setpoint       = drone_yaw - yaw_out
+        self.__ed.pid_pitch.setpoint     = drone_y + y_pos + y_adjust
+        self.__ed.pid_roll.setpoint      = drone_x + x_pos
+        self.__ed.pid_throttle.setpoint  = drone_z + z_pos + t_adjust
+        self.__ed.pid_yaw.setpoint       = drone_yaw - yaw_out
 
         ### ODOM DATA ###
         min_pos    = ("min", np.min(x_out) + drone_x, np.min(depth_out) + drone_y + y_adjust, np.min(y_out) + drone_z - t_adjust)
         max_pos    = ("max", np.max(x_out) + drone_x, np.max(depth_out) + drone_y + y_adjust, np.max(y_out) + drone_z - t_adjust)
-        dlp        = ("dlp", self.__pid_roll.setpoint, self.__pid_pitch.setpoint, self.__pid_throttle.setpoint, self.__pid_yaw.setpoint)
-        self.__dlp =  (self.__pid_roll.setpoint, self.__pid_pitch.setpoint, self.__pid_throttle.setpoint, self.__pid_yaw.setpoint)
+        dlp        = ("dlp", self.__ed.pid_roll.setpoint, self.__ed.pid_pitch.setpoint, self.__ed.pid_throttle.setpoint, self.__ed.pid_yaw.setpoint)
+        self.__dlp =  (self.__ed.pid_roll.setpoint, self.__ed.pid_pitch.setpoint, self.__ed.pid_throttle.setpoint, self.__ed.pid_yaw.setpoint)
 
         if not (self.__odom_file is None):
             self.__odom_start_time = time.time()
@@ -411,23 +356,23 @@ class LandingPipeline:
         #################
 
         #computing errors in x and z
-        error_cz = self.__pid_throttle.setpoint - z
-        error_cx = self.__pid_roll.setpoint - x
+        error_cz = self.__ed.pid_throttle.setpoint - z
+        error_cx = self.__ed.pid_roll.setpoint - x
 
         #computing throttle output
-        ctrl_throttle = np.round(self.__pid_throttle(z), 2)
+        ctrl_throttle = np.round(self.__ed.pid_throttle(z), 2)
         self.__ed.set_throttle(ctrl_throttle)
 
         #if height is good enought, adjust the x position
         if (abs(error_cz) < 2) and (abs(ctrl_throttle) < 0.1):
-            ctrl_roll = np.round(self.__pid_roll(x), 2)
+            ctrl_roll = np.round(self.__ed.pid_roll(x), 2)
             self.__ed.set_roll(ctrl_roll)
 
             #stop condition state 3
             if (abs(error_cz) < 1) and (abs(error_cx) < 1) and (abs(ctrl_roll) < 0.1):
                 self.__ed.rc_control()
-                self.__pid_throttle.set_auto_mode(enabled=True, last_output=0)
-                self.__pid_roll.set_auto_mode(enabled=True, last_output=0)
+                self.__ed.pid_throttle.set_auto_mode(enabled=True, last_output=0)
+                self.__ed.pid_roll.set_auto_mode(enabled=True, last_output=0)
                 print("-----------------------------------------------")
                 print( " STATE 3 END")
                 print(f"error_x={np.round(error_cx, 1)}")
@@ -437,7 +382,7 @@ class LandingPipeline:
 
         else:
             self.__ed.set_roll(0)
-            self.__pid_roll.set_auto_mode(enabled=True, last_output=0)
+            self.__ed.pid_roll.set_auto_mode(enabled=True, last_output=0)
 
         ut.draw_text(self.__image_s, f"error_x={np.round(error_cx, 1)}", 0)
         ut.draw_text(self.__image_s, f"error_z={np.round(error_cz, 1)}", 1)
@@ -454,9 +399,9 @@ class LandingPipeline:
         #################
 
         #computing controllers output
-        ctrl_throttle = np.round(self.__pid_throttle(z), 2)
-        ctrl_pitch    = np.round(self.__pid_pitch(y), 2)
-        ctrl_roll     = np.round(self.__pid_roll(x), 2)
+        ctrl_throttle = np.round(self.__ed.pid_throttle(z), 2)
+        ctrl_pitch    = np.round(self.__ed.pid_pitch(y), 2)
+        ctrl_roll     = np.round(self.__ed.pid_roll(x), 2)
 
         self.__ed.rc_control(throttle=ctrl_throttle, pitch=ctrl_pitch, roll=ctrl_roll)
 
@@ -476,10 +421,10 @@ class LandingPipeline:
             self.__odometry.append((curr_time, x, y, z, yaw))
         #################
 
-        ctrl_throttle = np.round(self.__pid_throttle(z), 2)
-        ctrl_pitch    = np.round(self.__pid_pitch(y), 2)
-        ctrl_roll     = np.round(self.__pid_roll(x), 2)
-        ctrl_yaw      = np.round(self.__pid_yaw(yaw), 2)
+        ctrl_throttle = np.round(self.__ed.pid_throttle(z), 2)
+        ctrl_pitch    = np.round(self.__ed.pid_pitch(y), 2)
+        ctrl_roll     = np.round(self.__ed.pid_roll(x), 2)
+        ctrl_yaw      = np.round(self.__ed.pid_yaw(yaw), 2)
             
         self.__ed.rc_control(ctrl_throttle, ctrl_pitch, ctrl_roll, ctrl_yaw)
 
@@ -487,7 +432,7 @@ class LandingPipeline:
         if speed_y > self.__max_speed_y :
             self.__max_speed_y  = speed_y
 
-        pid_error_test = abs(y - self.__pid_pitch.setpoint) < 0.8 * abs(self.__pid_pitch.setpoint)
+        pid_error_test = abs(y - self.__ed.pid_pitch.setpoint) < 0.8 * abs(self.__ed.pid_pitch.setpoint)
         #current speed < 1% of the maximum speed and the drone have moved at lest 20% forward
         #this 20% is just to ensure because sometimes the drone moves a little back
         if (speed_y < (0.01 * self.__max_speed_y))  and pid_error_test:

@@ -143,5 +143,4 @@ if __name__ == "__main__":
     
     if len(select_rect) > 2 or len(select_rect) == 0:
         lp = LandingPipeline(ed, s, v, yd, k_ref, d_ref, cx, cy, out_file)
-        lp.PID_setup()
         lp.run()
