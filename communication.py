@@ -1,10 +1,10 @@
 import socket
 import logging
 
-G_LAND_REQUEST = "LANDR"
-G_READY = "READY"
-G_TAKEOFF = "TAKEOFF"
-G_FAIL = "FAIL"
+G_LAND_REQUEST = "LANDR "
+G_READY = "READY "
+G_TAKEOFF = "TAKEOFF "
+G_FAIL = "FAIL "
 
 class Server:
     LAND_REQUEST = G_LAND_REQUEST
@@ -72,11 +72,13 @@ class Server:
         except Exception as e:
             if not isinstance(e, TimeoutError):
                 logging.error("Error getting message " + str(e), exc_info=True)
+                return None
             return False
 
-    def send_msg(self, msg = READY):
+    def send_msg(self, msg:str=LAND_REQUEST, value:str=""):
         try:
-            self.__curr_conn.sendall(msg.encode())
+            m = msg + value 
+            self.__curr_conn.sendall(m.encode())
             return True
         
         except Exception as e:
@@ -112,9 +114,10 @@ class Client:
             logging.error("Error connecting " + str(e), exc_info=True)
             return False
 
-    def send_msg(self, msg = LAND_REQUEST):
+    def send_msg(self, msg:str=LAND_REQUEST, value:str=""):
         try:
-            self.__s.sendall(msg.encode())
+            m = msg + value 
+            self.__s.sendall(m.encode())
             return True
         
         except Exception as e:
@@ -142,10 +145,80 @@ class Client:
         except Exception as e:
             if not isinstance(e, TimeoutError):
                 logging.error("Error getting message " + str(e), exc_info=True)
+                return None
             return False
     
     def close(self):
         self.__s.close()
+
+#adapted from https://stackoverflow.com/questions/54479347/simplest-way-to-connect-wifi-python
+class WiFiFinder:
+    def __init__(self, interface:str):
+        self.__interface = interface
+
+    def check_and_connect(self, ssid:str):
+        command = f"iwlist {self.__interface} scan | grep -ioE \'ssid:\"{ssid}\"\'"
+        result = os.popen(command)
+        result = list(result)
+
+        if "Device or resource busy" in result:
+                return None
+        else:
+            ssid_list = [item.lstrip('SSID:').strip('"\n') for item in result]
+
+        for ssid in ssid_list:
+            try:
+                result = self.__connect(ssid)
+            except Exception as e:
+                logging.error(f"Error connecting to {ssid}: " + str(e), exc_info=True)
+            else:
+                if result:
+                    return True
+        
+        return False
+
+    def __connect(self, ssid, password="TELLOBISG"):
+        cmd = f"nmcli d wifi connect {ssid} password {password}"
+        try:
+            if os.system(cmd) != 0: # This will run the command and check connection
+                raise Exception()
+        except:
+            raise # Not Connected
+        else:
+            return True # Connected
+
+class DroneToRechargeStation:
+    def __init__(self, host:str, port:int, ssid:str="TELLO-98FD38") -> None:
+        self.__host = host
+        self.__port = port
+        self.__ssid = ssid
+
+    def land_request(self):
+        c = Client(self.__host, self.__port)
+        check = False
+        if c.conn(): #If connection worked
+            if c.send_msg(c.LAND_REQUEST, self.__ssid): #if the message was sent
+                if c.receive_msg(msg=c.READY, timeout=0.5): #If received message ready ()
+                        check = c.send_msg(c.READY) #return true if sent the message ready
+            c.close()
+        return check #return false for any failure
+
+    def takeoff_request(self):
+        c = Client(self.__host, self.__port)
+        ssid = None
+        if c.conn(): #If connection worked
+            if c.send_msg(c.TAKEOFF): #if the message was sent
+                msg = c.receive_msg(timeout=0.5) #If received message TAKEOFF SSID
+                if msg and c.TAKEOFF in msg:
+                    check = c.send_msg(c.READY) #return true if sent the message ready
+                    if check:
+                        ssid = msg.split()[1]
+            c.close()
+        return ssid #return None for any failure or the ssid name
+
+    def wifi_conect(self, ssid:str):
+        pass
+
 
 if __name__ == "__main__":
     import sys
@@ -154,6 +227,10 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 2:
         running = sys.argv[1]
+
+    if "w" in running:
+        w = WiFiFinder("wlxd8ec5e0a30b5")
+        print(w.check_and_connect("TELLO-98FD38"))
 
     if "c" in running:
         time.sleep(2)
