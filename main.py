@@ -111,13 +111,13 @@ if __name__ == "__main__":
         
         if frame is None:
                 image = np.zeros((720, 960, 3), dtype = np.uint8)
-                image_s = image.copy()
                 select_rect = []
         
         elif (len(select_rect) < 1):
                 image = s.rotateImage(frame)
-                image_s = image.copy()
-
+                
+        image_s = image.copy()
+        
         if not (frame is None) and (len(select_rect) > 2) and manual_control:
             ut.draw_polylines(image_s, [np.array(select_rect)])
 
