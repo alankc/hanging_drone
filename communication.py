@@ -184,7 +184,7 @@ class WiFiFinder:
         else:
             return True # Connected
 
-class DroneToRechargeStation:
+class D2RS:
     def __init__(self, host:str, port:int, ssid:str="TELLO-98FD38") -> None:
         self.__host = host
         self.__port = port
@@ -194,9 +194,9 @@ class DroneToRechargeStation:
         c = Client(self.__host, self.__port)
         check = False
         if c.conn(): #If connection worked
-            if c.send_msg(c.LAND_REQUEST, self.__ssid): #if the message was sent
-                if c.receive_msg(msg=c.READY, timeout=0.5): #If received message ready ()
-                        check = c.send_msg(c.READY) #return true if sent the message ready
+            if c.send_msg(Client.LAND_REQUEST, self.__ssid): #if the message was sent
+                if c.receive_msg(msg=Client.READY, timeout=0.5): #If received message ready ()
+                        check = c.send_msg(Client.READY) #return true if sent the message ready
             c.close()
         return check #return false for any failure
 
@@ -204,10 +204,10 @@ class DroneToRechargeStation:
         c = Client(self.__host, self.__port)
         ssid = None
         if c.conn(): #If connection worked
-            if c.send_msg(c.TAKEOFF): #if the message was sent
+            if c.send_msg(Client.TAKEOFF): #if the message was sent
                 msg = c.receive_msg(timeout=0.5) #If received message TAKEOFF SSID
-                if msg and c.TAKEOFF in msg:
-                    check = c.send_msg(c.READY) #return true if sent the message ready
+                if isinstance(msg, str) and Client.TAKEOFF in msg:
+                    check = c.send_msg(Client.READY) #return true if sent the message ready
                     if check:
                         ssid = msg.split()[1]
             c.close()
@@ -216,6 +216,36 @@ class DroneToRechargeStation:
     def wifi_conect(self, ssid:str):
         pass
 
+class RS2D:
+    def __init__(self, port:int) -> None:
+        self.__port = port
+
+    def start_server(self):
+        self.__s = Server("0.0.0.0", self.__port)
+        return self.__s.conn()
+
+    def land_request(self):
+        ssid = None
+        if self.__s.wait_conn(timeout=0.5):
+            msg = self.__s.receive_msg(timeout=0.5) #If received message TAKEOFF SSID
+            if isinstance(msg, str) and Server.LAND_REQUEST in msg:
+                if self.__s.send_msg(Server.READY): #return true if sent the message ready
+                    if self.__s.receive_msg(msg=Server.READY, timeout=0.5):
+                        ssid = msg.split()[1]
+            self.__s.close_curr()  
+        return ssid
+
+    def takeoff_request(self, ssid):
+        check = False
+        if self.__s.wait_conn(timeout=0.5):
+            if self.__s.receive_msg(msg=Server.TAKEOFF, timeout=0.5)  #If received message TAKEOFF SSID
+                if self.__s.send_msg(Server.TAKEOFF, ssid): #return true if sent the message ready
+                    check = self.__s.receive_msg(msg=Server.READY, timeout=0.5)
+            self.__s.close_curr()
+        return check
+
+    def stop(self):
+        self.__s.close()
 
 if __name__ == "__main__":
     import sys
