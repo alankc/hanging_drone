@@ -112,12 +112,14 @@ if __name__ == "__main__":
         if frame is None:
                 image = np.zeros((720, 960, 3), dtype = np.uint8)
                 select_rect = []
+                key_delay = 30
         
         elif (len(select_rect) < 1):
                 image = s.rotateImage(frame)
+                key_delay = 1
                 
         image_s = image.copy()
-        
+
         if not (frame is None) and (len(select_rect) > 2) and manual_control:
             ut.draw_polylines(image_s, [np.array(select_rect)])
 
@@ -144,7 +146,7 @@ if __name__ == "__main__":
 
         cv2.imshow('Camera', image_s)
 
-        key = cv2.waitKey(1) & 0xFF
+        key = cv2.waitKey(key_delay) & 0xFF
         if key == ord("q"):
             ed.land()
             time.sleep(5)
