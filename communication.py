@@ -168,13 +168,10 @@ class WiFiFinder:
 
         for ssid in ssid_list:
             try:
-                result = self.__connect(ssid)
+                return self.__connect(ssid)
             except Exception as e:
                 logging.error(f"Error connecting to {ssid}: " + str(e), exc_info=True)
-            else:
-                if result:
-                    return True
-        
+
         return False
 
     def __connect(self, ssid, password="TELLOBISG"):
