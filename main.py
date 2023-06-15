@@ -124,16 +124,16 @@ if __name__ == "__main__":
             ut.draw_polylines(image_s, [np.array(select_rect)])
 
         if not manual_control:
-            if not (lp is None):
-                result = lp.run(image, image_s)
-                if (result == lp.SUCESS) or (result == lp.FAIL):
-                    manual_control = True
-                    lp = None
-                    ed.rc_control() #STOPING all controllers
-            else:
-                print("Press 1 to run landing pipeline with Yolo or")
-                print("Press 2 to run landing pipeline after selecting landing site")
+            #if not (lp is None):
+            result = lp.run(image, image_s)
+            if (result == lp.SUCESS) or (result == lp.FAIL):
                 manual_control = True
+                lp = None
+                ed.rc_control() #STOPING all controllers
+            #else:
+                #print("Press 1 to run landing pipeline with Yolo or")
+                #print("Press 2 to run landing pipeline after selecting landing site")
+                #manual_control = True
             
         if time.time() - time_start > 0:
             fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
