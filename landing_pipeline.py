@@ -89,7 +89,7 @@ class LandingPipeline:
         #treats the case that the user selects the rectangle
         if not ((self.__k_ref_i is None) and (self.__d_ref_i is None)): 
             self.__k_ref = self.__k_ref_i
-            self.__d_ref = self.__k_ref_i
+            self.__d_ref = self.__d_ref_i
             self.__state = self.__state + 1
             return
 
