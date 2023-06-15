@@ -92,28 +92,55 @@ if __name__ == "__main__":
     if args.takeoff:
         ed.takeoff()
     else:
-        ed.cooler_on()
+        #ed.cooler_on()
+        pass
     #ed.manual_takeoff()
 
     cv2.namedWindow("Camera")
     cv2.setMouseCallback("Camera", mouse_click)
 
+    manual_control = True
+    lp = None
+
+    time_start = time.time()
+    alpha = 0.1
+    fps = 0
+
     while True:
+        frame = ed.get_curr_frame()
+        
+        if frame is None:
+                image = np.zeros((720, 960, 3), dtype = np.uint8)
+                image_s = image.copy()
+                select_rect = []
+        
+        elif (len(select_rect) < 1):
+                image = s.rotateImage(frame)
+                image_s = image.copy()
 
-        if (len(select_rect) < 1):
-            image = ed.get_curr_frame()
-            if image is None:
-                frame = np.zeros((10, 10, 3), dtype = np.uint8)
-                time.sleep(0.1)
-                cv2.imshow('Camera', frame)
-                key = cv2.waitKey(1) & 0xFF
-                continue
-
-            image = s.rotateImage(image)
-
-        image_s = image.copy()
-        if (len(select_rect) > 2):
+        if not (frame is None) and (len(select_rect) > 2) and manual_control:
             ut.draw_polylines(image_s, [np.array(select_rect)])
+
+        if not manual_control:
+            if not (lp is None):
+                result = lp.run(image, image_s)
+                if (result == lp.SUCESS) or (result == lp.FAIL):
+                    manual_control = True
+                    lp = None
+                    ed.rc_control() #STOPING all controllers
+            else:
+                print("Press 1 to run landing pipeline with Yolo or")
+                print("Press 2 to run landing pipeline after selecting landing site")
+                manual_control = True
+            
+        if time.time() - time_start > 0:
+            fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
+            time_start = time.time()
+        
+        if manual_control:
+            ut.draw_text(image_s, f"FPS={fps:.1f}         MANUAL CONTROL", -1)
+        else:
+            ut.draw_text(image_s, f"FPS={fps:.1f}", -1)
 
         cv2.imshow('Camera', image_s)
 
@@ -125,22 +152,30 @@ if __name__ == "__main__":
             select_rect = []
             exit(0)
 
-        if key == ord("1"): # Use YOLO
-            break
+        elif key == ord("1"): # Use YOLO
+            manual_control = False
+            lp = LandingPipeline(ed, s, v, yd, None, None, int(round(cx, 0)), int(round(cy, 0)), out_file)
+            ed.PID_reset() #reseting all PIDs
+
         elif key == ord("2") and len(select_rect) > 2: # USe selected rectangle
+            manual_control = False
             k_ref, d_ref = v.detect_features_in_polygon(image, np.array(select_rect))
-            break
+            select_rect = []
+            lp = LandingPipeline(ed, s, v, yd, k_ref, d_ref, int(round(cx, 0)), int(round(cy, 0)), out_file)
+            ed.PID_reset() #reseting all PIDs
+
         elif key == ord("3"):# Clear selected rectangle
             select_rect = []
-        else:
+
+        elif key == ord(" "):# Change to manual control
+            if not (lp is None):
+                manual_control = not manual_control
+                lp.reset()  
+            else:
+                manual_control = True
+
+            ed.rc_control() #STOPING all controllers
+            ed.PID_reset() #reseting all PIDs
+
+        elif manual_control: 
             ut.rc_control(key, ed)
-
-        #print(ed.get_curr_speed_corrected())
-
-    #(cx, cy) = np.mean([x.pt for x in kp_ref], axis=0)
-    cx = int(round(cx, 0))
-    cy = int(round(cy, 0))
-    
-    if len(select_rect) > 2 or len(select_rect) == 0:
-        lp = LandingPipeline(ed, s, v, yd, k_ref, d_ref, cx, cy, out_file)
-        lp.run()

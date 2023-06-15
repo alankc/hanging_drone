@@ -9,6 +9,11 @@ from vision import Vision
 from yolo_detector import YOLODetector
 
 class LandingPipeline:
+
+    SUCESS = 0
+    RUNNING = 1
+    FAIL = -1
+
     def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, yd:YOLODetector, k_ref, d_ref, cx, cy, odom_file = None) -> None:
         self.__ed = ed
         self.__s = s
@@ -20,99 +25,69 @@ class LandingPipeline:
         self.__cy = cy
         self.__odom_file = odom_file
         self.__state = 0
+    
+    def reset(self):
+        self.__state = 0
 
-    def run(self):
+    def run(self, image, image_s):
 
-        time_start = time.time()
-        alpha = 0.1
-        fps = 0
-        while self.__state < 8:
+        #Image used in data processing
+        self.__image = image
+            
+        #Image used only to show
+        self.__image_s = image_s
+            
+        #loop state ensure that when the state is updated the loop will restart before run the next state
+        loop_state = self.__state
 
-            image = self.__ed.get_curr_frame()
-            if image is None:
-                frame = np.zeros((10, 10, 3), dtype = np.uint8)
-                time.sleep(0.1)
-                cv2.imshow('Camera', frame)
-                cv2.waitKey(1)
-                continue
-            
-            #Image used in data processing
-            self.__image = self.__s.rotateImage(image)
-            
-            #Image used only to show
-            self.__image_s = self.__image.copy()
-            
-            #loop state ensure that when the state is updated the loop will restart before run the next state
-            loop_state = self.__state
+        #state 0: the drone has to center a region of interest with cx and cy
+        if loop_state == 0:
+            self.state_0()
 
-            #state 0: the drone has to center a region of interest with cx and cy
-            if loop_state == 0:
-                self.state_0()
+        if loop_state == 1:
+            self.state_1()
+            
+        if loop_state == 2:
+            self.state_2()
+            
+        if loop_state == 3:
+            self.state_3()
+            
+        if loop_state == 4:
+            self.state_4()
+            
+        if loop_state == 5:
+            self.state_5()
 
-            if loop_state == 1:
-                self.state_1()
+        if loop_state == 6:
+            self.state_6()
             
-            if loop_state == 2:
-                self.state_2()
-            
-            if loop_state == 3:
-                self.state_3()
-            
-            if loop_state == 4:
-                self.state_4()
-            
-            if loop_state == 5:
-                self.state_5()
+        if loop_state == 7:
+            self.state_7()
 
-            if loop_state == 6:
-                self.state_6()
-            
-            if loop_state == 7:
-                self.state_7()
-           
-            if time.time() - time_start > 0:
-                fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
-                time_start = time.time()
-
-            ut.draw_text(self.__image_s, f"FPS={fps:.1f}", -1)
-            ut.draw_text(self.__image_s, f"State={loop_state}", -2)
-            height, width, _ = self.__image_s.shape
-            ut.draw_line(self.__image_s, (self.__cx, 0), (self.__cx, height))
-            ut.draw_line(self.__image_s, (0, self.__cy), (width, self.__cy))
-            cv2.imshow('Camera', self.__image_s)
-
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord("q"):
-                self.__ed.land()
-                time.sleep(5)
-                self.__ed.quit()
-                print("*************************************************")
-                print("*************************************************")
-                print("*************** LAND CANCELED *******************")
-                print("*************************************************")
-                print("*************************************************")
-                break
-            elif key == ord(" "):
-                if self.__state == -1:
-                    self.__state = 0 #OFF - RC CONTROL
-                    self.__ed.rc_control()
-                    self.PID_setup()
-                else:
-                    self.__state = -1 #ON - RC CONTROL
-                    self.__ed.rc_control()
-            elif loop_state == -1:
-                ut.rc_control(key, self.__ed)
+        if loop_state == 8:
+            return self.SUCESS
         
-        cv2.destroyAllWindows()
-        if self.__state == 9: #fail due roll
-                self.__ed.land()
-                time.sleep(5)
-                self.__ed.quit()
+        if loop_state == 9: #fail due roll
+            print("*************************************************")
+            print("*************************************************")
+            print("***************** LAND FAIL *********************")
+            print("*************************************************")
+            print("*************************************************")
+            return self.FAIL
+        
+        ut.draw_text(self.__image_s, f"State={loop_state}", -2)
+        height, width, _ = self.__image_s.shape
+        ut.draw_line(self.__image_s, (self.__cx, 0), (self.__cx, height))
+        ut.draw_line(self.__image_s, (0, self.__cy), (width, self.__cy))
+
+        return self.RUNNING
 
     #state 0: using yolo to detect branch
     def state_0(self):
-
-        if not ((self.__k_ref_i is None) and (self.__d_ref_i is None)):
+        #better here than in the reset, 
+        #treats the case that the user selects the rectangle
+        if not ((self.__k_ref_i is None) and (self.__d_ref_i is None)): 
             self.__k_ref = self.__k_ref_i
             self.__d_ref = self.__k_ref_i
             self.__state = self.__state + 1
@@ -163,7 +138,7 @@ class LandingPipeline:
 
         #get list of matched features
         k_curr, d_curr, error, _ = self.__v.bf_matching_descriptors(self.__d_ref, k, d, 0.65, (self.__cx, self.__cy))
-        self.__image_s = cv2.drawKeypoints(self.__image_s, k_curr, 0, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
+        cv2.drawKeypoints(self.__image_s, k_curr, self.__image_s, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
 
         #at least 2 feature matched
         if len(error) > 1:
@@ -223,7 +198,7 @@ class LandingPipeline:
             
             #get list of matched features
             k_curr, d_curr, error, matches = self.__v.bf_matching_descriptors(self.__d_start, k, d, 0.65, (self.__cx, self.__cy))
-            self.__image_s = cv2.drawKeypoints(self.__image_s, k_curr, 0, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
+            cv2.drawKeypoints(self.__image_s, k_curr, self.__image_s, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
 
             if len(error) > 1:
                 #computing mean error
@@ -457,7 +432,6 @@ class LandingPipeline:
         print("*************************************************")
         print("*************************************************")
         self.__ed.land()
-        self.__ed.quit()
         time.sleep(5)
 
         if not (self.__odom_file is None):
