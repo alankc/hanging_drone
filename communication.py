@@ -227,20 +227,20 @@ class RS2D:
     def land_request(self):
         ssid = None
         if self.__s.wait_conn(timeout=0.5):
-            msg = self.__s.receive_msg(timeout=0.5) #If received message TAKEOFF SSID
-            if isinstance(msg, str) and Server.LAND_REQUEST in msg:
-                if self.__s.send_msg(Server.READY): #return true if sent the message ready
-                    if self.__s.receive_msg(msg=Server.READY, timeout=0.5):
-                        ssid = msg.split()[1]
+            msg = self.__s.receive_msg(timeout=0.5)
+            if isinstance(msg, str) and Server.LAND_REQUEST in msg: #if received a land request
+                if self.__s.send_msg(Server.READY): #if sent the messsage ready
+                    if self.__s.receive_msg(msg=Server.READY, timeout=0.5): #if received a message ready
+                        ssid = msg.split()[1] #get the ssid
             self.__s.close_curr()  
         return ssid
 
     def takeoff_request(self, ssid):
         check = False
         if self.__s.wait_conn(timeout=0.5):
-            if self.__s.receive_msg(msg=Server.TAKEOFF, timeout=0.5)  #If received message TAKEOFF SSID
-                if self.__s.send_msg(Server.TAKEOFF, ssid): #return true if sent the message ready
-                    check = self.__s.receive_msg(msg=Server.READY, timeout=0.5)
+            if self.__s.receive_msg(msg=Server.TAKEOFF, timeout=0.5):  #If received message TAKEOFF
+                if self.__s.send_msg(Server.TAKEOFF, ssid): #if sent takeof with the SSID
+                    check = self.__s.receive_msg(msg=Server.READY, timeout=0.5) #if received ready to takeoff
             self.__s.close_curr()
         return check
 
