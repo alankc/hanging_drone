@@ -193,3 +193,8 @@ if __name__ == "__main__":
 
         elif manual_control: 
             ut.rc_control(key, ed)
+
+#Disconected: Try to rech server, if not work try to conect the network I know
+#Changing battery: Try to reach server only
+#Manual controll: runs regular
+#Autonomous controll: runs regular
