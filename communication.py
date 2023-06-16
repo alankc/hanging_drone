@@ -291,7 +291,7 @@ if __name__ == "__main__":
                 check = d2rs.wifi_conect(res_ssid)
                 count = count - 1
 
-            if count == 0:
+            if count == 0 and not check:
                 print("Failed to connect wifi")
             else:
                 print("Ready to takeoff")
