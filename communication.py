@@ -49,17 +49,21 @@ class Server:
             except Exception as e:
                 if not isinstance(e, TimeoutError):
                     logging.error("Error connection " + str(e), exc_info=True)
-                    return False
+                return False
         return True
 
     def receive_msg(self, msg=None, timeout=None):
         """
         msg = LAND_REQUEST, READY, TAKEOFF, FAIL, None.
         When msg=None, returns the actual data received.
-        When msg=e.g., TAKEOFF, returns True if data is a TAKEOFF message.
+        e.g., when msg=TAKEOFF, returns True if data is a TAKEOFF message, False if other
 
         timeout = seconds e.g., 0.5.
         When timeout=None, waits for message indefinitely
+
+        returns in exception: 
+                None in timeout
+                False in others
         """
         self.__curr_conn.settimeout(timeout)
         try:
@@ -128,10 +132,14 @@ class Client:
         """
         msg = LAND_REQUEST, READY, TAKEOFF, FAIL, None.
         When msg=None, returns the actual data received.
-        When msg=e.g., TAKEOFF, returns True if data is a TAKEOFF message.
+        e.g., when msg=TAKEOFF, returns True if data is a TAKEOFF message, False if other
 
         timeout = seconds e.g., 0.5.
         When timeout=None, waits for message indefinitely
+
+        returns in exception: 
+                None in timeout
+                False in others
         """
         self.__s.settimeout(timeout)
         try:
@@ -153,10 +161,15 @@ class Client:
 
 #adapted from https://stackoverflow.com/questions/54479347/simplest-way-to-connect-wifi-python
 class WiFiFinder:
-    def __init__(self, interface:str):
+    def __init__(self, interface:str="wlxd8ec5e0a30b5"):
         self.__interface = interface
 
     def check_and_connect(self, ssid:str):
+        
+        os.system("nmcli radio wifi off")
+        os.system("nmcli radio wifi on")
+        time.sleep(1)
+
         command = f"iwlist {self.__interface} scan | grep -ioE \'ssid:\"{ssid}\"\'"
         result = os.popen(command)
         result = list(result)
@@ -185,27 +198,28 @@ class WiFiFinder:
             return True # Connected
 
 class D2RS:
-    def __init__(self, host:str, port:int, ssid:str="TELLO-98FD38") -> None:
+    def __init__(self, host:str, port:int, interface="wlxd8ec5e0a30b5", ssid:str="TELLO-98FD38") -> None:
         self.__host = host
         self.__port = port
         self.__ssid = ssid
+        self.__wifi = WiFiFinder(interface)
 
-    def land_request(self):
+    def land_request(self, timeout=0.5):
         c = Client(self.__host, self.__port)
         check = False
         if c.conn(): #If connection worked
             if c.send_msg(Client.LAND_REQUEST, self.__ssid): #if the message was sent
-                if c.receive_msg(msg=Client.READY, timeout=0.5): #If received message ready ()
+                if c.receive_msg(msg=Client.READY, timeout=timeout): #If received message ready ()
                         check = c.send_msg(Client.READY) #return true if sent the message ready
             c.close()
         return check #return false for any failure
 
-    def takeoff_request(self):
+    def takeoff_request(self, timeout=0.5):
         c = Client(self.__host, self.__port)
         ssid = None
         if c.conn(): #If connection worked
             if c.send_msg(Client.TAKEOFF): #if the message was sent
-                msg = c.receive_msg(timeout=0.5) #If received message TAKEOFF SSID
+                msg = c.receive_msg(timeout=timeout) #If received message TAKEOFF SSID
                 if isinstance(msg, str) and Client.TAKEOFF in msg:
                     check = c.send_msg(Client.READY) #return true if sent the message ready
                     if check:
@@ -214,7 +228,10 @@ class D2RS:
         return ssid #return None for any failure or the ssid name
 
     def wifi_conect(self, ssid:str):
-        pass
+        if self.__wifi.check_and_connect(ssid):
+            self.__ssid = ssid
+            return True
+        return False
 
 class RS2D:
     def __init__(self, port:int) -> None:
@@ -224,23 +241,23 @@ class RS2D:
         self.__s = Server("0.0.0.0", self.__port)
         return self.__s.conn()
 
-    def land_request(self):
+    def land_request(self, timeout=0.5):
         ssid = None
-        if self.__s.wait_conn(timeout=0.5):
-            msg = self.__s.receive_msg(timeout=0.5)
+        if self.__s.wait_conn(timeout=timeout):
+            msg = self.__s.receive_msg(timeout=timeout)
             if isinstance(msg, str) and Server.LAND_REQUEST in msg: #if received a land request
                 if self.__s.send_msg(Server.READY): #if sent the messsage ready
-                    if self.__s.receive_msg(msg=Server.READY, timeout=0.5): #if received a message ready
+                    if self.__s.receive_msg(msg=Server.READY, timeout=timeout): #if received a message ready
                         ssid = msg.split()[1] #get the ssid
             self.__s.close_curr()  
         return ssid
 
-    def takeoff_request(self, ssid):
+    def takeoff_request(self, ssid, timeout=0.5):
         check = False
-        if self.__s.wait_conn(timeout=0.5):
-            if self.__s.receive_msg(msg=Server.TAKEOFF, timeout=0.5):  #If received message TAKEOFF
+        if self.__s.wait_conn(timeout=timeout):
+            if self.__s.receive_msg(msg=Server.TAKEOFF, timeout=timeout):  #If received message TAKEOFF
                 if self.__s.send_msg(Server.TAKEOFF, ssid): #if sent takeof with the SSID
-                    check = self.__s.receive_msg(msg=Server.READY, timeout=0.5) #if received ready to takeoff
+                    check = self.__s.receive_msg(msg=Server.READY, timeout=timeout) #if received ready to takeoff
             self.__s.close_curr()
         return check
 
@@ -255,36 +272,43 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         running = sys.argv[1]
 
-    if "w" in running:
-        w = WiFiFinder("wlxd8ec5e0a30b5")
-        print(w.check_and_connect("TELLO-98FD38"))
-
     if "c" in running:
-        time.sleep(2)
-        c = Client("", 2810)
-        if(c.conn()):
-            print(str(os.getpid()) + str(c.send_msg(c.LAND_REQUEST)))
-            while not c.receive_msg(c.READY, timeout=0.1) : pass
-            print(str(os.getpid()) + str(True))
-            time.sleep(0.1)
-            print(str(os.getpid()) + str(c.send_msg(c.READY)))
-            print(str(os.getpid()) + str(c.receive_msg(c.TAKEOFF)))
-            print(str(os.getpid()) + str(c.send_msg(c.READY)))
-            c.close()
-            print(str(os.getpid()) + "done")
+        d2rs = D2RS("", 2810, "wlxd8ec5e0a30b5", "TELLO-98FD38")
+
+        tst = d2rs.land_request()
+        if tst:
+            print("Success in land request!")
+        else:
+            print("No response in land request!")
+            exit(0)
+
+        res_ssid = d2rs.takeoff_request()
+        if res_ssid:
+            count = 5
+            check = False
+            while not check and count > 0:
+                print(f"Trying to connect to Wifi: {res_ssid}")
+                check = d2rs.wifi_conect(res_ssid)
+                count = count - 1
+
+            if count == 0:
+                print("Failed to connect wifi")
+            else:
+                print("Ready to takeoff")
+        else:
+            print("No response from takeoff request")
 
     if "s" in running:
-        s = Server("0.0.0.0", 2810) #beginning
-        if (s.conn()):
-            for i in range(20):
-                print(f"Round{i}")
-                s.wait_conn() #wait for a connection
-                print(s.receive_msg(s.LAND_REQUEST)) #get msg of land request
-                time.sleep(2)
-                print(s.send_msg(s.READY)) #send ready only when the drone is allowed to land
-                print(s.receive_msg(s.READY)) #receive a ready only when the drone has landed
-                time.sleep(0.5) #change battery
-                print(s.send_msg(s.TAKEOFF)) #send takeoff to drone
-                print(s.receive_msg(s.READY)) #receive ready after drone being flying
-                s.close_curr()
-            s.close()
+        rs2d = RS2D(2810)
+        if rs2d.start_server():
+            while True:
+                print("Waiting Connection")
+                res_ssid = rs2d.land_request()
+                #You have to keep the ssids from the drone that are ready to takeof
+                #You must run the takeoff_request only if you have drone available to takeoff 
+                if res_ssid:
+                    print("Changing battery")
+                    rs2d.takeoff_request(res_ssid)
+                time.sleep(0.5)
+
+        rs2d.stop()
