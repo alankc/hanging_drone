@@ -228,9 +228,13 @@ class D2RS:
         return ssid #return None for any failure or the ssid name
 
     def wifi_conect(self, ssid:str):
+        if ssid is None:
+            return self.__wifi.check_and_connect(self.__ssid)
+        
         if self.__wifi.check_and_connect(ssid):
             self.__ssid = ssid
             return True
+        
         return False
 
 class RS2D:
