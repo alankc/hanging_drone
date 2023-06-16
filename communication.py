@@ -303,12 +303,11 @@ if __name__ == "__main__":
         if rs2d.start_server():
             while True:
                 print("Waiting Connection")
-                res_ssid = rs2d.land_request()
+                res_ssid = rs2d.land_request(0.1)
                 #You have to keep the ssids from the drone that are ready to takeof
                 #You must run the takeoff_request only if you have drone available to takeoff 
                 if res_ssid:
                     print("Changing battery")
-                    rs2d.takeoff_request(res_ssid)
-                time.sleep(0.5)
+                    rs2d.takeoff_request(res_ssid, 0.1)
 
         rs2d.stop()
