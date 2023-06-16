@@ -147,12 +147,24 @@ if __name__ == "__main__":
         cv2.imshow('Camera', image_s)
 
         key = cv2.waitKey(key_delay) & 0xFF
-        if key == ord("q"):
+        if key == 27:
             ed.land()
             time.sleep(5)
             ed.quit()
             select_rect = []
             exit(0)
+
+        elif key == ord("q"):
+            ed.land()
+            print("*************************************************")
+            print("******************** LAND ***********************")
+            print("*************************************************")
+
+        elif key == ord("e"):
+            ed.takeoff()
+            print("*************************************************")
+            print("****************** TAKE OFF *********************")
+            print("*************************************************")
 
         elif key == ord("1"): # Use YOLO
             manual_control = False
