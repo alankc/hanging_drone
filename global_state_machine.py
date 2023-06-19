@@ -10,7 +10,7 @@ from yolo_detector import YOLODetector
 from landing_pipeline import LandingPipeline
 from communication import D2RS
 
-class MainStateMachine:
+class GlobalStateMachine:
     S_DISCONECTED = 0
     S_WAITING_RS = 1
     S_MANUAL = 2

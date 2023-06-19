@@ -1,7 +1,7 @@
 import argparse
 import os
 import yaml
-from main_state_machine import MainStateMachine
+from global_state_machine import GlobalStateMachine
 
 if __name__ == "__main__":
 
@@ -24,5 +24,5 @@ if __name__ == "__main__":
     with open(f'{args.parameters}','r') as f:
         parameters_file = yaml.safe_load(f)
     
-    msm = MainStateMachine(parameters_file)
+    msm = GlobalStateMachine(parameters_file)
     msm.start()
