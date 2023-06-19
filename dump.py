@@ -14,16 +14,17 @@ cy = 175
 
 data = {
     'Vision': {'fast':{'nonmaxSuppression':1, 'type':2, 'threshold':10}},
-    'Camera': {'fx':912.8844558325202, 'fy':916.1788304640794, 'cx':488.3668390339133, 'cy':377.42470274611975, 'cy_aligned':175, 'pitch':-13},
+    'Camera': {'fx':912.8844558325202, 'fy':916.1788304640794, 'cx':488.3668390339133, 'cy':377.42470274611975, 'cy_aligned':175, 'pitch':-13, 'stream':False},
     'YOLO': {'path':"yolo_dataset/runs/detect/train6/weights/best.pt"},
-    'PID': {
-            'screen_yaw':{'kp':-1/960, 'ki':-0.2/960, 'kd':-0.1/960, 'min':-0.3, 'max':0.3}, 
-            'screen_throttle':{'kp':1/240, 'ki':0.25/240, 'kd':0.3/240, 'min':-0.3, 'max':0.3},
-            'throttle':{'kp':1/30, 'ki':1/40, 'kd':1/60, 'min':-0.3, 'max':0.3},
-            'pitch':{'kp':1/150, 'ki':1/(8*150), 'kd':1/150, 'min':-0.2, 'max':0.2},
-            'roll':{'kp':1/150, 'ki':1/(5*150), 'kd':2/150, 'min':-0.7, 'max':0.7},
-            'yaw':{'kp':1/10, 'ki':1/10, 'kd':0.1*1/10, 'min':-0.5, 'max':0.5},
-            },
+    'Control': {'pid':{
+                'screen_yaw':{'kp':-1/960, 'ki':-0.2/960, 'kd':-0.1/960, 'min':-0.3, 'max':0.3}, 
+                'screen_throttle':{'kp':1/240, 'ki':0.25/240, 'kd':0.3/240, 'min':-0.3, 'max':0.3},
+                'throttle':{'kp':1/30, 'ki':1/40, 'kd':1/60, 'min':-0.3, 'max':0.3},
+                'pitch':{'kp':1/150, 'ki':1/(8*150), 'kd':1/150, 'min':-0.2, 'max':0.2},
+                'roll':{'kp':1/150, 'ki':1/(5*150), 'kd':2/150, 'min':-0.7, 'max':0.7},
+                'yaw':{'kp':1/10, 'ki':1/10, 'kd':0.1*1/10, 'min':-0.5, 'max':0.5},
+                },
+                'folder_odom': None},
     'WiFi': {'interface':'wlxd8ec5e0a30b5', 'ssid':'TELLO-98FD38', 'password':'TELLOBISG'},
     'RechargeStation': {'ip':"192.168.1.122", 'port':2810}
 }
@@ -40,6 +41,6 @@ def read_one_block_of_yaml_data(filename):
         output = yaml.safe_load(f)
     print(output) 
 
-#write_yaml_to_file(data, 'parameters') 
-read_one_block_of_yaml_data('parameters')
+write_yaml_to_file(data, 'parameters') 
+#read_one_block_of_yaml_data('parameters')
 
