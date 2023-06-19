@@ -164,7 +164,7 @@ class WiFiFinder:
     def __init__(self, interface:str="wlxd8ec5e0a30b5"):
         self.__interface = interface
 
-    def check_and_connect(self, ssid:str):
+    def check_and_connect(self, ssid:str, password:str):
         
         os.system("nmcli radio wifi off")
         os.system("nmcli radio wifi on")
@@ -181,13 +181,13 @@ class WiFiFinder:
 
         for ssid in ssid_list:
             try:
-                return self.__connect(ssid)
+                return self.__connect(ssid, password)
             except Exception as e:
                 logging.error(f"Error connecting to {ssid}: " + str(e), exc_info=True)
 
         return False
 
-    def __connect(self, ssid, password="TELLOBISG"):
+    def __connect(self, ssid, password):
         cmd = f"nmcli d wifi connect {ssid} password {password}"
         try:
             if os.system(cmd) != 0: # This will run the command and check connection
@@ -198,10 +198,11 @@ class WiFiFinder:
             return True # Connected
 
 class D2RS:
-    def __init__(self, host:str, port:int, interface="wlxd8ec5e0a30b5", ssid:str="TELLO-98FD38") -> None:
+    def __init__(self, host:str, port:int, interface="wlxd8ec5e0a30b5", ssid:str="TELLO-98FD38", password="TELLOBISG") -> None:
         self.__host = host
         self.__port = port
         self.__ssid = ssid
+        self.__password = password
         self.__wifi = WiFiFinder(interface)
 
     def land_request(self, timeout=0.5):
@@ -229,9 +230,9 @@ class D2RS:
 
     def wifi_conect(self, ssid:str):
         if ssid is None:
-            return self.__wifi.check_and_connect(self.__ssid)
+            return self.__wifi.check_and_connect(self.__ssid, self.__password)
         
-        if self.__wifi.check_and_connect(ssid):
+        if self.__wifi.check_and_connect(ssid, self.__password):
             self.__ssid = ssid
             return True
         
