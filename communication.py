@@ -314,7 +314,11 @@ if __name__ == "__main__":
                 #You have to keep the ssids from the drone that are ready to takeof
                 #You must run the takeoff_request only if you have drone available to takeoff 
                 if res_ssid:
-                    print("Changing battery")
-                    rs2d.takeoff_request(res_ssid, 0.1)
+                    break
+
+            while True:
+                print("Changing battery")
+                if rs2d.takeoff_request(res_ssid, 0.1):
+                    break
 
         rs2d.stop()
