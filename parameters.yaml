@@ -56,7 +56,8 @@ Control:
   folder_odom: null
 WiFi:
   interface: wlxd8ec5e0a30b5
-  ssid: TELLO-98FD38
+  ssid: TELLO-98FC9A
+  #ssid: TELLO-98FD38
   password: TELLOBISG
 RechargeStation:
   ip: 192.168.1.122
