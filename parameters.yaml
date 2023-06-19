@@ -12,7 +12,7 @@ Camera:
   cy: 377.42470274611975
   cy_aligned: 175
   pitch: -13
-  stream: false
+  stream: null
 YOLO:
   path: yolo_dataset/runs/detect/train6/weights/best.pt
 Control:
