@@ -1,0 +1,60 @@
+Vision:
+  fast:
+    nonmaxSuppression: 1
+    type: 2
+    threshold: 10
+  #sift:
+  #orb:
+Camera:
+  fx: 912.8844558325202
+  fy: 916.1788304640794
+  cx: 488.3668390339133
+  cy: 377.42470274611975
+  cy_aligned: 175
+  pitch: -13
+YOLO:
+  path: yolo_dataset/runs/detect/train6/weights/best.pt
+PID:
+  screen_yaw:
+    kp: -0.0010416666666666667
+    ki: -0.00020833333333333335
+    kd: -0.00010416666666666667
+    min: -0.3
+    max: 0.3
+  screen_throttle:
+    kp: 0.004166666666666667
+    ki: 0.0010416666666666667
+    kd: 0.00125
+    min: -0.3
+    max: 0.3
+  throttle:
+    kp: 0.03333333333333333
+    ki: 0.025
+    kd: 0.016666666666666666
+    min: -0.3
+    max: 0.3
+  pitch:
+    kp: 0.006666666666666667
+    ki: 0.0008333333333333334
+    kd: 0.006666666666666667
+    min: -0.2
+    max: 0.2
+  roll:
+    kp: 0.006666666666666667
+    ki: 0.0013333333333333333
+    kd: 0.013333333333333334
+    min: -0.7
+    max: 0.7
+  yaw:
+    kp: 0.1
+    ki: 0.1
+    kd: 0.01
+    min: -0.5
+    max: 0.5
+WiFi:
+  interface: wlxd8ec5e0a30b5
+  ssid: TELLO-98FD38
+  password: TELLOBISG
+RechargeStation:
+  ip: 192.168.1.122
+  port: 2810
