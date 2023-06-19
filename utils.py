@@ -24,6 +24,25 @@ def draw_text(image, text, row):
     cv2.putText(image, text, pos, font, font_scale, bg_color, 6)
     cv2.putText(image, text, pos, font, font_scale, font_color, 1)
 
+def draw_big_text(image, text):
+    # setup text
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 2
+    font_color = (66,203,245)
+    bg_color = (50,50,255)
+
+    # get boundary of this text
+    textsize = cv2.getTextSize(text, font, font_scale, 6)[0]
+
+    # get coords based on boundary
+    textX = int((image.shape[1] - textsize[0]) / 2)
+    textY = int((image.shape[0] + textsize[1]) / 2)
+    pos = (textX, textY)
+    
+    # add text centered on image
+    cv2.putText(image, text, pos, font, font_scale, bg_color, 6)
+    cv2.putText(image, text, pos, font, font_scale, font_color, 2)
+
 def draw_line(image, start_point, end_point):
     color = (0, 255, 0)
     thickness = 1
