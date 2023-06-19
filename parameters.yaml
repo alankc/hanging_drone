@@ -60,5 +60,5 @@ WiFi:
   #ssid: TELLO-98FD38
   password: TELLOBISG
 RechargeStation:
-  ip: 192.168.1.122
+  ip: ""
   port: 2810
