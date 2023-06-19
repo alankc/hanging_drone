@@ -206,10 +206,10 @@ class GlobalStateMachine:
         image = self.__s.rotateImage(frame)
         image_s = image.copy()
 
-        result = lp.run(image, image_s)
-        if (result == lp.SUCESS) or (result == lp.FAIL):
+        result = self.__lp.run(image, image_s)
+        if (result == self.__lp.SUCESS) or (result == self.__lp.FAIL):
             self.__state = self.S_MANUAL
-            lp = None
+            self.__lp = None
             self.__ed.rc_control() #STOPING all controllers
 
         ut.draw_text(image_s, f"FPS={self.__fps:.1f}", -1)
@@ -258,9 +258,6 @@ class GlobalStateMachine:
 
         cv2.namedWindow("Camera")
         cv2.setMouseCallback("Camera", self.mouse_click)
-
-        manual_control = True
-        lp = None
 
         time_start = time.time()
         alpha = 0.1
