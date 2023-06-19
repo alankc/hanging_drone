@@ -192,8 +192,10 @@ class GlobalStateMachine:
             print("******************** LAND ***********************")
             print("*************************************************", flush=True)
 
-        elif key == ord("Q"):
+        elif key == ord("e"):
             self.__ed.quit()
+            time.sleep(5)
+            self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'])
             self.__state = self.S_WAITING_RS_TAKEOFF
 
         elif key == ord(" "):# Clear selected rectangle
