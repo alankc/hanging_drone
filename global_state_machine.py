@@ -43,6 +43,7 @@ class GlobalStateMachine:
         
         frame = np.zeros((720, 960, 3), dtype = np.uint8)
         ut.draw_big_text(frame, "WAITING CONNECTION")
+        ut.draw_text(frame, "Press ESC to exit", -1)
 
         cv2.imshow('Camera', frame)
         key = cv2.waitKey(30) & 0xFF
@@ -70,6 +71,8 @@ class GlobalStateMachine:
         
         frame = np.zeros((720, 960, 3), dtype = np.uint8)
         ut.draw_big_text(frame, "WAITING LAND PERMISSION")
+        ut.draw_text(frame, "Press ESC to exit", -1)
+        ut.draw_text(frame, "Press SPACE return to MANUAL CONTROL", -2)
 
         cv2.imshow('Camera', frame)
         key = cv2.waitKey(30) & 0xFF
