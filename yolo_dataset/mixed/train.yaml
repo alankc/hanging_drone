@@ -5,3 +5,4 @@ val: images/valid  # val images (relative to 'path')
 # Classes
 names:
   0: branch
+  1: trunk

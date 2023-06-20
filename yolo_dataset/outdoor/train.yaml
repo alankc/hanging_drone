@@ -1,4 +1,4 @@
-path: /home/x/Documents/landing_pipeline/yolo_dataset/data/  # dataset root dir
+path: /home/x/Documents/landing_pipeline/yolo_dataset/outdoor/  # dataset root dir
 train: images/train  # train images (relative to 'path')
 val: images/valid/  # val images (relative to 'path')
 
