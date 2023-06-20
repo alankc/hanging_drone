@@ -136,14 +136,18 @@ class GlobalStateMachine:
             print("*************************************************", flush=True)
 
         elif key == ord("1"): # Use YOLO
-            self.__lp = LandingPipeline(self.__ed, self.__s, self.__v, self.__yd, None, None, int(round(self.__cx, 0)), int(round(self.__cy, 0)), self.__out_file)
+            ty = self.__parameters['Control']['ty']
+            dhc = self.__parameters['Control']['drone_hook_center']
+            self.__lp = LandingPipeline(self.__ed, self.__s, self.__v, self.__yd, None, None, int(round(self.__cx, 0)), int(round(self.__cy, 0)), self.__out_file, ty, dhc)
             self.__ed.PID_reset() #reseting all PIDs
             self.__state = self.S_AUTONOMOUS
 
         elif key == ord("2") and len(self.__select_rect) > 2: # USe selected rectangle
             k_ref, d_ref = self.__v.detect_features_in_polygon(image, np.array(self.__select_rect))
             self.__select_rect = []
-            self.__lp = LandingPipeline(self.__ed, self.__s, self.__v, self.__yd, k_ref, d_ref, int(round(self.__cx, 0)), int(round(self.__cy, 0)), self.__out_file)
+            ty = self.__parameters['Control']['ty']
+            dhc = self.__parameters['Control']['drone_hook_center']
+            self.__lp = LandingPipeline(self.__ed, self.__s, self.__v, self.__yd, k_ref, d_ref, int(round(self.__cx, 0)), int(round(self.__cy, 0)), self.__out_file, ty, dhc)
             self.__ed.PID_reset() #reseting all PIDs
             self.__state = self.S_AUTONOMOUS
 

@@ -14,7 +14,7 @@ class LandingPipeline:
     RUNNING = 1
     FAIL = -1
 
-    def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, yd:YOLODetector, k_ref, d_ref, cx, cy, odom_file = None) -> None:
+    def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, yd:YOLODetector, k_ref, d_ref, cx, cy, odom_file, ty:float, drone_hook_center:float) -> None:
         self.__ed = ed
         self.__s = s
         self.__v = v
@@ -25,6 +25,8 @@ class LandingPipeline:
         self.__cy = cy
         self.__odom_file = odom_file
         self.__state = 0
+        self.__ty = ty
+        self.__drone_hook_center = drone_hook_center
     
     def reset(self):
         self.__state = 0
@@ -171,7 +173,7 @@ class LandingPipeline:
                 self.__p_start = self.__ed.get_curr_pos()
 
                 #setthe pid throttle to the current height + 15cm
-                self.__ed.pid_throttle.setpoint = self.__p_start[2] + 10
+                self.__ed.pid_throttle.setpoint = self.__p_start[2] + self.__ty
 
                 print("-----------------------------------------------")
                 print( " STATE 0 END")
@@ -290,17 +292,16 @@ class LandingPipeline:
 
         #Adjust constants in in world's coordinates
         y_adjust = 20 + np.abs(self.__p_start[0] - self.__p_end[0])
-        t_adjust = -8 + 3
 
         #Setting PID's setpoints in world's coordinates
         self.__ed.pid_pitch.setpoint     = drone_y + y_pos + y_adjust
         self.__ed.pid_roll.setpoint      = drone_x + x_pos
-        self.__ed.pid_throttle.setpoint  = drone_z + z_pos + t_adjust
+        self.__ed.pid_throttle.setpoint  = drone_z + z_pos + self.__drone_hook_center
         self.__ed.pid_yaw.setpoint       = drone_yaw - yaw_out
 
         ### ODOM DATA ###
-        min_pos    = ("min", np.min(x_out) + drone_x, np.min(depth_out) + drone_y + y_adjust, np.min(y_out) + drone_z - t_adjust)
-        max_pos    = ("max", np.max(x_out) + drone_x, np.max(depth_out) + drone_y + y_adjust, np.max(y_out) + drone_z - t_adjust)
+        min_pos    = ("min", np.min(x_out) + drone_x, np.min(depth_out) + drone_y + y_adjust, np.min(y_out) + drone_z - self.__drone_hook_center)
+        max_pos    = ("max", np.max(x_out) + drone_x, np.max(depth_out) + drone_y + y_adjust, np.max(y_out) + drone_z - self.__drone_hook_center)
         dlp        = ("dlp", self.__ed.pid_roll.setpoint, self.__ed.pid_pitch.setpoint, self.__ed.pid_throttle.setpoint, self.__ed.pid_yaw.setpoint)
         self.__dlp =  (self.__ed.pid_roll.setpoint, self.__ed.pid_pitch.setpoint, self.__ed.pid_throttle.setpoint, self.__ed.pid_yaw.setpoint)
 
