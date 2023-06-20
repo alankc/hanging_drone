@@ -54,6 +54,8 @@ Control:
       min: -0.5
       max: 0.5
   folder_odom: null
+  ty: 10
+  drone_hook_center: -8
 WiFi:
   interface: wlxd8ec5e0a30b5
   ssid: TELLO-98FC9A
