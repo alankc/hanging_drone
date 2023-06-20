@@ -258,6 +258,7 @@ class LandingPipeline:
             print("*************************************************")
             print("*************************************************")
             self.__state = 9
+            return
         
         """ V1
         #choose as landing site the detect feature neares the mean
