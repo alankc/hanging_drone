@@ -117,7 +117,10 @@ class Client:
             return True
         
         except Exception as e:
-            logging.error("Error connecting " + str(e), exc_info=True)
+            if isinstance(e, ConnectionRefusedError):
+                logging.error("Server not found")
+            else:
+                logging.error("Error connecting " + str(e), exc_info=True)
             return False
 
     def send_msg(self, msg:str=LAND_REQUEST, value:str=""):
