@@ -128,8 +128,8 @@ class EasyDrone(Thread):
         self.pid_roll.setpoint = cx + x
         self.pid_pitch.setpoint = cy + y
         self.pid_throttle.setpoint = cz + z
-        self.pid_yaw = cyaw + yaw
-        
+        self.pid_yaw.setpoint = cyaw + yaw
+
         self.pid_throttle.set_auto_mode(True, last_output=0)
         self.pid_pitch.set_auto_mode(True, last_output=0)
         self.pid_roll.set_auto_mode(True, last_output=0)

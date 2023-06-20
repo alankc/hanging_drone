@@ -45,8 +45,8 @@ Control:
       kp: 0.006666666666666667
       ki: 0.0013333333333333333
       kd: 0.013333333333333334
-      min: -0.7
-      max: 0.7
+      min: -0.5
+      max: 0.5
     yaw:
       kp: 0.1
       ki: 0.1
@@ -58,8 +58,8 @@ Control:
   drone_hook_center: -8 #-8 for the printed hook, -5 for steel hook
 WiFi:
   interface: wlxd8ec5e0a30b5
-  ssid: TELLO-98FC9A
-  #ssid: TELLO-98FD38
+  #ssid: TELLO-98FC9A
+  ssid: TELLO-98FD38
   password: TELLOBISG
 RechargeStation:
   ip: ""

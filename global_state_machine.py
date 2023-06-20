@@ -160,7 +160,7 @@ class GlobalStateMachine:
 
         elif key == ord("g"):# Manual land
             self.__state = self.S_GO_TO
-            self.__ed.set_destination(150, 150, 30, 0)
+            self.__ed.set_destination(100, 100, 30, -45)
 
         elif key == ord(" "):# Clear selected rectangle
             if not (self.__lp is None):
@@ -252,7 +252,7 @@ class GlobalStateMachine:
             self.__state = self.S_MANUAL
             return
         
-        ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f}", -1)
+        ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f} GOING TO", -1)
         cv2.imshow('Camera', self.__image_s)
 
         key = cv2.waitKey(1) & 0xFF
