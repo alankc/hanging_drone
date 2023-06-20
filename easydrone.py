@@ -107,7 +107,7 @@ class EasyDrone(Thread):
         self.__drone.set_pitch(pitch)
         self.__drone.set_roll(roll)
         self.__drone.set_yaw(yaw)
-
+    
     def set_throttle(self, throttle:float):
         self.__drone.set_throttle(throttle)
 
@@ -119,6 +119,50 @@ class EasyDrone(Thread):
 
     def set_yaw(self, yaw:float):
         self.__drone.set_yaw(yaw)
+
+    def set_destination(self, x, y, z, yaw):
+        self.save_quaternion()
+        (cy, cx, cz) = self.get_curr_pos_corrected()
+        cyaw = self.get_curr_yaw()
+
+        self.pid_roll.setpoint = cx + x
+        self.pid_pitch.setpoint = cy + y
+        self.pid_throttle.setpoint = cz + z
+        self.pid_yaw = cyaw + yaw
+        
+        self.pid_throttle.set_auto_mode(True, last_output=0)
+        self.pid_pitch.set_auto_mode(True, last_output=0)
+        self.pid_roll.set_auto_mode(True, last_output=0)
+        self.pid_yaw.set_auto_mode(True, last_output=0)
+    
+    #pt: position tolerance
+    #yt: yaw tolerance
+    def update_control(self, pt = 10, yt = 5):
+        
+        (cy, cx, cz) = self.get_curr_pos_corrected()
+        cyaw = self.get_curr_yaw()
+
+        ex = self.pid_roll.setpoint - cx
+        ey = self.pid_pitch.setpoint - cy
+        ez = self.pid_throttle.setpoint - cz
+        eyaw = abs(self.pid_yaw.setpoint - cyaw)
+        pe = (ex**2 + ey**2 + ez**2) ** 0.5
+        
+        if pe <= pt and eyaw <= yt:
+            self.rc_control()
+            return True
+
+        throttle = self.pid_throttle(cz)
+        pitch = self.pid_pitch(cy)
+        roll = self.pid_roll(cx)
+        yaw = self.pid_yaw(cyaw)
+
+        self.__drone.set_throttle(throttle)
+        self.__drone.set_pitch(pitch)
+        self.__drone.set_roll(roll)
+        self.__drone.set_yaw(yaw)
+
+        return False
 
     def quit(self):
         self.__event.set()
