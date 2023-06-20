@@ -95,8 +95,8 @@ class GlobalStateMachine:
         frame = self.__ed.get_curr_frame()
             
         if frame is None:
-            image = np.zeros((720, 960, 3), dtype = np.uint8)
-            ut.draw_big_text(image, "WAITING FRAME")
+            self.__image = np.zeros((720, 960, 3), dtype = np.uint8)
+            ut.draw_big_text(self.__image, "WAITING FRAME")
             self.__select_rect = []
             key = cv2.waitKey(30) & 0xFF
             if key == 27:
@@ -105,15 +105,15 @@ class GlobalStateMachine:
             return
             
         elif (len(self.__select_rect) < 1):
-            image = self.__s.rotateImage(frame)
+            self.__image = self.__s.rotateImage(frame)
                     
-        image_s = image.copy()
+        self.__image_s = self.__image.copy()
 
         if (len(self.__select_rect) > 2):
-            ut.draw_polylines(image_s, [np.array(self.__select_rect)])
+            ut.draw_polylines(self.__image_s, [np.array(self.__select_rect)])
 
-        ut.draw_text(image_s, f"FPS={self.__fps:.1f}         MANUAL CONTROL", -1)
-        cv2.imshow('Camera', image_s)
+        ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f}         MANUAL CONTROL", -1)
+        cv2.imshow('Camera', self.__image_s)
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27:
@@ -143,7 +143,7 @@ class GlobalStateMachine:
             self.__state = self.S_AUTONOMOUS
 
         elif key == ord("2") and len(self.__select_rect) > 2: # USe selected rectangle
-            k_ref, d_ref = self.__v.detect_features_in_polygon(image, np.array(self.__select_rect))
+            k_ref, d_ref = self.__v.detect_features_in_polygon(self.__image, np.array(self.__select_rect))
             self.__select_rect = []
             ty = self.__parameters['Control']['ty']
             dhc = self.__parameters['Control']['drone_hook_center']
@@ -170,8 +170,8 @@ class GlobalStateMachine:
         frame = self.__ed.get_curr_frame()
             
         if frame is None:
-            image = np.zeros((720, 960, 3), dtype = np.uint8)
-            ut.draw_big_text(image, "WAITING FRAME")
+            self.__image = np.zeros((720, 960, 3), dtype = np.uint8)
+            ut.draw_big_text(self.__image, "WAITING FRAME")
             self.__select_rect = []
             key = cv2.waitKey(30) & 0xFF
             if key == 27:
@@ -179,11 +179,11 @@ class GlobalStateMachine:
                 exit(0)
             return
             
-        image = self.__s.rotateImage(frame)        
-        image_s = image.copy()
+        self.__image = self.__s.rotateImage(frame)        
+        self.__image_s = self.__image.copy()
 
-        ut.draw_text(image_s, f"FPS={self.__fps:.1f}         MANUAL LAND", -1)
-        cv2.imshow('Camera', image_s)
+        ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f}         MANUAL LAND", -1)
+        cv2.imshow('Camera', self.__image_s)
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27:
@@ -212,17 +212,17 @@ class GlobalStateMachine:
 
     def state_autonomous(self):
         frame = self.__ed.get_curr_frame()
-        image = self.__s.rotateImage(frame)
-        image_s = image.copy()
+        self.__image = self.__s.rotateImage(frame)
+        self.__image_s = self.__image.copy()
 
-        result = self.__lp.run(image, image_s)
+        result = self.__lp.run(self.__image, self.__image_s)
         if (result == self.__lp.SUCESS) or (result == self.__lp.FAIL):
             self.__state = self.S_MANUAL
             self.__lp = None
             self.__ed.rc_control() #STOPING all controllers
 
-        ut.draw_text(image_s, f"FPS={self.__fps:.1f}", -1)
-        cv2.imshow('Camera', image_s)
+        ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f}", -1)
+        cv2.imshow('Camera', self.__image_s)
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27:
