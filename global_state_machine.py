@@ -17,6 +17,7 @@ class GlobalStateMachine:
     S_MANUAL = 3
     S_MANUAL_LAND = 4
     S_AUTONOMOUS = 5
+    S_GO_TO = 6
 
     def __init__(self, parameters:dict) -> None:
         self.__parameters = parameters
@@ -157,6 +158,10 @@ class GlobalStateMachine:
         elif key == ord("m"):# Manual land
             self.__state = self.S_WAITING_RS_LAND
 
+        elif key == ord("g"):# Manual land
+            self.__state = self.S_GO_TO
+            self.__ed.set_destination(150, 150, 30, 0)
+
         elif key == ord(" "):# Clear selected rectangle
             if not (self.__lp is None):
                 self.__ed.rc_control() #STOPING all controllers
@@ -237,6 +242,31 @@ class GlobalStateMachine:
             self.__ed.rc_control() #STOPING all controllers
             self.__ed.PID_reset() #reseting all PIDs
             self.__state = self.S_MANUAL
+    
+    def state_go_to(self):
+        frame = self.__ed.get_curr_frame()
+        self.__image = self.__s.rotateImage(frame)
+        self.__image_s = self.__image.copy()
+
+        if self.__ed.update_control():
+            self.__state = self.S_MANUAL
+            return
+        
+        ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f}", -1)
+        cv2.imshow('Camera', self.__image_s)
+
+        key = cv2.waitKey(1) & 0xFF
+        if key == 27:
+            self.__ed.land()
+            time.sleep(5)
+            self.__ed.quit()
+            self.__select_rect = []
+            exit(0)
+
+        elif key == ord(" "):# Change to manual control
+            self.__ed.rc_control() #STOPING all controllers
+            self.__ed.PID_reset() #reseting all PIDs
+            self.__state = self.S_MANUAL
 
     def start(self):
         self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'])
@@ -291,6 +321,9 @@ class GlobalStateMachine:
 
             if curr_state == self.S_AUTONOMOUS:
                 self.state_autonomous()
+
+            if curr_state == self.S_GO_TO:
+                self.state_go_to()
 
             if time.time() - time_start > 0:
                 self.__fps = (1 - alpha) * self.__fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
