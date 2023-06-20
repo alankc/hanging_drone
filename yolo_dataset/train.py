@@ -4,4 +4,4 @@ from ultralytics import YOLO
 model = YOLO("yolov8x.pt")  # load a pretrained model (recommended for training)YOLO("yolov8n.yaml")
 
 # Use the model
-results = model.train(data="/home/x/Documents/landing_pipeline/yolo_dataset/indoor/train.yaml", epochs=500, patience=100)  # train the model
+results = model.train(data="/home/x/Documents/landing_pipeline/yolo_dataset/mixed/train.yaml", epochs=500, patience=100)  # train the model
