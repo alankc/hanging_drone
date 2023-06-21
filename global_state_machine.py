@@ -142,6 +142,7 @@ class GlobalStateMachine:
             dhc = self.__parameters['Control']['drone_hook_center']
             self.__lp = LandingPipeline(self.__ed, self.__s, self.__v, self.__yd, None, None, int(round(self.__cx, 0)), int(round(self.__cy, 0)), self.__out_file, ty, dhc)
             self.__ed.PID_reset() #reseting all PIDs
+            self.__ed.attitude_reset() #ensure proper positions during the landing
             self.__state = self.S_AUTONOMOUS
 
         elif key == ord("2") and len(self.__select_rect) > 2: # USe selected rectangle
@@ -151,6 +152,7 @@ class GlobalStateMachine:
             dhc = self.__parameters['Control']['drone_hook_center']
             self.__lp = LandingPipeline(self.__ed, self.__s, self.__v, self.__yd, k_ref, d_ref, int(round(self.__cx, 0)), int(round(self.__cy, 0)), self.__out_file, ty, dhc)
             self.__ed.PID_reset() #reseting all PIDs
+            self.__ed.attitude_reset() #ensure proper positions during the landing
             self.__state = self.S_AUTONOMOUS
 
         elif key == ord("3"):# Clear selected rectangle
@@ -165,6 +167,7 @@ class GlobalStateMachine:
             if res:
                 (x, y, z, yaw) = res
                 self.__state = self.S_GO_TO
+                self.__ed.attitude_reset()
                 self.__ed.set_destination(x, y, z, yaw)
 
         elif key == ord(" "):# Clear selected rectangle

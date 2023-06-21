@@ -87,6 +87,10 @@ class EasyDrone(Thread):
         self.pid_pitch.set_auto_mode(True, last_output=0)
         self.pid_roll.set_auto_mode(True, last_output=0)
         self.pid_yaw.set_auto_mode(True, last_output=0)
+    
+    def attitude_reset(self):
+        self.__q = Quaternion(1,0,0,0) #No rotation
+        self.__start_yaw = 0
 
     def connect(self):
         self.__drone = tellopy.Tello()
