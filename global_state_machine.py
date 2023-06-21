@@ -2,6 +2,7 @@ import cv2
 import time
 import numpy as np
 import utils as ut
+import tkinter as tk
 
 from easydrone import EasyDrone
 from vision import Vision
@@ -159,8 +160,12 @@ class GlobalStateMachine:
             self.__state = self.S_WAITING_RS_LAND
 
         elif key == ord("g"):# Manual land
-            self.__state = self.S_GO_TO
-            self.__ed.set_destination(100, 100, 30, -45)
+            gdw = GetDataWindow()
+            res = gdw.get_values()
+            if res:
+                (x, y, z, yaw) = res
+                self.__state = self.S_GO_TO
+                self.__ed.set_destination(x, y, z, yaw)
 
         elif key == ord(" "):# Clear selected rectangle
             if not (self.__lp is None):
@@ -328,4 +333,49 @@ class GlobalStateMachine:
             if time.time() - time_start > 0:
                 self.__fps = (1 - alpha) * self.__fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
                 time_start = time.time()
-            
+
+
+
+class GetDataWindow:
+    def __init__(self) -> None:
+        self.__root = tk.Tk()
+        self.__root.eval('tk::PlaceWindow . center')
+        self.__root.title("Position")
+        self.__root.resizable(0,0)
+
+        self.__xtk = tk.StringVar(None, "0")
+        self.__ytk = tk.StringVar(None, "0")
+        self.__ztk = tk.StringVar(None, "0")
+        self.__yawtk = tk.StringVar(None, "0")
+
+        tk.Label(self.__root, text="  x").grid(row=0)
+        tk.Label(self.__root, text="  y").grid(row=1)
+        tk.Label(self.__root, text="  z").grid(row=2)
+        tk.Label(self.__root, text="yaw").grid(row=3)
+        tk.Button(self.__root,text ="Enter", command=self.__save_values, activebackground='green', justify='center').grid(row=4, column=1)
+
+        e1 = tk.Entry(self.__root, textvariable=self.__xtk).grid(row=0, column=1)
+        e2 = tk.Entry(self.__root, textvariable=self.__ytk).grid(row=1, column=1)
+        e3 = tk.Entry(self.__root, textvariable=self.__ztk).grid(row=2, column=1)
+        e4 = tk.Entry(self.__root, textvariable=self.__yawtk).grid(row=3, column=1)
+
+    def __save_values(self):
+        self.__x = self.__xtk.get().strip()
+        self.__y = self.__ytk.get().strip()
+        self.__z = self.__ztk.get().strip()
+        self.__yaw = self.__yawtk.get().strip()
+        self.__root.destroy()
+          
+    def get_values(self):
+        self.__x = ''
+        self.__y = ''
+        self.__z = ''
+        self.__yaw = ''
+
+        self.__root.mainloop()
+        self.__root.quit()
+
+        if (self.__x == '') or (self.__y == '') or (self.__z == '') or (self.__yaw == ''):
+            return None
+
+        return (float(self.__x), float(self.__y), float(self.__z), float(self.__yaw))
