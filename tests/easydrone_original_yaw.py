@@ -30,8 +30,6 @@ class EasyDrone(Thread):
         self.__get_log_data = get_log_data
         self.__q = Quaternion(1,0,0,0) #No rotation
         self.__start_yaw = 0
-        self.__last_yaw = 0 #last yaw
-        self.__acc_yaw = 0 #accumulated yaw
 
         if not (pub_video_stream is None):
             self.__camera = FakeWebcam(pub_video_stream, 960, 720)
@@ -181,37 +179,18 @@ class EasyDrone(Thread):
                 self.mvo = data.mvo
                 self.imu = data.imu
 
-            q_read = Quaternion(self.imu.q0, self.imu.q1, self.imu.q2, self.imu.q3) #current quaternion
-            q0 = q_read.w
-            q1 = q_read.x
-            q2 = q_read.y
-            q3 = q_read.z
-            curr_yaw = np.arctan2(2 * ((q1 * q2) + (q0 * q3)), q0**2 + q1**2 - q2**2 - q3**2) * 180 /  np.pi
-
-            diference = curr_yaw - self.__last_yaw
-            acc_yaw = self.__acc_yaw
-
-            if (curr_yaw < 0) and (self.__last_yaw > 170):
-                acc_yaw = acc_yaw + diference + 360 
-            elif (curr_yaw > 0) and (self.__last_yaw < -170):
-                acc_yaw = acc_yaw + diference - 360   
-            elif (curr_yaw < 0) and (self.__last_yaw > 0):
-                acc_yaw = acc_yaw - diference
-            elif (curr_yaw > 0) and (self.__last_yaw < 0):
-                acc_yaw = acc_yaw - diference
-            else:
-                acc_yaw = acc_yaw + diference
-
-            self.__acc_yaw = acc_yaw
-            self.__last_yaw = curr_yaw
-
     def get_curr_frame(self):
         return self.__curr_frame
     
     def save_quaternion(self):
         self.__q = Quaternion(self.imu.q0, self.imu.q1, self.imu.q2, self.imu.q3)
         self.__q = self.__q.inverse
-        self.__start_yaw =  self.__acc_yaw
+
+        q0 = self.__q.w
+        q1 = self.__q.x
+        q2 = self.__q.y
+        q3 = self.__q.z
+        self.__start_yaw =  np.arctan2(2 * ((q1 * q2) + (q0 * q3)), q0**2 + q1**2 - q2**2 - q3**2) * 180 /  np.pi
     
     def get_curr_pos(self):
         return (self.mvo.pos_x*100, self.mvo.pos_y*100, -self.mvo.pos_z*100)
@@ -221,7 +200,13 @@ class EasyDrone(Thread):
         return self.__q.rotate(curr_pos)
     
     def get_curr_yaw(self):
-        return self.__acc_yaw - self.__start_yaw
+        q_read = Quaternion(self.imu.q0, self.imu.q1, self.imu.q2, self.imu.q3) #current quaternion
+        q0 = q_read.w
+        q1 = q_read.x
+        q2 = q_read.y
+        q3 = q_read.z
+        curr_yaw = np.arctan2(2 * ((q1 * q2) + (q0 * q3)), q0**2 + q1**2 - q2**2 - q3**2) * 180 /  np.pi
+        return curr_yaw - self.__start_yaw
 
     def get_curr_speed_corrected(self):
         curr_speed = (self.mvo.vel_x * 10, self.mvo.vel_y * 10, -self.mvo.vel_z * 10)
