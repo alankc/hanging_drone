@@ -260,6 +260,16 @@ class GlobalStateMachine:
             self.__state = self.S_MANUAL
             return
         
+        (cy, cx, cz) = self.__ed.get_curr_pos_corrected()
+        cyaw = self.__ed.get_curr_yaw()
+        px = self.__ed.pid_roll.setpoint
+        py = self.__ed.pid_pitch.setpoint
+        pz = self.__ed.pid_throttle.setpoint
+        pyaw = self.__ed.pid_yaw.setpoint
+
+        ut.draw_text(self.__image_s, f"CURR: {cx:.1f} {cy:.1f} {cz:.1f} {cyaw:.1f}", 0)
+        ut.draw_text(self.__image_s, f"DEST: {px:.1f} {py:.1f} {pz:.1f} {pyaw:.1f}", 1)
+
         ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f} GOING TO", -1)
         cv2.imshow('Camera', self.__image_s)
 
