@@ -52,6 +52,7 @@ class GlobalStateMachine:
         if key == 27:
             exit(0)
 
+        print("takeoff_request", flush=True)
         res_ssid = self.__d2rs.takeoff_request(0.5)
         if res_ssid:
             count = 5
@@ -215,6 +216,7 @@ class GlobalStateMachine:
         elif key == ord("e"):
             self.__ed.quit()
             time.sleep(5)
+            print("DELETING EASY DRONE")
             self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'])
             self.__state = self.S_WAITING_RS_TAKEOFF
 
