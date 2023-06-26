@@ -62,6 +62,9 @@ class EasyDrone(Thread):
         self.pid_throttle.set_auto_mode(True, last_output=0)
         
         dpid = pid['pitch']
+        self.__pitch_kp = dpid['kp']
+        self.__pitch_ki = dpid['ki']
+        self.__pitch_kd = dpid['kd']
         self.pid_pitch = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
         self.pid_pitch.output_limits = (dpid['min'], dpid['max']) 
         self.pid_pitch.setpoint = 0
@@ -69,6 +72,9 @@ class EasyDrone(Thread):
         self.pid_pitch.set_auto_mode(True, last_output=0)
 
         dpid = pid['roll']
+        self.__roll_kp = dpid['kp']
+        self.__roll_ki = dpid['ki']
+        self.__roll_kd = dpid['kd']
         self.pid_roll = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
         self.pid_roll.output_limits = (dpid['min'], dpid['max']) 
         self.pid_roll.setpoint = 0
@@ -147,6 +153,37 @@ class EasyDrone(Thread):
         
         (cy, cx, cz) = self.get_curr_pos_corrected()
         cyaw = self.get_curr_yaw()
+
+        if cyaw > 90:
+            floor_cyaw = np.floor(cyaw/360.0) * 360.0
+            if (90 + floor_cyaw) <= cyaw <= (270 + floor_cyaw):
+                if self.pid_roll.Kp > 0 and self.pid_pitch.Kp > 0:
+                  self.pid_roll.Kp = -self.__roll_kp
+                  self.pid_roll.Ki = -self.__roll_ki
+                  self.pid_roll.Kd = -self.__roll_kd
+
+                  self.pid_pitch.Kp = -self.__pitch_kp  
+                  self.pid_pitch.Ki = -self.__pitch_ki  
+                  self.pid_pitch.Kd = -self.__pitch_kd 
+        elif cyaw < -90:
+            ceil_cyaw = np.ceil(cyaw/360.0) * 360.0
+            if (ceil_cyaw - 270) <= cyaw <= (ceil_cyaw - 90):
+                if self.pid_roll.Kp > 0 and self.pid_pitch.Kp > 0:
+                  self.pid_roll.Kp = -self.__roll_kp
+                  self.pid_roll.Ki = -self.__roll_ki
+                  self.pid_roll.Kd = -self.__roll_kd
+
+                  self.pid_pitch.Kp = -self.__pitch_kp  
+                  self.pid_pitch.Ki = -self.__pitch_ki  
+                  self.pid_pitch.Kd = -self.__pitch_kd 
+        else:
+            self.pid_roll.Kp = self.__roll_kp
+            self.pid_roll.Ki = self.__roll_ki
+            self.pid_roll.Kd = self.__roll_kd
+
+            self.pid_pitch.Kp = self.__pitch_kp  
+            self.pid_pitch.Ki = self.__pitch_ki  
+            self.pid_pitch.Kd = self.__pitch_kd
 
         ex = self.pid_roll.setpoint - cx
         ey = self.pid_pitch.setpoint - cy
