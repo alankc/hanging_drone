@@ -113,11 +113,12 @@ class Client:
     def conn(self):
         try:
             self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.__s.settimeout(0.5)
             self.__s.connect((self.__host, self.__port))
             return True
         
         except Exception as e:
-            if isinstance(e, ConnectionRefusedError):
+            if isinstance(e, ConnectionRefusedError) or isinstance(e, TimeoutError):
                 logging.error("Server not found")
             else:
                 logging.error("Error connecting " + str(e), exc_info=True)
