@@ -177,6 +177,7 @@ class GlobalStateMachine:
                 (x, y, z, yaw) = res
                 self.__state = self.S_GO_TO
                 self.__curr_state_method = self.state_go_to
+                self.__ed.PID_reset()
                 self.__ed.attitude_reset()
                 self.__ed.set_destination(x, y, z, yaw)
 
