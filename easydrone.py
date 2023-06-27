@@ -40,53 +40,54 @@ class EasyDrone(Thread):
 
         #Dear Programmer from the future, I know that putting all these PIDs here is a trash practice,
         #but it was a fast way, sorry and good luck ;D
-        dpid = pid['screen_yaw']
-        self.pid_s_yaw = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
-        self.pid_s_yaw.output_limits = (dpid['min'], dpid['max']) 
-        self.pid_s_yaw.setpoint = 0
-        self.pid_s_yaw.sample_time = None
-        self.pid_s_yaw.set_auto_mode(True, last_output=0)
+        if len(pid) > 0:
+            dpid = pid['screen_yaw']
+            self.pid_s_yaw = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
+            self.pid_s_yaw.output_limits = (dpid['min'], dpid['max']) 
+            self.pid_s_yaw.setpoint = 0
+            self.pid_s_yaw.sample_time = None
+            self.pid_s_yaw.set_auto_mode(True, last_output=0)
 
-        dpid = pid['screen_throttle']
-        self.pid_s_throttle = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
-        self.pid_s_throttle.output_limits = (dpid['min'], dpid['max']) 
-        self.pid_s_throttle.setpoint = 0
-        self.pid_s_throttle.sample_time = None
-        self.pid_s_throttle.set_auto_mode(True, last_output=0)
+            dpid = pid['screen_throttle']
+            self.pid_s_throttle = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
+            self.pid_s_throttle.output_limits = (dpid['min'], dpid['max']) 
+            self.pid_s_throttle.setpoint = 0
+            self.pid_s_throttle.sample_time = None
+            self.pid_s_throttle.set_auto_mode(True, last_output=0)
 
-        dpid = pid['throttle']
-        self.pid_throttle = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
-        self.pid_throttle.output_limits = (dpid['min'], dpid['max']) 
-        self.pid_throttle.setpoint = 0
-        self.pid_throttle.sample_time = None
-        self.pid_throttle.set_auto_mode(True, last_output=0)
-        
-        dpid = pid['pitch']
-        self.__pitch_kp = dpid['kp']
-        self.__pitch_ki = dpid['ki']
-        self.__pitch_kd = dpid['kd']
-        self.pid_pitch = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
-        self.pid_pitch.output_limits = (dpid['min'], dpid['max']) 
-        self.pid_pitch.setpoint = 0
-        self.pid_pitch.sample_time = None
-        self.pid_pitch.set_auto_mode(True, last_output=0)
+            dpid = pid['throttle']
+            self.pid_throttle = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
+            self.pid_throttle.output_limits = (dpid['min'], dpid['max']) 
+            self.pid_throttle.setpoint = 0
+            self.pid_throttle.sample_time = None
+            self.pid_throttle.set_auto_mode(True, last_output=0)
+            
+            dpid = pid['pitch']
+            self.__pitch_kp = dpid['kp']
+            self.__pitch_ki = dpid['ki']
+            self.__pitch_kd = dpid['kd']
+            self.pid_pitch = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
+            self.pid_pitch.output_limits = (dpid['min'], dpid['max']) 
+            self.pid_pitch.setpoint = 0
+            self.pid_pitch.sample_time = None
+            self.pid_pitch.set_auto_mode(True, last_output=0)
 
-        dpid = pid['roll']
-        self.__roll_kp = dpid['kp']
-        self.__roll_ki = dpid['ki']
-        self.__roll_kd = dpid['kd']
-        self.pid_roll = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
-        self.pid_roll.output_limits = (dpid['min'], dpid['max']) 
-        self.pid_roll.setpoint = 0
-        self.pid_roll.sample_time = None
-        self.pid_roll.set_auto_mode(True, last_output=0)
-        
-        dpid = pid['yaw']
-        self.pid_yaw = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
-        self.pid_yaw.output_limits = (dpid['min'], dpid['max'])  
-        self.pid_yaw.setpoint = 0
-        self.pid_yaw.sample_time = None
-        self.pid_yaw.set_auto_mode(True, last_output=0)
+            dpid = pid['roll']
+            self.__roll_kp = dpid['kp']
+            self.__roll_ki = dpid['ki']
+            self.__roll_kd = dpid['kd']
+            self.pid_roll = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
+            self.pid_roll.output_limits = (dpid['min'], dpid['max']) 
+            self.pid_roll.setpoint = 0
+            self.pid_roll.sample_time = None
+            self.pid_roll.set_auto_mode(True, last_output=0)
+            
+            dpid = pid['yaw']
+            self.pid_yaw = PID(Kp=dpid['kp'], Ki=dpid['ki'], Kd=dpid['kd'], proportional_on_measurement=False, differential_on_measurement=False)
+            self.pid_yaw.output_limits = (dpid['min'], dpid['max'])  
+            self.pid_yaw.setpoint = 0
+            self.pid_yaw.sample_time = None
+            self.pid_yaw.set_auto_mode(True, last_output=0)
 
     def PID_reset(self):
         self.pid_s_yaw.set_auto_mode(True, last_output=0)
