@@ -50,7 +50,7 @@ class GlobalStateMachine:
         ut.draw_text(frame, "Press ESC to exit", -1)
 
         cv2.imshow('Camera', frame)
-        key = cv2.waitKey(30) & 0xFF
+        key = cv2.waitKey(10) & 0xFF
         if key == 27:
             exit(0)
 
@@ -81,7 +81,7 @@ class GlobalStateMachine:
         ut.draw_text(frame, "Press SPACE return to MANUAL CONTROL", -2)
 
         cv2.imshow('Camera', frame)
-        key = cv2.waitKey(30) & 0xFF
+        key = cv2.waitKey(10) & 0xFF
         if key == 27:
             self.__ed.land()
             time.sleep(5)
@@ -106,7 +106,7 @@ class GlobalStateMachine:
             self.__image = np.zeros((720, 960, 3), dtype = np.uint8)
             ut.draw_big_text(self.__image, "WAITING FRAME")
             self.__select_rect = []
-            key = cv2.waitKey(30) & 0xFF
+            key = cv2.waitKey(10) & 0xFF
             if key == 27:
                 self.__ed.quit()
                 exit(0)
@@ -197,7 +197,7 @@ class GlobalStateMachine:
             self.__image = np.zeros((720, 960, 3), dtype = np.uint8)
             ut.draw_big_text(self.__image, "WAITING FRAME")
             self.__select_rect = []
-            key = cv2.waitKey(30) & 0xFF
+            key = cv2.waitKey(10) & 0xFF
             if key == 27:
                 self.__ed.quit()
                 exit(0)
