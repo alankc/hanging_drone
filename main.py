@@ -25,4 +25,5 @@ if __name__ == "__main__":
         parameters_file = yaml.safe_load(f)
     
     msm = GlobalStateMachine(parameters_file)
+    msm.setup()
     msm.start()
