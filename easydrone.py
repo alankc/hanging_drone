@@ -193,6 +193,13 @@ class EasyDrone(Thread):
         
         if pe <= pt and eyaw <= yt:
             self.rc_control()
+            self.pid_roll.Kp = self.__roll_kp
+            self.pid_roll.Ki = self.__roll_ki
+            self.pid_roll.Kd = self.__roll_kd
+
+            self.pid_pitch.Kp = self.__pitch_kp  
+            self.pid_pitch.Ki = self.__pitch_ki  
+            self.pid_pitch.Kd = self.__pitch_kd
             return True
 
         throttle = self.pid_throttle(cz)
