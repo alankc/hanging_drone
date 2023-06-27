@@ -236,4 +236,5 @@ class Stereo:
         # Apply matrix transformation
         shape = (input.shape[1], input.shape[0])
         #return cv2.warpPerspective(input, H, shape, None, cv2.INTER_LANCZOS4)
-        return cv2.warpPerspective(input, H, shape, None, cv2.INTER_LINEAR)
+        #return cv2.warpPerspective(input, H, shape, None, cv2.INTER_LINEAR)
+        return cv2.warpPerspective(input, H, shape, None, cv2.INTER_CUBIC)
