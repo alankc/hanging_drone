@@ -123,7 +123,7 @@ class GlobalStateMachine:
         ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f}         MANUAL CONTROL", -1)
         cv2.imshow('Camera', self.__image_s)
 
-        key = cv2.waitKey(1) & 0xFF
+        key = cv2.waitKey(20) & 0xFF
         if key == 27:
             self.__ed.land()
             time.sleep(5)
