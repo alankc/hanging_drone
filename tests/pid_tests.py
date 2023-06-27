@@ -57,20 +57,27 @@ TI = 5
 TD = 2
 """
 
-
-KP = 1/150
+"""
+new throttle
+KP = 1/50
 TI = 5
-TD = 2
+TD = 3
 pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
-pid.output_limits = (-0.2, 0.2) 
+"""
+
+KP = 1/50
+TI = 5
+TD = 3
+pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
+pid.output_limits = (-0.5, 0.5) 
 pid.setpoint = 0
 pid.sample_time = None
 pid.set_auto_mode(True, last_output=0)
 
 run_control = False
 ed = EasyDrone(True)
-system_set_ctrl = lambda ctrl: ed.rc_control(roll=ctrl)
-system_get_out =  lambda : ed.get_curr_pos_corrected()[1]
+system_set_ctrl = lambda ctrl: ed.rc_control(throttle=ctrl)
+system_get_out =  lambda : ed.get_curr_pos_corrected()[2]
 e = Event()
 
 def controller():
@@ -81,13 +88,13 @@ def controller():
             ctrl = pid(data)
             system_set_ctrl(ctrl)
             y_read.append(data)
-        time.sleep(1/20)
+        time.sleep(1/65)
 
 if __name__ == "__main__":
 
     ed.connect()
     ed.start()
-
+    time.sleep(5)
     ed.takeoff()
 
     cv2.namedWindow('Camera')
