@@ -25,11 +25,15 @@ class LandingPipeline:
         self.__cy = cy
         self.__odom_file = odom_file
         self.__state = 0
+        self.__curr_state_method = self.state_0
+        self.__ret_status = self.RUNNING
         self.__ty = ty
         self.__drone_hook_center = drone_hook_center
     
     def reset(self):
         self.__state = 0
+        self.__curr_state_method = self.state_0
+        self.__ret_status = self.RUNNING
 
     def run(self, image, image_s):
 
@@ -40,50 +44,14 @@ class LandingPipeline:
         self.__image_s = image_s
             
         #loop state ensure that when the state is updated the loop will restart before run the next state
-        loop_state = self.__state
-
-        #state 0: the drone has to center a region of interest with cx and cy
-        if loop_state == 0:
-            self.state_0()
-
-        if loop_state == 1:
-            self.state_1()
-            
-        if loop_state == 2:
-            self.state_2()
-            
-        if loop_state == 3:
-            self.state_3()
-            
-        if loop_state == 4:
-            self.state_4()
-            
-        if loop_state == 5:
-            self.state_5()
-
-        if loop_state == 6:
-            self.state_6()
-            
-        if loop_state == 7:
-            self.state_7()
-
-        if loop_state == 8:
-            return self.SUCESS
+        self.__curr_state_method()
         
-        if loop_state == 9: #fail due roll
-            print("*************************************************")
-            print("*************************************************")
-            print("***************** LAND FAIL *********************")
-            print("*************************************************")
-            print("*************************************************")
-            return self.FAIL
-        
-        ut.draw_text(self.__image_s, f"State={loop_state}", -2)
+        ut.draw_text(self.__image_s, f"State={self.__state}", -2)
         height, width, _ = self.__image_s.shape
         ut.draw_line(self.__image_s, (self.__cx, 0), (self.__cx, height))
         ut.draw_line(self.__image_s, (0, self.__cy), (width, self.__cy))
 
-        return self.RUNNING
+        return self.__ret_status
 
     #state 0: using yolo to detect branch
     def state_0(self):
@@ -92,7 +60,8 @@ class LandingPipeline:
         if not ((self.__k_ref_i is None) and (self.__d_ref_i is None)): 
             self.__k_ref = self.__k_ref_i
             self.__d_ref = self.__d_ref_i
-            self.__state = self.__state + 1
+            self.__state = 1
+            self.__curr_state_method = self.state_1
             return
 
         pt1, pt2, conf = self.__yd.detect_best(self.__image, confidence=0.4)
@@ -120,7 +89,8 @@ class LandingPipeline:
                 self.__k_ref = k_ref
                 self.__d_ref = d_ref
 
-                self.__state = self.__state + 1
+                self.__state = 1
+                self.__curr_state_method = self.state_1
 
             #drawing the point in image that must be in the center
             ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy + error_cy)))
@@ -179,7 +149,8 @@ class LandingPipeline:
                 print( " STATE 0 END")
                 print(f" Start Position: {self.__p_start} ")
                 print("-----------------------------------------------")
-                self.__state = self.__state + 1   
+                self.__state = 2
+                self.__curr_state_method = self.state_2  
 
         else:
             self.__ed.set_yaw(0)
@@ -234,7 +205,8 @@ class LandingPipeline:
                     print( " STATE 1 END")
                     print(f" End Position: {self.__p_end} ")
                     print("-----------------------------------------------")
-                    self.__state = self.__state + 1   
+                    self.__state = 3
+                    self.__curr_state_method = self.state_3
 
             else: # YES, it is necessary, do not remove!
                 self.__ed.set_yaw(0)
@@ -258,6 +230,7 @@ class LandingPipeline:
             print("*************************************************")
             print("*************************************************")
             self.__state = 9
+            self.__curr_state_method = self.state_9
             return
         
         """ V1
@@ -321,7 +294,8 @@ class LandingPipeline:
         print(f"{max_pos}")
         print(f"{dlp}")
         print("-----------------------------------------------")
-        self.__state = self.__state + 1
+        self.__state = 4
+        self.__curr_state_method = self.state_4
 
     def state_4(self):
         (y, x, z) = self.__ed.get_curr_pos_corrected()
@@ -355,7 +329,8 @@ class LandingPipeline:
                 print(f"error_x={np.round(error_cx, 1)}")
                 print(f"error_z={np.round(error_cz, 1)}")
                 print("-----------------------------------------------")
-                self.__state = self.__state + 1
+                self.__state = 5
+                self.__curr_state_method = self.state_5
 
         else:
             self.__ed.set_roll(0)
@@ -385,7 +360,8 @@ class LandingPipeline:
         #ensure initial movement
         time.sleep(0.5)
 
-        self.__state = self.__state + 1
+        self.__state = 6
+        self.__curr_state_method = self.state_6
         self.__max_speed_y = self.__ed.get_curr_speed_corrected()[0]
 
     def state_6(self):
@@ -420,7 +396,8 @@ class LandingPipeline:
             print("-----------------------------------------------")
             print( " STATE 5 END")
             print("-----------------------------------------------")
-            self.__state = self.__state + 1
+            self.__state = 7
+            self.__curr_state_method = self.state_7
 
         ut.draw_text(self.__image_s, f"landing_pos = {self.__dlp[0]:.1f} {self.__dlp[1]:.1f} {self.__dlp[2]:.1f} {self.__dlp[3]:.1f}", 0)
         ut.draw_text(self.__image_s, f"curr_pos    = {x:.1f} {y:.1f} {z:.1f} {yaw:.1f}", 1)
@@ -451,4 +428,16 @@ class LandingPipeline:
                 f.write(f"{self.__odometry[i]}\n")
             f.close()
 
-        self.__state = self.__state + 1
+        self.__state = 8
+        self.__curr_state_method = self.state_8
+
+    def state_8(self):
+        self.__ret_status = self.SUCESS
+
+    def state_9(self):
+        print("*************************************************")
+        print("*************************************************")
+        print("***************** LAND FAIL *********************")
+        print("*************************************************")
+        print("*************************************************")
+        self.__ret_status = self.FAIL
