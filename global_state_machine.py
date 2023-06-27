@@ -304,7 +304,7 @@ class GlobalStateMachine:
             self.__state = self.S_MANUAL
             self.__curr_state_method = self.state_manual
 
-    def start(self):
+    def setup(self):
         self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'])
 
         self.__v = Vision()
@@ -333,6 +333,8 @@ class GlobalStateMachine:
 
         cv2.namedWindow("Camera")
         cv2.setMouseCallback("Camera", self.mouse_click)
+
+    def start(self):
 
         time_start = time.time()
         alpha = 0.1
