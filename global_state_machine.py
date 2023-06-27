@@ -24,6 +24,7 @@ class GlobalStateMachine:
         self.__parameters = parameters
         self.__select_rect = []
         self.__state = self.S_DISCONECTED
+        self.__curr_state_method = self.state_disconected
         self.__lp = None
 
     def mouse_click(self, event, x, y, flags, param):
@@ -38,6 +39,7 @@ class GlobalStateMachine:
         if self.__state == self.S_DISCONECTED and self.__d2rs.wifi_conect(None):
             print("Ready to takeoff")
             self.__state = self.S_MANUAL
+            self.__curr_state_method = self.state_manual
             self.__ed.connect()
             self.__ed.start()
 
@@ -67,6 +69,7 @@ class GlobalStateMachine:
             else:
                 print("Ready to takeoff")
                 self.__state = self.S_MANUAL
+                self.__curr_state_method = self.state_manual
                 self.__ed.connect()
                 self.__ed.start()
 
@@ -87,11 +90,13 @@ class GlobalStateMachine:
             exit(0)
         elif key  == ord(" "):
             self.__state = self.S_MANUAL
+            self.__curr_state_method = self.state_manual
             return
 
         result = self.__d2rs.land_request(0.2)
         if result:
             self.__state = self.S_MANUAL_LAND
+            self.__curr_state_method = self.state_manual_land
 
     def state_manual(self):
         
@@ -145,6 +150,7 @@ class GlobalStateMachine:
             self.__ed.PID_reset() #reseting all PIDs
             self.__ed.attitude_reset() #ensure proper positions during the landing
             self.__state = self.S_AUTONOMOUS
+            self.__curr_state_method = self.state_autonomous
 
         elif key == ord("2") and len(self.__select_rect) > 2: # USe selected rectangle
             k_ref, d_ref = self.__v.detect_features_in_polygon(self.__image, np.array(self.__select_rect))
@@ -155,12 +161,14 @@ class GlobalStateMachine:
             self.__ed.PID_reset() #reseting all PIDs
             self.__ed.attitude_reset() #ensure proper positions during the landing
             self.__state = self.S_AUTONOMOUS
+            self.__curr_state_method = self.state_autonomous
 
         elif key == ord("3"):# Clear selected rectangle
             self.__select_rect = []
 
         elif key == ord("m"):# Manual land
             self.__state = self.S_WAITING_RS_LAND
+            self.__curr_state_method = self.state_waiting_rs_land
 
         elif key == ord("g"):# Manual land
             gdw = GetDataWindow()
@@ -168,6 +176,7 @@ class GlobalStateMachine:
             if res:
                 (x, y, z, yaw) = res
                 self.__state = self.S_GO_TO
+                self.__curr_state_method = self.state_go_to
                 self.__ed.attitude_reset()
                 self.__ed.set_destination(x, y, z, yaw)
 
@@ -176,6 +185,7 @@ class GlobalStateMachine:
                 self.__ed.rc_control() #STOPING all controllers
                 self.__ed.PID_reset() #reseting all PIDs
                 self.__state = self.S_AUTONOMOUS
+                self.__curr_state_method = self.state_autonomous
         else:
             ut.rc_control(key, self.__ed)
 
@@ -219,9 +229,11 @@ class GlobalStateMachine:
             print("DELETING EASY DRONE")
             self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'])
             self.__state = self.S_WAITING_RS_TAKEOFF
+            self.__curr_state_method = self.state_waiting_rs_takeoff
 
         elif key == ord(" "):# Clear selected rectangle
                 self.__state = self.S_MANUAL
+                self.__curr_state_method = self.state_manual
         else:
             ut.rc_control(key, self.__ed)
 
@@ -233,6 +245,7 @@ class GlobalStateMachine:
         result = self.__lp.run(self.__image, self.__image_s)
         if (result == self.__lp.SUCESS) or (result == self.__lp.FAIL):
             self.__state = self.S_MANUAL
+            self.__curr_state_method = self.state_manual
             self.__lp = None
             self.__ed.rc_control() #STOPING all controllers
 
@@ -252,6 +265,7 @@ class GlobalStateMachine:
             self.__ed.rc_control() #STOPING all controllers
             self.__ed.PID_reset() #reseting all PIDs
             self.__state = self.S_MANUAL
+            self.__curr_state_method = self.state_manual
     
     def state_go_to(self):
         frame = self.__ed.get_curr_frame()
@@ -260,6 +274,7 @@ class GlobalStateMachine:
 
         if self.__ed.update_control():
             self.__state = self.S_MANUAL
+            self.__curr_state_method = self.state_manual
             return
         
         (cy, cx, cz) = self.__ed.get_curr_pos_corrected()
@@ -287,6 +302,7 @@ class GlobalStateMachine:
             self.__ed.rc_control() #STOPING all controllers
             self.__ed.PID_reset() #reseting all PIDs
             self.__state = self.S_MANUAL
+            self.__curr_state_method = self.state_manual
 
     def start(self):
         self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'])
@@ -323,31 +339,11 @@ class GlobalStateMachine:
         self.__fps = 0
 
         while True:
-            curr_state = self.__state
-            if curr_state == self.S_DISCONECTED:
-                self.state_disconected()
 
-            if curr_state == self.S_WAITING_RS_TAKEOFF:
-                self.state_waiting_rs_takeoff()
+            self.__fps = (1 - alpha) * self.__fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
+            time_start = time.time()
 
-            if curr_state == self.S_WAITING_RS_LAND:
-                self.state_waiting_rs_land()
-
-            if curr_state == self.S_MANUAL_LAND:
-                self.state_manual_land()
-
-            if curr_state == self.S_MANUAL:
-                self.state_manual()
-
-            if curr_state == self.S_AUTONOMOUS:
-                self.state_autonomous()
-
-            if curr_state == self.S_GO_TO:
-                self.state_go_to()
-
-            if time.time() - time_start > 0:
-                self.__fps = (1 - alpha) * self.__fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
-                time_start = time.time()
+            self.__curr_state_method()
 
 
 
