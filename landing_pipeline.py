@@ -385,7 +385,7 @@ class LandingPipeline:
         if speed_y > self.__max_speed_y :
             self.__max_speed_y  = speed_y
 
-        pid_error_test = abs(y - self.__ed.pid_pitch.setpoint) < 0.8 * abs(self.__ed.pid_pitch.setpoint)
+        pid_error_test = abs(y - self.__ed.pid_pitch.setpoint) < 0.9 * abs(self.__ed.pid_pitch.setpoint)
         #current speed < 1% of the maximum speed and the drone have moved at lest 20% forward
         #this 20% is just to ensure because sometimes the drone moves a little back
         if (speed_y < (0.01 * self.__max_speed_y))  and pid_error_test:
