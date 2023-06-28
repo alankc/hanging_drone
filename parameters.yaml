@@ -33,12 +33,12 @@ Control:
       #kp: 0.03333333333333333
       #ki: 0.025
       #kd: 0.016666666666666666
-      kp: 0.02
+      kp: 0.025
       #ki: 0.004
-      ki: 0.008
-      kd: 0.06
-      min: -0.3
-      max: 0.3
+      ki: 0.0
+      kd: 0.0025
+      min: -0.5
+      max: 0.5
     pitch:
       kp: 0.006666666666666667
       ki: 0.0008333333333333334
@@ -61,7 +61,7 @@ Control:
   ty: 10
   drone_hook_center: -8 #-8 for the printed hook, -5 for steel hook
 WiFi:
-  interface: wlxd8ec5e0a30b5
+  interface: wlp61s0
   #ssid: TELLO-98FC9A
   ssid: TELLO-98FD38
   password: TELLOBISG
