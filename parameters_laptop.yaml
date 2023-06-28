@@ -1,0 +1,70 @@
+Vision:
+  fast:
+    nonmaxSuppression: 1
+    type: 2
+    threshold: 10
+  #sift:
+  #orb:
+Camera:
+  fx: 912.8844558325202
+  fy: 916.1788304640794
+  cx: 488.3668390339133
+  cy: 377.42470274611975
+  cy_aligned: 175
+  pitch: -13
+  stream: null
+YOLO:
+  path: yolo_dataset/runs/detect/train6/weights/best.pt
+Control:
+  pid:
+    screen_yaw:
+      kp: -0.0010416666666666667
+      ki: -0.00020833333333333335
+      kd: -0.00010416666666666667
+      min: -0.3
+      max: 0.3
+    screen_throttle:
+      kp: 0.004166666666666667
+      ki: 0.0010416666666666667
+      kd: 0.00125
+      min: -0.3
+      max: 0.3
+    throttle:
+      #kp: 0.03333333333333333
+      #ki: 0.025
+      #kd: 0.016666666666666666
+      kp: 0.025
+      #ki: 0.004
+      ki: 0.0
+      kd: 0.0025
+      min: -0.5
+      max: 0.5
+    pitch:
+      kp: 0.006666666666666667
+      ki: 0.0008333333333333334
+      kd: 0.006666666666666667
+      min: -0.2
+      max: 0.2
+    roll:
+      kp: 0.008333333
+      ki: 0.0
+      kd: 0.004166667
+      min: -0.5
+      max: 0.5
+    yaw:
+      kp: 0.1
+      ki: 0.1
+      kd: 0.01
+      min: -0.5
+      max: 0.5
+  folder_odom: null
+  ty: 10
+  drone_hook_center: -8 #-8 for the printed hook, -5 for steel hook
+WiFi:
+  interface: wlp61s0
+  #ssid: TELLO-98FC9A
+  ssid: TELLO-98FD38
+  password: TELLOBISG
+RechargeStation:
+  ip: "192.168.1.11"
+  port: 2810

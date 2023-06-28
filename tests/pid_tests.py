@@ -65,10 +65,10 @@ TD = 3
 pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
 """
 
-KP = 1/50
-TI = 5
-TD = 3
-pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
+KP = 1/120
+TI = 50
+TD = 0.5
+pid = PID(Kp=KP, Ki=0, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
 pid.output_limits = (-0.5, 0.5) 
 pid.setpoint = 0
 pid.sample_time = None
@@ -76,8 +76,8 @@ pid.set_auto_mode(True, last_output=0)
 
 run_control = False
 ed = EasyDrone(True)
-system_set_ctrl = lambda ctrl: ed.rc_control(throttle=ctrl)
-system_get_out =  lambda : ed.get_curr_pos_corrected()[2]
+system_set_ctrl = lambda ctrl: ed.rc_control(roll=ctrl)
+system_get_out =  lambda : ed.get_curr_pos_corrected()[1]
 e = Event()
 
 def controller():
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         plt.clf()
         plt.plot(x_time, y_setpoint)
         plt.plot(x_time, y_read)
-
+        plt.pause(0.01)
 
         key = cv2.waitKey(1) & 0xFF
 
