@@ -65,10 +65,17 @@ TD = 3
 pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
 """
 
-KP = 1/120
-TI = 50
-TD = 0.5
-pid = PID(Kp=KP, Ki=0, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
+KP  = 0.6 / 20
+PCR = 2.5
+TI  = PCR * 0.5
+TD  = PCR * 0.125
+
+print(f"KP= {KP}")
+print(f"KI= {KP/TI}")
+print(f"KD= {KP*TD}")
+
+
+pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
 pid.output_limits = (-0.5, 0.5) 
 pid.setpoint = 0
 pid.sample_time = None
@@ -76,8 +83,8 @@ pid.set_auto_mode(True, last_output=0)
 
 run_control = False
 ed = EasyDrone(True)
-system_set_ctrl = lambda ctrl: ed.rc_control(roll=ctrl)
-system_get_out =  lambda : ed.get_curr_pos_corrected()[1]
+system_set_ctrl = lambda ctrl: ed.rc_control(throttle=ctrl)
+system_get_out =  lambda : ed.get_curr_pos_corrected()[2]
 e = Event()
 
 def controller():
@@ -88,7 +95,7 @@ def controller():
             ctrl = pid(data)
             system_set_ctrl(ctrl)
             y_read.append(data)
-        time.sleep(1/65)
+        time.sleep(1/60)
 
 if __name__ == "__main__":
 
@@ -164,4 +171,7 @@ if __name__ == "__main__":
             ed.quit()
             break
     
+    print(f"KP={KP}")
+    print(f"KI={KP/TI}")
+    print(f"KD={KP*TD}")
     
