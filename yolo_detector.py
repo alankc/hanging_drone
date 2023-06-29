@@ -7,6 +7,12 @@ class YOLODetector:
         self.__model = YOLO(path_to_weights)
 
     def detect_best(self, image, confidence = 0.7, classes_to_detect=[0]):
+        """
+        Returns the rectangle defining the branch with the biggest value evaluation
+            ==> evaluation = confidence * (width/height)
+
+        Yolo searches only by the classes in "classes_to_detect" with at least "confidence"
+        """
         results = self.__model(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), conf=confidence, classes=classes_to_detect)
         best_func = 0
         best_conf = 0
