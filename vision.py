@@ -54,17 +54,16 @@ class Vision:
         else: #IF FAST or ORB
             self.__bfm = cv2.BFMatcher(normType=cv2.NORM_HAMMING)
     
-    """
-    Detect the feature in an image
-    """
     def detect_features(self, img):
+        """
+        Detect the feature in an image
+        """
         return self.__detec_and_compute(img)
     
-    """
-    Detect the feature in an image that are inside the rectangle rect
-    """
     def detect_features_in_rect(self, img, rect):
-        
+        """
+        Detect the feature in an image that are inside the rectangle rect
+        """
         rec_x_i, rec_y_i = rect[0]
         rec_x_e, rec_y_e = rect[1]
 
@@ -81,11 +80,10 @@ class Vision:
 
         return np.array(k_out), np.array(d_out)
     
-    """
-    Detect the feature in an image that are inside the polygon
-    """
     def detect_features_in_polygon(self, img, polygon):
-        
+        """
+        Detect the feature in an image that are inside the polygon
+        """    
         keypoints, descriptors = self.__detec_and_compute(img)
         
         k_out = []
@@ -98,11 +96,11 @@ class Vision:
 
         return np.array(k_out), np.array(d_out)
     
-    """
-    Matches the descriptors and returns the the variation in X and Y of the reference
-    """
-    def bf_matching_descriptors(self, d1, k2, d2, ratio, ref):
 
+    def bf_matching_descriptors(self, d1, k2, d2, ratio, ref):
+        """
+        Matches the descriptors and returns the the variation in X and Y of the reference
+        """
         matches = self.__bfm.knnMatch(d1, d2, k=2)
         x_ref, y_ref =  ref
         
@@ -132,11 +130,10 @@ class Vision:
         
         return np.array(k_curr), np.array(d_curr), np.array(error), np.array(good_matches)
 
-    """
-    make feature dection and matching using two images
-    """
     def bf_matching(self, img1, img2, ratio):
-
+        """
+        make feature dection and matching using two images
+        """
         #PARALLEL if FAST or ORB
         if self.__detector_type != self.__DETECTOR_TYPE_SIFT:
             executor = ThreadPoolExecutor(max_workers=2)
@@ -157,11 +154,10 @@ class Vision:
 
         return keypoints1, keypoints2, good_matches
    
-    """
-    Rotate an image
-    """
     def rotateImage(self, input, roll, pitch, yaw, dx, dy, dz, fx, fy, cx, cy):
-        
+        """
+        Rotate an image
+        """
         roll = roll * np.pi / 180
         pitch = pitch * np.pi / 180
         yaw = yaw * np.pi / 180
