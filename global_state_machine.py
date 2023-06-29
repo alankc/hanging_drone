@@ -32,6 +32,13 @@ class GlobalStateMachine:
             self.__select_rect.append([x,y])
 
     def state_disconected(self):
+        """
+        First, try to receive SSID from the recharge station. 
+        If it does not receive, try to connect to the ssid saved on the yaml file
+
+        Options:
+            ESC: Exit
+        """
         print("*************************************************")
         print("************* TRYING CONNECTION *****************")
         print("*************************************************", flush=True)
@@ -44,7 +51,13 @@ class GlobalStateMachine:
             self.__ed.start()
 
     def state_waiting_rs_takeoff(self):
-        
+        """
+        First, try to receive SSID from the recharge station. 
+        If it works, try to connect to it
+
+        Options:
+            ESC: Exit
+        """
         frame = np.zeros((720, 960, 3), dtype = np.uint8)
         ut.draw_big_text(frame, "WAITING CONNECTION")
         ut.draw_text(frame, "Press ESC to exit", -1)
@@ -74,7 +87,13 @@ class GlobalStateMachine:
                 self.__ed.start()
 
     def state_waiting_rs_land(self):
-        
+        """
+        Waiting land permission
+
+        Options:
+            ESC: Exit
+            SPACE: return to MANUAL CONTROL
+        """
         frame = np.zeros((720, 960, 3), dtype = np.uint8)
         ut.draw_big_text(frame, "WAITING LAND PERMISSION")
         ut.draw_text(frame, "Press ESC to exit", -1)
@@ -99,7 +118,32 @@ class GlobalStateMachine:
             self.__curr_state_method = self.state_manual_land
 
     def state_manual(self):
-        
+        """
+        Manual control
+
+        General options:
+            ESC: Exit
+            1: Runs landing pipeline with Yolo (autonomous mode)
+            2: Runs landing pipeline with the selected shape (autonomous mode)
+            3: Reset the selected shape
+            m: Send land request
+            g: Open destination window
+            SPACE: switch between autonomous and manual
+            
+        Movement OPTIONS:
+            q: land
+            e: takeoff
+
+            w: up
+            s: down
+            a: rotate counterclockwise
+            d: rotate clockwise
+
+            i: forward
+            k: backward
+            j: left
+            l: right
+        """
         frame = self.__ed.get_curr_frame()
             
         if frame is None:
@@ -191,7 +235,26 @@ class GlobalStateMachine:
             ut.rc_control(key, self.__ed)
 
     def state_manual_land(self):
-        
+        """
+        Manual Land
+
+        Options:
+            ESC: Exit
+            q: land
+            e: disconnect from drone
+            SPACE: return to manual control
+
+        Movement Options:
+            w: up
+            s: down
+            a: rotate counterclockwise
+            d: rotate clockwise
+
+            i: forward
+            k: backward
+            j: left
+            l: right
+        """
         frame = self.__ed.get_curr_frame()
             
         if frame is None:
@@ -239,6 +302,14 @@ class GlobalStateMachine:
             ut.rc_control(key, self.__ed)
 
     def state_autonomous(self):
+        """
+        Autonomous control
+
+        Options:
+            ESC: Exit
+            SPACE: switch between autonomous and manual
+        """
+
         frame = self.__ed.get_curr_frame()
         self.__image = self.__s.rotateImage(frame)
         self.__image_s = self.__image.copy()
@@ -269,6 +340,13 @@ class GlobalStateMachine:
             self.__curr_state_method = self.state_manual
     
     def state_go_to(self):
+        """
+        Go to desired position
+
+        Options:
+            ESC: Exit
+            SPACE: switch between autonomous and manual
+        """
         frame = self.__ed.get_curr_frame()
         self.__image = self.__s.rotateImage(frame)
         self.__image_s = self.__image.copy()
@@ -306,6 +384,9 @@ class GlobalStateMachine:
             self.__curr_state_method = self.state_manual
 
     def setup(self):
+        """
+        Mandatory initial setup
+        """
         self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'])
 
         self.__v = Vision()
@@ -336,7 +417,9 @@ class GlobalStateMachine:
         cv2.setMouseCallback("Camera", self.mouse_click)
 
     def start(self):
-
+        """
+        State Machine loop
+        """
         time_start = time.time()
         alpha = 0.1
         self.__fps = 0
