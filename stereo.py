@@ -20,10 +20,14 @@ class Stereo:
         self.cy = cy
         self.angle = angle * np.pi / 180
     
-    """
-    Deprecated function
-    """
     def compute_relative_depth_filtered(self, ty, kp1, kp2, matches, rect1, rect2):
+        """
+        Deprecated function
+
+        Compute the depth considering 
+        the keypoints kp1 inside the rectangle rect1 and 
+        the keypoints kp2 inside the rectangle rect2 
+        """
         # For each match compute the disparity, and 3D position
         depth = []
 
@@ -63,6 +67,11 @@ class Stereo:
         return depth
     
     def __k_means_filter(self, depth, x, y):
+        """
+        k_means filter to select the cluster nearest the drone
+
+        used when detects several features in the background
+        """
         data = [[x[i], depth[i], y[i]] for i in range(len(x))]
         data = np.array(data)
 
@@ -113,12 +122,18 @@ class Stereo:
         
         return depth_out, x_out, y_out
 
-    """
-    Return x, y (camera like) position, the depth from the second image, and
-    the angle theta formed considerend x = x and y = depth
-    Theta is used to define the drone's yaw
-    """
     def compute_relative_depth(self, ty, kp1, kp2, matches, kfilter = True, kdist = 50):
+        """
+        Return the landing site's x, y, depth, yaw, and roll relative to the drone's position in the second picture
+
+        In the landing pipeline:
+            x: x in the landing pipeline
+            y: height in the landing pipeline
+            depth: y in the landing pipeline
+            yaw: used rotate the drone and hit the landing site facing forward
+            roll: used to define if the drone can or cannot land in the place
+        """
+
         # For each match compute the disparity, and 3D position
         depth_out = []
         x_out = []
@@ -176,11 +191,10 @@ class Stereo:
 
         return x_out, y_out, depth_out, yaw_out, roll_out
     
-    """
-    Rotate an image
-    """
     def rotateImage(self, input):
-        
+        """
+        Rotate the image considering the camera pitch
+        """
         roll = 0
         pitch = self.angle
         yaw = 0
