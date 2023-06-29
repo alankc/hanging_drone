@@ -2,10 +2,11 @@ import cv2
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
-"""
-IMPORTANT: ALWAYS! use set_x_detector(...), then set_x_matching(...), then bf_matching(...)
-"""
+
 class Vision:
+    """
+    IMPORTANT: ALWAYS! use set_x_detector(...), then set_x_matching(...), then bf_matching(...)
+    """
     __DETECTOR_TYPE_FAST = 0
     __DETECTOR_TYPE_ORB = 1
     __DETECTOR_TYPE_SIFT = 2
