@@ -90,6 +90,9 @@ class EasyDrone(Thread):
             self.pid_yaw.set_auto_mode(True, last_output=0)
 
     def PID_reset(self):
+        """
+        Reset the PIDs to prevent abrupt starting movements
+        """
         self.pid_s_yaw.set_auto_mode(True, last_output=0)
         self.pid_s_throttle.set_auto_mode(True, last_output=0)
         self.pid_throttle.set_auto_mode(True, last_output=0)
@@ -98,42 +101,78 @@ class EasyDrone(Thread):
         self.pid_yaw.set_auto_mode(True, last_output=0)
     
     def attitude_reset(self):
+        """
+        Reset the initial attitude and yaw
+        """
         self.__q = Quaternion(1,0,0,0) #No rotation
         self.__start_yaw = 0
 
     def connect(self):
+        """
+        Connect to the drone
+        """
         self.__drone = tellopy.Tello()
         self.__drone.connect()
         self.__drone.wait_for_connection(60.0)
 
     def takeoff(self):
+        """
+        Automatic takeoff
+        """
         self.__drone.takeoff()
 
     def cooler_on(self):
+        """
+        Spins the propellers to prevent overheat
+        """
         self.__drone.manual_takeoff()
 
     def land(self):
+        """
+        Automatic land
+        """
         self.__drone.land()
 
     def rc_control(self, throttle:float = 0, pitch:float = 0, roll:float = 0, yaw:float = 0):
+        """
+        Define throttle, pitch, roll and yaw power
+        """
         self.__drone.set_throttle(throttle)
         self.__drone.set_pitch(pitch)
         self.__drone.set_roll(roll)
         self.__drone.set_yaw(yaw)
     
     def set_throttle(self, throttle:float):
+        """
+        Define throttle power
+        """
         self.__drone.set_throttle(throttle)
 
     def set_pitch(self, pitch:float):
+        """
+        Define pitch power
+        """
         self.__drone.set_pitch(pitch)
 
     def set_roll(self, roll:float):
+        """
+        Define roll power
+        """
         self.__drone.set_roll(roll)
 
     def set_yaw(self, yaw:float):
+        """
+        Define yaw power
+        """
         self.__drone.set_yaw(yaw)
 
     def set_destination(self, x, y, z, yaw):
+        """
+        Set a destination considering the current position of the drone
+        x = right and left
+        y = forward and backward
+        z = up and down
+        """
         self.save_quaternion()
         (cy, cx, cz) = self.get_curr_pos_corrected()
         cyaw = self.get_curr_yaw()
@@ -148,13 +187,18 @@ class EasyDrone(Thread):
         self.pid_roll.set_auto_mode(True, last_output=0)
         self.pid_yaw.set_auto_mode(True, last_output=0)
     
-    #pt: position tolerance
-    #yt: yaw tolerance
     def update_control(self, pt = 10, yt = 5):
-        
+        """
+        Considering that a destination was set. 
+        Update the controllers to move the drone toward that.
+        pt = position tolerance
+        yt = yaw tolerance
+        """
         (cy, cx, cz) = self.get_curr_pos_corrected()
         cyaw = self.get_curr_yaw()
 
+        # when the drone rotates more than +/- 90 degrees, it is necessary
+        # to adjust the PID gains from pitch and roll
         if cyaw > 90:
             floor_cyaw = np.floor(cyaw/360.0) * 360.0
             if (90 + floor_cyaw) <= cyaw <= (270 + floor_cyaw):
@@ -186,12 +230,14 @@ class EasyDrone(Thread):
             self.pid_pitch.Ki = self.__pitch_ki  
             self.pid_pitch.Kd = self.__pitch_kd
 
+        #computing error
         ex = self.pid_roll.setpoint - cx
         ey = self.pid_pitch.setpoint - cy
         ez = self.pid_throttle.setpoint - cz
         eyaw = abs(self.pid_yaw.setpoint - cyaw)
         pe = (ex**2 + ey**2 + ez**2) ** 0.5
         
+        #if error ecceptable, stop
         if pe <= pt and eyaw <= yt:
             self.rc_control()
             self.pid_roll.Kp = self.__roll_kp
@@ -216,66 +262,62 @@ class EasyDrone(Thread):
         return False
 
     def quit(self):
+        """
+        Disconnect from the drone
+        """
         self.__event.set()
         self.__drone.quit()
 
-    def handler_log_data(self, event, sender, data, **args):
-        drone = sender
-        if event is drone.EVENT_LOG_DATA:      
-            if data:
-                self.mvo = data.mvo
-                self.imu = data.imu
-
-            q_read = Quaternion(self.imu.q0, self.imu.q1, self.imu.q2, self.imu.q3) #current quaternion
-            q0 = q_read.w
-            q1 = q_read.x
-            q2 = q_read.y
-            q3 = q_read.z
-            curr_yaw = np.arctan2(2 * ((q1 * q2) + (q0 * q3)), q0**2 + q1**2 - q2**2 - q3**2) * 180 /  np.pi
-
-            diference = curr_yaw - self.__last_yaw
-            acc_yaw = self.__acc_yaw
-
-            if (curr_yaw < 0) and (self.__last_yaw > 170):
-                acc_yaw = acc_yaw + diference + 360 
-            elif (curr_yaw > 0) and (self.__last_yaw < -170):
-                acc_yaw = acc_yaw + diference - 360   
-            elif (curr_yaw < 0) and (self.__last_yaw > 0):
-                acc_yaw = acc_yaw - diference
-            elif (curr_yaw > 0) and (self.__last_yaw < 0):
-                acc_yaw = acc_yaw - diference
-            else:
-                acc_yaw = acc_yaw + diference
-
-            self.__acc_yaw = acc_yaw
-            self.__last_yaw = curr_yaw
-
     def get_curr_frame(self):
+        """
+        Get last frame read from camera
+        """
         return self.__curr_frame
     
     def save_quaternion(self):
+        """
+        Save the current quaternion and yaw
+        """
         self.__q = Quaternion(self.imu.q0, self.imu.q1, self.imu.q2, self.imu.q3)
         self.__q = self.__q.inverse
         self.__start_yaw =  self.__acc_yaw
     
     def get_curr_pos(self):
+        """
+        Get the global position
+        """
         return (self.mvo.pos_x*100, self.mvo.pos_y*100, -self.mvo.pos_z*100)
     
     def get_curr_pos_corrected(self):
+        """
+        Get the position relative to the saved quaternion
+        """
         curr_pos = (self.mvo.pos_x*100, self.mvo.pos_y*100, -self.mvo.pos_z*100)
         return self.__q.rotate(curr_pos)
     
     def get_curr_yaw(self):
+        """
+        Get the current yaw considering the yaw saved
+        """
         return self.__acc_yaw - self.__start_yaw
 
-    def get_curr_speed_corrected(self):
+    def get_curr_velocity_corrected(self):
+        """
+        Get the current velocities considering the saved quaternion
+        """
         curr_speed = (self.mvo.vel_x * 10, self.mvo.vel_y * 10, -self.mvo.vel_z * 10)
         return self.__q.rotate(curr_speed)
     
     def rotate_pos(self, pos):
+        """
+        Rotate a position considering the saved quaternion
+        """
         return self.__q.rotate(pos)
     
     def run(self):
+        """
+        Image capturing function
+        """
         kernel = np.array([[ 0,-1, 0], 
                         [-1, 5,-1],
                         [ 0,-1, 0]])
@@ -353,6 +395,40 @@ class EasyDrone(Thread):
             print("===========================================")
             self.__drone.quit()
             """
+
+    def handler_log_data(self, event, sender, data, **args):
+        """
+        Hanfler function used by tellopy
+        """
+        drone = sender
+        if event is drone.EVENT_LOG_DATA:      
+            if data:
+                self.mvo = data.mvo
+                self.imu = data.imu
+
+            q_read = Quaternion(self.imu.q0, self.imu.q1, self.imu.q2, self.imu.q3) #current quaternion
+            q0 = q_read.w
+            q1 = q_read.x
+            q2 = q_read.y
+            q3 = q_read.z
+            curr_yaw = np.arctan2(2 * ((q1 * q2) + (q0 * q3)), q0**2 + q1**2 - q2**2 - q3**2) * 180 /  np.pi
+
+            diference = curr_yaw - self.__last_yaw
+            acc_yaw = self.__acc_yaw
+
+            if (curr_yaw < 0) and (self.__last_yaw > 170):
+                acc_yaw = acc_yaw + diference + 360 
+            elif (curr_yaw > 0) and (self.__last_yaw < -170):
+                acc_yaw = acc_yaw + diference - 360   
+            elif (curr_yaw < 0) and (self.__last_yaw > 0):
+                acc_yaw = acc_yaw - diference
+            elif (curr_yaw > 0) and (self.__last_yaw < 0):
+                acc_yaw = acc_yaw - diference
+            else:
+                acc_yaw = acc_yaw + diference
+
+            self.__acc_yaw = acc_yaw
+            self.__last_yaw = curr_yaw
 
 
 

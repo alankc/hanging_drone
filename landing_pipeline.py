@@ -362,7 +362,7 @@ class LandingPipeline:
 
         self.__state = 6
         self.__curr_state_method = self.state_6
-        self.__max_speed_y = self.__ed.get_curr_speed_corrected()[0]
+        self.__max_speed_y = self.__ed.get_curr_velocity_corrected()[0]
 
     def state_6(self):
         (y, x, z) = self.__ed.get_curr_pos_corrected()
@@ -381,7 +381,7 @@ class LandingPipeline:
             
         self.__ed.rc_control(ctrl_throttle, ctrl_pitch, ctrl_roll, ctrl_yaw)
 
-        speed_y = self.__ed.get_curr_speed_corrected()[0]
+        speed_y = self.__ed.get_curr_velocity_corrected()[0]
         if speed_y > self.__max_speed_y :
             self.__max_speed_y  = speed_y
 
