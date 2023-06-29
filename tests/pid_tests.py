@@ -76,7 +76,7 @@ print(f"KD= {KP*TD}")
 
 
 pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
-pid.output_limits = (-0.5, 0.5) 
+pid.output_limits = (-0.3, 0.3) 
 pid.setpoint = 0
 pid.sample_time = None
 pid.set_auto_mode(True, last_output=0)
@@ -86,7 +86,7 @@ ed = EasyDrone(True)
 system_set_ctrl = lambda ctrl: ed.rc_control(throttle=ctrl)
 system_get_out =  lambda : ed.get_curr_pos_corrected()[2]
 e = Event()
-freq = 15
+freq = 45
 
 def controller():
     global run_control, system_get_out, pid, system_set_ctrl, y_read, e, freq
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     ed.connect()
     ed.start()
     time.sleep(5)
-    #ed.takeoff()
+    ed.takeoff()
 
     cv2.namedWindow('Camera')
     cv2.createTrackbar('Variation', 'Camera', 0, 40, nothing)
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     cv2.createTrackbar('Hz', 'Camera', 0, 60, nothing)
     cv2.setTrackbarMin('Hz', 'Camera', 10)
-    cv2.setTrackbarPos('Hz', 'Camera', 15)
+    cv2.setTrackbarPos('Hz', 'Camera', 45)
     
     time_start = time.time()
     alpha = 0.1
@@ -153,7 +153,7 @@ if __name__ == "__main__":
             setpoint = cv2.getTrackbarPos('Variation', 'Camera')
             cv2.setTrackbarPos('Variation', 'Camera', 0)
             freq = cv2.getTrackbarPos('Hz', 'Camera')
-            cv2.setTrackbarPos('Hz', 'Camera', 15)
+            cv2.setTrackbarPos('Hz', 'Camera', 45)
 
             ed.save_quaternion()
             data = system_get_out()
