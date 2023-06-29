@@ -35,24 +35,6 @@ class LandingPipeline:
         self.__curr_state_method = self.state_0
         self.__ret_status = self.RUNNING
 
-    def run(self, image, image_s):
-
-        #Image used in data processing
-        self.__image = image
-            
-        #Image used only to show
-        self.__image_s = image_s
-            
-        #loop state ensure that when the state is updated the loop will restart before run the next state
-        self.__curr_state_method()
-        
-        ut.draw_text(self.__image_s, f"State={self.__state}", -2)
-        height, width, _ = self.__image_s.shape
-        ut.draw_line(self.__image_s, (self.__cx, 0), (self.__cx, height))
-        ut.draw_line(self.__image_s, (0, self.__cy), (width, self.__cy))
-
-        return self.__ret_status
-
     #state 0: using yolo to detect branch
     def state_0(self):
         #better here than in the reset, 
@@ -441,3 +423,21 @@ class LandingPipeline:
         print("*************************************************")
         print("*************************************************")
         self.__ret_status = self.FAIL
+
+    def run(self, image, image_s):
+
+        #Image used in data processing
+        self.__image = image
+            
+        #Image used only to show
+        self.__image_s = image_s
+            
+        #loop state ensure that when the state is updated the loop will restart before run the next state
+        self.__curr_state_method()
+        
+        ut.draw_text(self.__image_s, f"State={self.__state}", -2)
+        height, width, _ = self.__image_s.shape
+        ut.draw_line(self.__image_s, (self.__cx, 0), (self.__cx, height))
+        ut.draw_line(self.__image_s, (0, self.__cy), (width, self.__cy))
+
+        return self.__ret_status
