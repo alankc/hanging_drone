@@ -14,7 +14,7 @@ Camera:
   pitch: -13
   stream: null
 YOLO:
-  path: yolo_dataset/runs/detect/train4/weights/best.pt
+  path: yolo_dataset/runs/detect/train6/weights/best.pt
 Control:
   pid:
     screen_yaw:
@@ -56,8 +56,10 @@ Control:
   folder_odom: null
   ty: 10
   drone_hook_center: -8 #-8 for the printed hook, -5 for steel hook
+  desired_fps: 25
 WiFi:
-  interface: wlp61s0
+  #interface: wlp61s0
+  interface: wlxd8ec5e0a30b5
   #ssid: TELLO-98FC9A
   ssid: TELLO-98FD38
   password: TELLOBISG

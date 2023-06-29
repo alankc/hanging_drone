@@ -413,6 +413,8 @@ class GlobalStateMachine:
         prs = self.__parameters['RechargeStation']
         self.__d2rs = D2RS(prs['ip'], prs['port'], pwifi['interface'], pwifi['ssid'], pwifi['password'])
 
+        self.__desired_fps = self.__parameters['Control']['desired_fps']
+
         cv2.namedWindow("Camera")
         cv2.setMouseCallback("Camera", self.mouse_click)
 
@@ -425,8 +427,14 @@ class GlobalStateMachine:
         self.__fps = 0
 
         while True:
+            
+            curr_dt = time.time()-time_start
+            if curr_dt < 1.0/self.__desired_fps:
+                t_delay = 1.0/self.__desired_fps - curr_dt
+                time.sleep(t_delay / 10)
+                continue
 
-            self.__fps = (1 - alpha) * self.__fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
+            self.__fps = (1 - alpha) * self.__fps + alpha * 1 / curr_dt  # exponential moving average
             time_start = time.time()
 
             self.__curr_state_method()
