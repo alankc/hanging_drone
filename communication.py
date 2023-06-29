@@ -19,6 +19,9 @@ class Server:
         self.__port = port
 
     def conn(self):
+        """
+        Bind and Listen server
+        """
         try:
             self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.__s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -82,6 +85,11 @@ class Server:
             return False
 
     def send_msg(self, msg:str=LAND_REQUEST, value:str=""):
+        """
+        Send a text msg to the currently active connection
+        
+        Return true if delivered with success
+        """
         try:
             m = msg + value 
             self.__curr_conn.sendall(m.encode())
@@ -92,11 +100,17 @@ class Server:
             return False
 
     def close_curr(self):
+        """
+        Close current active connection
+        """
         self.__curr_conn.close()
         self.__curr_conn = None
         self.__curr_addr = None
 
     def close(self):
+        """
+        Close server
+        """
         self.__s.close()
 
 
@@ -111,6 +125,11 @@ class Client:
         self.__port = port
 
     def conn(self):
+        """
+        Try to connect to the server at the host and port provided in the constructor
+
+        Return true if connected
+        """
         try:
             self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.__s.settimeout(0.5)
@@ -125,6 +144,11 @@ class Client:
             return False
 
     def send_msg(self, msg:str=LAND_REQUEST, value:str=""):
+        """
+        Send a text msg to the currently active connection
+        
+        Return true if delivered with success
+        """
         try:
             m = msg + value 
             self.__s.sendall(m.encode())
@@ -163,6 +187,9 @@ class Client:
             return False
     
     def close(self):
+        """
+        Close connection to the server
+        """
         self.__s.close()
 
 #adapted from https://stackoverflow.com/questions/54479347/simplest-way-to-connect-wifi-python
@@ -171,7 +198,11 @@ class WiFiFinder:
         self.__interface = interface
 
     def check_and_connect(self, ssid:str, password:str):
-        
+        """
+        Check if is possible to connect to the SSID and connect to it
+
+        Return true if connected
+        """
         os.system("nmcli radio wifi off")
         os.system("nmcli radio wifi on")
         time.sleep(1)
@@ -194,6 +225,11 @@ class WiFiFinder:
         return False
 
     def __connect(self, ssid, password):
+        """
+        Connect to the ssid using the password
+
+        Return true if connected
+        """
         cmd = f"nmcli d wifi connect {ssid} password {password}"
         try:
             if os.system(cmd) != 0: # This will run the command and check connection
@@ -212,6 +248,11 @@ class D2RS:
         self.__wifi = WiFiFinder(interface)
 
     def land_request(self, timeout=0.5):
+        """
+        Send a land request to the battery recharge station
+
+        Return true if permission to land granted
+        """
         c = Client(self.__host, self.__port)
         check = False
         if c.conn(): #If connection worked
@@ -222,6 +263,12 @@ class D2RS:
         return check #return false for any failure
 
     def takeoff_request(self, timeout=0.5):
+        """
+        Send a takeoff request to the battery recharge station (BRS). 
+        It sends the SSID so the BRS knows the drone that is going to land
+
+        Return the SSID of the drone to connect or None
+        """
         c = Client(self.__host, self.__port)
         ssid = None
         if c.conn(): #If connection worked
@@ -235,6 +282,9 @@ class D2RS:
         return ssid #return None for any failure or the ssid name
 
     def wifi_conect(self, ssid:str):
+        """
+        Connect to the Wi-Fi SSID informed
+        """        
         if ssid is None:
             return self.__wifi.check_and_connect(self.__ssid, self.__password)
         
@@ -253,6 +303,11 @@ class RS2D:
         return self.__s.conn()
 
     def land_request(self, timeout=0.5):
+        """
+        Respond to a land request
+
+        Return the ssid of the drone requesting land
+        """
         ssid = None
         if self.__s.wait_conn(timeout=timeout):
             msg = self.__s.receive_msg(timeout=timeout)
@@ -264,6 +319,11 @@ class RS2D:
         return ssid
 
     def takeoff_request(self, ssid, timeout=0.5):
+        """
+        Respond to a takeoff request with the SSID of the drone ready to takeoff
+
+        Return true if a client accepted to takeoff
+        """
         check = False
         if self.__s.wait_conn(timeout=timeout):
             if self.__s.receive_msg(msg=Server.TAKEOFF, timeout=timeout):  #If received message TAKEOFF
@@ -273,6 +333,9 @@ class RS2D:
         return check
 
     def stop(self):
+        """
+        Stop server
+        """
         self.__s.close()
 
 if __name__ == "__main__":
