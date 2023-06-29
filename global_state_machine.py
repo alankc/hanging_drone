@@ -315,7 +315,7 @@ class GlobalStateMachine:
         self.__image_s = self.__image.copy()
 
         result = self.__lp.run(self.__image, self.__image_s)
-        if (result == self.__lp.SUCESS) or (result == self.__lp.FAIL):
+        if (result == self.__lp.SUCCESS) or (result == self.__lp.FAIL):
             self.__state = self.S_MANUAL
             self.__curr_state_method = self.state_manual
             self.__lp = None

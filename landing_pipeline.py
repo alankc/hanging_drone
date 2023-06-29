@@ -10,7 +10,7 @@ from yolo_detector import YOLODetector
 
 class LandingPipeline:
 
-    SUCESS = 0
+    SUCCESS = 0
     RUNNING = 1
     FAIL = -1
 
@@ -31,12 +31,21 @@ class LandingPipeline:
         self.__drone_hook_center = drone_hook_center
     
     def reset(self):
+        """
+        Reset to state 0
+        """
         self.__state = 0
         self.__curr_state_method = self.state_0
         self.__ret_status = self.RUNNING
 
-    #state 0: using yolo to detect branch
     def state_0(self):
+        """
+        Uses YOLO to detect possible branches combined with picture-based PIDs 
+        to centralize YOLO's rectangle in the midle of the screen
+
+        When the rectangle is centralized, it captures the features inside it
+        """
+
         #better here than in the reset, 
         #treats the case that the user selects the rectangle
         if not ((self.__k_ref_i is None) and (self.__d_ref_i is None)): 
@@ -85,8 +94,15 @@ class LandingPipeline:
             self.__ed.set_throttle(0)
             self.__ed.pid_s_throttle.set_auto_mode(enabled=True, last_output=0)   
 
-    #state 1: the drone has to center a region of interest with cx and cy
+
     def state_1(self):
+        """
+        Centralizes the picture with the features using the features detected before
+
+
+        Saves them and the current position when the features are centralized
+        """
+
         #detect features in the current image
         k, d = self.__v.detect_features(self.__image)
 
@@ -143,6 +159,12 @@ class LandingPipeline:
             
     #state 2: center cx and move up
     def state_2(self):
+        """
+        Moves the drone TY cm up while keeping the features centralized
+
+        Saves them and the current position when the features are centralized and TY adjusted
+        """
+
         error_cz = self.__ed.pid_throttle.setpoint - self.__ed.get_curr_pos()[2]
         #computing control output based on height
         ctrl_throttle = np.round(self.__ed.pid_throttle(self.__ed.get_curr_pos()[2]), 2)
@@ -198,8 +220,10 @@ class LandingPipeline:
             self.__ed.set_yaw(0)
             self.__ed.pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
 
-    #state 3: compute landing site position
     def state_3(self):
+        """
+        Compute the landing site position
+        """
         #compute relative position
         ty = self.__p_end[2] - self.__p_start[2]
         # x, y in the image and depth 
@@ -280,6 +304,9 @@ class LandingPipeline:
         self.__curr_state_method = self.state_4
 
     def state_4(self):
+        """
+        Adjust height and x position
+        """
         (y, x, z) = self.__ed.get_curr_pos_corrected()
 
         ### ODOM DATA ###
@@ -322,6 +349,10 @@ class LandingPipeline:
         ut.draw_text(self.__image_s, f"error_z={np.round(error_cz, 1)}", 1)
 
     def state_5(self):
+        """
+        Initial movement towards the landing site to get the first value of __max_speed_y
+        """
+
         #ensure drone stoped
         time.sleep(0.5)
         (y, x, z) = self.__ed.get_curr_pos_corrected()
@@ -347,6 +378,10 @@ class LandingPipeline:
         self.__max_speed_y = self.__ed.get_curr_velocity_corrected()[0]
 
     def state_6(self):
+        """
+        Navigation towards the landing site 
+        """
+
         (y, x, z) = self.__ed.get_curr_pos_corrected()
         yaw = self.__ed.get_curr_yaw()
 
@@ -368,8 +403,8 @@ class LandingPipeline:
             self.__max_speed_y  = speed_y
 
         pid_error_test = abs(y - self.__ed.pid_pitch.setpoint) < 0.9 * abs(self.__ed.pid_pitch.setpoint)
-        #current speed < 1% of the maximum speed and the drone have moved at lest 20% forward
-        #this 20% is just to ensure because sometimes the drone moves a little back
+        #current speed < 1% of the maximum speed and the drone have moved at lest 10% forward
+        #this 10% is just to ensure because sometimes the drone moves a little back
         if (speed_y < (0.01 * self.__max_speed_y))  and pid_error_test:
             self.__ed.rc_control(pitch=0.5)
             time.sleep(1)
@@ -387,6 +422,12 @@ class LandingPipeline:
         ut.draw_text(self.__image_s, f"curr_speed  = {np.round(speed_y, 1)}", 3)
 
     def state_7(self):
+        """
+        Lands the drone after hitting the landing site
+        
+        It also saves the log into a file 
+        (bad implementation, I should save the log from time to time)
+        """
         print("*************************************************")
         print("*************************************************")
         print("*************** LAND COMPLETE *******************")
@@ -414,9 +455,15 @@ class LandingPipeline:
         self.__curr_state_method = self.state_8
 
     def state_8(self):
-        self.__ret_status = self.SUCESS
+        """
+        Informs a successful landing
+        """
+        self.__ret_status = self.SUCCESS
 
     def state_9(self):
+        """
+        Informs a failed landing
+        """
         print("*************************************************")
         print("*************************************************")
         print("***************** LAND FAIL *********************")

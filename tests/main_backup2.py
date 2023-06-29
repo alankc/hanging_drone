@@ -126,7 +126,7 @@ if __name__ == "__main__":
         if not manual_control:
             #if not (lp is None):
             result = lp.run(image, image_s)
-            if (result == lp.SUCESS) or (result == lp.FAIL):
+            if (result == lp.SUCCESS) or (result == lp.FAIL):
                 manual_control = True
                 lp = None
                 ed.rc_control() #STOPING all controllers
