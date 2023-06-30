@@ -164,8 +164,8 @@ if __name__ == "__main__":
             fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
             time_start = time.time()
 
-        ut.draw_text(image, f"FPS SCREEN     = {fps}", -1)
-        ut.draw_text(image, f"FPS CONTROLLER = {fps_controller}", -2)
+        ut.draw_text(image, f"    FPS SCREEN = {fps:.2f}", -1)
+        ut.draw_text(image, f"FPS CONTROLLER = {fps_controller:.2f}", -2)
         
         cv2.imshow('Camera', image)
         
