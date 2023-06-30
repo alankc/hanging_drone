@@ -482,7 +482,7 @@ class LandingPipeline:
         #loop state ensure that when the state is updated the loop will restart before run the next state
         self.__curr_state_method()
         
-        ut.draw_text(self.__image_s, f"State={self.__state}", -2)
+        ut.draw_text(self.__image_s, f"Autonomous Landing - State {self.__state} of 8", -2)
         height, width, _ = self.__image_s.shape
         ut.draw_line(self.__image_s, (self.__cx, 0), (self.__cx, height))
         ut.draw_line(self.__image_s, (0, self.__cy), (width, self.__cy))
