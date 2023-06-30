@@ -70,10 +70,10 @@ KI= 0.008
 KD= 0.00825
 """
 
-KP  = 0.6 / 20
+KP  = 0.33 / 20
 PCR = 2.5
 TI  = PCR * 0.5
-TD  = PCR * 0.125
+TD  = PCR * 0.33
 
 print(f"KP= {KP}")
 print(f"KI= {KP/TI}")
@@ -123,6 +123,7 @@ def controller():
         
         else:
             time_start = time.time()
+            time.sleep(1/50)
 
 if __name__ == "__main__":
 
@@ -138,7 +139,7 @@ if __name__ == "__main__":
 
     cv2.createTrackbar('Hz', 'Camera', 0, 60, nothing)
     cv2.setTrackbarMin('Hz', 'Camera', 10)
-    cv2.setTrackbarPos('Hz', 'Camera', 45)
+    cv2.setTrackbarPos('Hz', 'Camera', 25)
     
     time_start = time.time()
     alpha = 0.1
@@ -172,7 +173,7 @@ if __name__ == "__main__":
         plt.clf()
         plt.plot(x_time, y_setpoint)
         plt.plot(x_time, y_read)
-        plt.pause(0.01)
+        #plt.pause(0.001)
 
         key = cv2.waitKey(1) & 0xFF
 
@@ -180,7 +181,7 @@ if __name__ == "__main__":
             setpoint = cv2.getTrackbarPos('Variation', 'Camera')
             cv2.setTrackbarPos('Variation', 'Camera', 0)
             freq = cv2.getTrackbarPos('Hz', 'Camera')
-            cv2.setTrackbarPos('Hz', 'Camera', 45)
+            cv2.setTrackbarPos('Hz', 'Camera', 25)
 
             ed.save_quaternion()
             data = system_get_out()
@@ -191,6 +192,10 @@ if __name__ == "__main__":
             for i in range(300):
                 y_setpoint.append(pid.setpoint)
                 y_read.append(data)
+
+            x_time = collections.deque(maxlen=300)
+            for t in range(300):
+                x_time.append(np.round(t * 1.0/freq, 2))
 
             run_control = True
         
