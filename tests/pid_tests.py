@@ -16,13 +16,6 @@ import utils as ut
 def nothing(x):
     pass
 
-x_time = collections.deque(maxlen=300)
-for t in range(300):
-    x_time.append(t * 0.05)
-y_setpoint = collections.deque(np.zeros(300))
-y_read = collections.deque(np.zeros(300))
-
-
 """
 throttle
 KP = 1/80
@@ -98,10 +91,17 @@ ed = EasyDrone(True)
 system_set_ctrl = lambda ctrl: ed.rc_control(throttle=ctrl)
 system_get_out =  lambda : ed.get_curr_pos_corrected()[2]
 e = Event()
+
 freq = 25
+fps_controller = 0
+x_time = collections.deque(maxlen=300)
+for t in range(300):
+    x_time.append(np.round(t * 1.0/freq, 2))
+y_setpoint = collections.deque(np.zeros(300))
+y_read = collections.deque(np.zeros(300))
 
 def controller():
-    global run_control, system_get_out, pid, system_set_ctrl, y_read, e, freq
+    global run_control, system_get_out, pid, system_set_ctrl, y_read, e, freq, fps_controller
     
     while not e.is_set():
 
@@ -112,14 +112,14 @@ def controller():
                 t_delay = 1.0/freq - curr_dt
                 time.sleep(t_delay / 10)
                 continue
-
+            
+            fps_controller = 0.9 * fps_controller + 0.1 / curr_dt
             time_start = time.time()
+
             data = system_get_out()
             ctrl = pid(data)
             system_set_ctrl(ctrl)
             y_read.append(data)
-            
-            print(1/curr_dt, flush=True)
         
         else:
             time_start = time.time()
@@ -164,7 +164,8 @@ if __name__ == "__main__":
             fps = (1 - alpha) * fps + alpha * 1 / (time.time()-time_start)  # exponential moving average
             time_start = time.time()
 
-        ut.draw_text(image, f"FPS={fps}", -1)
+        ut.draw_text(image, f"FPS SCREEN     = {fps}", -1)
+        ut.draw_text(image, f"FPS CONTROLLER = {fps_controller}", -2)
         
         cv2.imshow('Camera', image)
         
