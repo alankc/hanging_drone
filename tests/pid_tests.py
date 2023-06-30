@@ -70,15 +70,14 @@ KI= 0.008
 KD= 0.00825
 """
 
-KP  = 0.33 / 20
+KP  = 0.2 / 20
 PCR = 2.5
 TI  = PCR * 0.5
 TD  = PCR * 0.33
 
-print(f"KP= {KP}")
-print(f"KI= {KP/TI}")
-print(f"KD= {KP*TD}")
-
+print(f"kp: {KP}")
+print(f"ki: {KP/TI}")
+print(f"kd: {KP*TD}")
 
 pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
 pid.output_limits = (-0.3, 0.3) 
@@ -211,7 +210,7 @@ if __name__ == "__main__":
             ed.quit()
             break
     
-    print(f"KP={KP}")
-    print(f"KI={KP/TI}")
-    print(f"KD={KP*TD}")
+    print(f"kp: {KP}")
+    print(f"ki: {KP/TI}")
+    print(f"kd: {KP*TD}")
     
