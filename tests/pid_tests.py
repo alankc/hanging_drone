@@ -65,6 +65,18 @@ TD = 3
 pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD)
 """
 
+"""
+Interesting link: https://www.mstarlabs.com/control/znrule.html
+Rule Name	            Tuning Parameters
+Classic Ziegler-Nichols Kp = 0.6 Ku     Ti = 0.5 Tu     Td = 0.125 Tu
+Pessen Integral Rule    Kp = 0.7 Ku     Ti = 0.4 Tu     Td = 0.15 Tu
+Some Overshoot          Kp = 0.33 Ku    Ti = 0.5 Tu     Td = 0.33 Tu
+No Overshoot            Kp = 0.2 Ku     Ti = 0.5 Tu     Td = 0.33 Tu
+KP= 0.01
+KI= 0.008
+KD= 0.00825
+"""
+
 KP  = 0.6 / 20
 PCR = 2.5
 TI  = PCR * 0.5
