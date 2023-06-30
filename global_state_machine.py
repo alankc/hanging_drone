@@ -345,7 +345,7 @@ class GlobalStateMachine:
 
         Options:
             ESC: Exit
-            SPACE: switch between autonomous and manual
+            SPACE: return to manual mode
         """
         frame = self.__ed.get_curr_frame()
         self.__image = self.__s.rotateImage(frame)
