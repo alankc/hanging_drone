@@ -98,17 +98,31 @@ ed = EasyDrone(True)
 system_set_ctrl = lambda ctrl: ed.rc_control(throttle=ctrl)
 system_get_out =  lambda : ed.get_curr_pos_corrected()[2]
 e = Event()
-freq = 45
+freq = 25
 
 def controller():
     global run_control, system_get_out, pid, system_set_ctrl, y_read, e, freq
+    
     while not e.is_set():
+
         if run_control:
+
+            curr_dt = time.time()-time_start
+            if curr_dt < 1.0/freq:
+                t_delay = 1.0/freq - curr_dt
+                time.sleep(t_delay / 10)
+                continue
+
+            time_start = time.time()
             data = system_get_out()
             ctrl = pid(data)
             system_set_ctrl(ctrl)
             y_read.append(data)
-        time.sleep(1/freq)
+            
+            print(1/curr_dt, flush=True)
+        
+        else:
+            time_start = time.time()
 
 if __name__ == "__main__":
 
