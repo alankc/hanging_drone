@@ -75,7 +75,7 @@ class LandingPipeline:
                 time_start = time.time()
 
             ut.draw_text(self.__image_s, f"FPS={fps:.1f}", -1)
-            ut.draw_text(self.__image_s, f"State={loop_state}", -2)
+            ut.draw_text(self.__image_s, f"Autonomous Landing - State {loop_state} of 8", -2)
             height, width, _ = self.__image_s.shape
             ut.draw_line(self.__image_s, (self.__cx, 0), (self.__cx, height))
             ut.draw_line(self.__image_s, (0, self.__cy), (width, self.__cy))
