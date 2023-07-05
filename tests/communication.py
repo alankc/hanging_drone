@@ -1,4 +1,5 @@
 import socket
+import select
 import logging
 import os
 import time
@@ -17,45 +18,20 @@ class Server:
     def __init__(self, host, port) -> None:
         self.__host = host
         self.__port = port
+        self.__curr_addr = None
 
-    def conn(self):
+    def start(self):
         """
-        Bind and Listen server
+        Bind server
         """
         try:
-            self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.__s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.__s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.__s.bind((self.__host, self.__port))
-            self.__s.listen()
             return True
         
         except Exception as e:
             logging.error("Error creating socket " + str(e), exc_info=True)
             return False 
-
-    #None timeout = Infinitum time, loop = 1, runs only once
-    def wait_conn(self, timeout = None, loop = 1):
-        """
-        timeout = seconds e.g., 0.5.
-        When timeout=None, waits for message indefinitely
-        
-        loop = numbers of attemps with timeout
-
-        combining timeout with loop might be interesting when the system has several threads runnning
-        """
-        self.__s.settimeout(timeout)
-        while loop > 0:
-            loop = loop - 1
-            try:
-                conn, addr = self.__s.accept()
-                self.__curr_conn = conn
-                self.__curr_addr = addr
-
-            except Exception as e:
-                if not (isinstance(e, TimeoutError) or isinstance(e, ConnectionResetError)):
-                    logging.error("Error connection " + str(e), exc_info=True)
-                return False
-        return True
 
     def receive_msg(self, msg=None, timeout=None):
         """
@@ -70,16 +46,33 @@ class Server:
                 None in timeout
                 False in others
         """
-        self.__curr_conn.settimeout(timeout)
         try:
-            data = self.__curr_conn.recv(1024).decode()
-            if msg is None: 
-                return data
-            else:
-                return msg in data
+            self.__s.setblocking(False)
+
+            ready = select.select([self.__s], [], [], timeout)
+            print(ready)
+            if len(ready[0]) > 0:
+                
+                for i in range(len(ready[0])):
+                    data, addr = self.__s.recvfrom(1024)
+                    print(data)
+                    print("----")
+                
+                if self.__curr_addr is None: #If last connection is closed, update it
+                    self.__curr_addr = addr
+
+                if self.__curr_addr == addr: #If the received packet came from the same current connecion
+                    data = data.decode()
+                    if msg is None:
+                        return data
+                    
+                    else:
+                        return msg in data
+            
+            return False
 
         except Exception as e:
-            if not (isinstance(e, TimeoutError) or isinstance(e, ConnectionResetError)):
+            if not isinstance(e, TimeoutError):
                 logging.error("Error getting message " + str(e), exc_info=True)
                 return None
             return False
@@ -92,22 +85,17 @@ class Server:
         """
         try:
             m = msg + value 
-            self.__curr_conn.sendall(m.encode())
-            return True
+            sent = self.__s.sendto(m.encode(), self.__curr_addr)
+            return sent > 0
         
         except Exception as e:
             logging.error("Error sending message " + str(e), exc_info=True)
             return False
 
     def close_curr(self):
-        """
-        Close current active connection
-        """
-        self.__curr_conn.close()
-        self.__curr_conn = None
         self.__curr_addr = None
 
-    def close(self):
+    def stop(self):
         """
         Close server
         """
@@ -124,22 +112,8 @@ class Client:
         self.__host = host
         self.__port = port
 
-    def conn(self, timeout = 1):
-        """
-        Try to connect to the server at the host and port provided in the constructor
-
-        Return true if connected
-        """
-        try:
-            self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.__s.settimeout(timeout)
-            self.__s.connect((self.__host, self.__port))
-            return True
-        
-        except Exception as e:
-            if not (isinstance(e, ConnectionRefusedError) or isinstance(e, TimeoutError) or isinstance(e, ConnectionResetError)):
-                logging.error("Error connecting " + str(e), exc_info=True)
-            return False
+    def start(self):
+        self.__s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send_msg(self, msg:str=LAND_REQUEST, value:str=""):
         """
@@ -148,13 +122,14 @@ class Client:
         Return true if delivered with success
         """
         try:
-            m = msg + value 
-            self.__s.sendall(m.encode())
-            return True
+            m = msg + value
+            sent = self.__s.sendto(m.encode(), (self.__host, self.__port))
+            return sent > 0
         
         except Exception as e:
             logging.error("Error sending message " + str(e), exc_info=True)
-            return False       
+            return False 
+  
 
     def receive_msg(self, msg=None, timeout=None):
         """
@@ -169,22 +144,30 @@ class Client:
                 None in timeout
                 False in others
         """
-        self.__s.settimeout(timeout)
         try:
-            data = self.__s.recv(1024).decode()
-             
-            if msg is None: 
-                return data
-            else:
-                return msg in data
+            self.__s.setblocking(False)
+            ready = select.select([self.__s], [], [], timeout)
+
+            if ready[0]:
+                
+                data, _ = self.__s.recvfrom(1024)
+                data = data.decode()
+
+                if msg is None: 
+                    return data
+                    
+                else:
+                    return msg in data
             
+            return False
+
         except Exception as e:
-            if not (isinstance(e, TimeoutError) or isinstance(e, ConnectionResetError)):
-                logging.error("Error connecting " + str(e), exc_info=True)
+            if not isinstance(e, TimeoutError):
+                logging.error("Error getting message " + str(e), exc_info=True)
                 return None
             return False
     
-    def close(self):
+    def stop(self):
         """
         Close connection to the server
         """
@@ -252,12 +235,15 @@ class D2RS:
         Return true if permission to land granted
         """
         c = Client(self.__host, self.__port)
+        c.start()
+        
         check = False
-        if c.conn(): #If connection worked
-            if c.send_msg(Client.LAND_REQUEST, self.__ssid): #if the message was sent
-                if c.receive_msg(msg=Client.READY, timeout=timeout): #If received message ready ()
-                        check = c.send_msg(Client.READY) #return true if sent the message ready
-            c.close()
+        
+        if c.send_msg(Client.LAND_REQUEST, self.__ssid): #if the message was sent
+            if c.receive_msg(msg=Client.READY, timeout=timeout): #If received message ready ()
+                check = c.send_msg(Client.READY) #return true if sent the message ready
+        
+        c.stop()
         return check #return false for any failure
 
     def takeoff_request(self, timeout=0.5):
@@ -268,15 +254,17 @@ class D2RS:
         Return the SSID of the drone to connect or None
         """
         c = Client(self.__host, self.__port)
+        c.start()
+
         ssid = None
-        if c.conn(): #If connection worked
-            if c.send_msg(Client.TAKEOFF): #if the message was sent
-                msg = c.receive_msg(timeout=timeout) #If received message TAKEOFF SSID
-                if isinstance(msg, str) and Client.TAKEOFF in msg:
-                    check = c.send_msg(Client.READY) #return true if sent the message ready
-                    if check:
-                        ssid = msg.split()[1]
-            c.close()
+
+        if c.send_msg(Client.TAKEOFF): #if the message was sent
+            msg = c.receive_msg(timeout=timeout) #If received message TAKEOFF SSID
+            if isinstance(msg, str) and Client.TAKEOFF in msg:
+                check = c.send_msg(Client.READY) #return true if sent the message ready
+                if check:
+                    ssid = msg.split()[1]
+        c.stop()
         return ssid #return None for any failure or the ssid name
 
     def wifi_conect(self, ssid:str):
@@ -293,9 +281,13 @@ class D2RS:
         return False
 
 class RS2D:
-    def __init__(self, host:str = "127.0.0.1", port:int = 2810) -> None:
+    def __init__(self, host:str = "0.0.0.0", port:int = 2810) -> None:
         self.__port = port
         self.__host = host
+
+    def start_server(self):
+        self.__s = Server(self.__host, self.__port)
+        return self.__s.start()
 
     def land_request(self, timeout=0.5):
         """
@@ -304,19 +296,14 @@ class RS2D:
         Return the ssid of the drone requesting land
         """
         ssid = None
-        self.__s = Server(self.__host, self.__port)
-        
-        if self.__s.conn():
-            if self.__s.wait_conn(timeout=timeout):
-                msg = self.__s.receive_msg(timeout=timeout)
-                if isinstance(msg, str) and Server.LAND_REQUEST in msg: #if received a land request
-                    if self.__s.send_msg(Server.READY): #if sent the messsage ready
-                        if self.__s.receive_msg(msg=Server.READY, timeout=timeout): #if received a message ready
-                            ssid = msg.split()[1] #get the ssid
-                self.__s.close_curr()
-            
-            self.__s.close()
 
+        msg = self.__s.receive_msg(timeout=timeout)
+        if isinstance(msg, str) and Server.LAND_REQUEST in msg: #if received a land request
+            if self.__s.send_msg(Server.READY): #if sent the messsage ready
+                if self.__s.receive_msg(msg=Server.READY, timeout=timeout): #if received a message ready
+                    ssid = msg.split()[1] #get the ssid
+        
+        self.__s.close_curr()  
         return ssid
 
     def takeoff_request(self, ssid, timeout=0.5):
@@ -326,18 +313,19 @@ class RS2D:
         Return true if a client accepted to takeoff
         """
         check = False
-        self.__s = Server(self.__host, self.__port)
 
-        if self.__s.conn():
-            if self.__s.wait_conn(timeout=timeout):
-                if self.__s.receive_msg(msg=Server.TAKEOFF, timeout=timeout):  #If received message TAKEOFF
-                    if self.__s.send_msg(Server.TAKEOFF, ssid): #if sent takeof with the SSID
-                        check = self.__s.receive_msg(msg=Server.READY, timeout=timeout) #if received ready to takeoff
-                self.__s.close_curr()
-            
-            self.__s.close()
-
+        if self.__s.receive_msg(msg=Server.TAKEOFF, timeout=timeout):  #If received message TAKEOFF
+            if self.__s.send_msg(Server.TAKEOFF, ssid): #if sent takeof with the SSID
+                check = self.__s.receive_msg(msg=Server.READY, timeout=timeout) #if received ready to takeoff
+        
+        self.__s.close_curr()
         return check
+
+    def stop_server(self):
+        """
+        Stop server
+        """
+        self.__s.stop()
 
 if __name__ == "__main__":
     import sys
@@ -350,43 +338,28 @@ if __name__ == "__main__":
     if "C" in running:
         d2rs = D2RS("127.0.0.1", 2810, "wlxd8ec5e0a30b5", "TELLO-98FD38")
         while True:
-            if d2rs.land_request(1):
-                print("LAND OK")
-            else:
-                print("DELAY")
-                time.sleep(0.1)
+            print(d2rs.land_request(5))
 
     if "S" in running:
         rs2d = RS2D("127.0.0.1", 2810)
-        import random
-        while True:
-            tr = random.randint(1, 2000) / 100
-            print("-------------------------------")
-            print(f"Sleep time: {tr}")
-            time.sleep(tr)
-            t1 = time.time()
-            print(rs2d.land_request(1))
-            print(f"Time of land request = {time.time() - t1}")
+        if rs2d.start_server():
+            while True:
+                #time.sleep(10)
+                t1 = time.time()
+                print(rs2d.land_request(5))
+                print(f"Delay = {time.time() - t1}")
 
     if "c" in running:
         d2rs = D2RS("127.0.0.1", 2810, "wlxd8ec5e0a30b5", "TELLO-98FD38")
 
-        count = 0
-        while not d2rs.land_request():
-            print(f"{count} No response in land request!")
-            count = count + 1
-            time.sleep(1)
+        tst = d2rs.land_request(1)
+        if tst:
+            print("Success in land request!")
+        else:
+            print("No response in land request!")
+            exit(0)
 
-        print("Success in land request!")
-
-            
-        count = 0
-        res_ssid = d2rs.takeoff_request()
-        while res_ssid is None:
-            print(f"{count} No response in takeoff request!")
-            count = count + 1
-            res_ssid = d2rs.takeoff_request()
-
+        res_ssid = d2rs.takeoff_request(1)
         if res_ssid:
             count = 5
             check = False
@@ -404,15 +377,18 @@ if __name__ == "__main__":
 
     if "s" in running:
         rs2d = RS2D("127.0.0.1", 2810)
-        while True:
-            print("Waiting Connection")
-            res_ssid = rs2d.land_request(0.1)
-            #You have to keep the ssids from the drone that are ready to takeof
-            #You must run the takeoff_request only if you have drone available to takeoff 
-            if res_ssid:
-                break
+        if rs2d.start_server():
+            while True:
+                print("Waiting Connection")
+                res_ssid = rs2d.land_request(1)
+                #You have to keep the ssids from the drone that are ready to takeof
+                #You must run the takeoff_request only if you have drone available to takeoff 
+                if res_ssid:
+                    break
 
-        while True:
-            print("Changing battery")
-            if rs2d.takeoff_request(res_ssid, 0.1):
-                break
+            while True:
+                print("Changing battery")
+                if rs2d.takeoff_request(res_ssid, 0.1):
+                    break
+
+        rs2d.stop_server()
