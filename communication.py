@@ -253,7 +253,7 @@ class D2RS:
         """
         c = Client(self.__host, self.__port)
         check = False
-        if c.conn(): #If connection worked
+        if c.conn(timeout): #If connection worked
             if c.send_msg(Client.LAND_REQUEST, self.__ssid): #if the message was sent
                 if c.receive_msg(msg=Client.READY, timeout=timeout): #If received message ready ()
                         check = c.send_msg(Client.READY) #return true if sent the message ready
@@ -269,7 +269,7 @@ class D2RS:
         """
         c = Client(self.__host, self.__port)
         ssid = None
-        if c.conn(): #If connection worked
+        if c.conn(timeout): #If connection worked
             if c.send_msg(Client.TAKEOFF): #if the message was sent
                 msg = c.receive_msg(timeout=timeout) #If received message TAKEOFF SSID
                 if isinstance(msg, str) and Client.TAKEOFF in msg:
