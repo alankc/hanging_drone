@@ -369,7 +369,7 @@ if __name__ == "__main__":
             print(f"Sleep time: {tr}")
             time.sleep(tr)
             t1 = time.time()
-            print(rs2d.takeoff_request("SSID TESTER", 1))
+            print(rs2d.takeoff_request("SSID-TESTER", 1))
             print(f"Time of land request = {time.time() - t1}")
 
     if "c" in running:
