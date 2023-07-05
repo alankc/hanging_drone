@@ -349,12 +349,16 @@ if __name__ == "__main__":
 
     if "C" in running:
         d2rs = D2RS("127.0.0.1", 2810, "wlxd8ec5e0a30b5", "TELLO-98FD38")
+        count = 0
         while True:
-            if d2rs.land_request(1):
-                print("LAND OK")
+            ssid = d2rs.takeoff_request(1)
+            if ssid:
+                print(f"TAKEOF WITH: {ssid}")
+                exit(0)
             else:
-                print("DELAY")
-                time.sleep(0.1)
+                print(f"{count}th attempt!")
+                count = count + 1
+                time.sleep(1)
 
     if "S" in running:
         rs2d = RS2D("127.0.0.1", 2810)
@@ -365,7 +369,7 @@ if __name__ == "__main__":
             print(f"Sleep time: {tr}")
             time.sleep(tr)
             t1 = time.time()
-            print(rs2d.land_request(1))
+            print(rs2d.takeoff_request("SSID TESTER", 1))
             print(f"Time of land request = {time.time() - t1}")
 
     if "c" in running:
