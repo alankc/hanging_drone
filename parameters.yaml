@@ -63,7 +63,8 @@ Control:
   drone_hook_center: -8 #-8 for the printed hook, -5 for steel hook
   desired_fps: 25
 WiFi:
-  interface: wlxd8ec5e0a30b5
+  #interface: wlxd8ec5e0a30b5
+  interface: wlp61s0
   #ssid: TELLO-98FC9A
   ssid: TELLO-98FD38
   password: TELLOBISG
