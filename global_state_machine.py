@@ -70,10 +70,10 @@ class GlobalStateMachine:
         print("takeoff_request", flush=True)
         res_ssid = self.__d2rs.takeoff_request(0.5)
         if res_ssid:
-            count = 5
+            count = 30
             check = False
             while not check and count > 0:
-                print(f"Trying to connect to Wifi: {res_ssid}")
+                print(f"{30 - count} Trying to connect to Wifi: {res_ssid}")
                 check = self.__d2rs.wifi_conect(res_ssid)
                 count = count - 1
 
