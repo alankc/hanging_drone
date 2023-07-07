@@ -14,7 +14,8 @@ Camera:
   pitch: -13
   stream: null
 YOLO:
-  path: yolo_dataset/runs/detect/train6/weights/best.pt
+  path: yolo_dataset/mixed.pt
+  #path: yolo_dataset/indoor.pt
 Control:
   pid:
     screen_yaw:
