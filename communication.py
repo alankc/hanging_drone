@@ -192,8 +192,9 @@ class Client:
 
 #adapted from https://stackoverflow.com/questions/54479347/simplest-way-to-connect-wifi-python
 class WiFiFinder:
-    def __init__(self, interface:str="wlxd8ec5e0a30b5"):
+    def __init__(self, interface:str="wlxd8ec5e0a30b5", interface_ip = ""):
         self.__interface = interface
+        self.__interface_ip = interface_ip
 
     def check_and_connect(self, ssid:str, password:str):
         """
@@ -201,8 +202,19 @@ class WiFiFinder:
 
         Return true if connected
         """
-        os.system("nmcli radio wifi off")
-        os.system("nmcli radio wifi on")
+
+        #Remove SSID from known list to avoid wrong interface connect to it
+        cmd = "nmcli connection show | grep {ssid} | grep -E -o '[0-9a-f\-]{36}'".replace("{ssid}", ssid)
+        results = list(os.popen(cmd))
+        for r in results:
+            os.system(f"nmcli con delete {r}")
+
+        #TURN OFF THE INTERFACE
+        os.system(f"sudo ifconfig {self.__interface} down")
+        
+        #TURN ON THE INTERFACE
+        os.system(f"sudo ifconfig {self.__interface} up")
+
         time.sleep(1)
 
         command = f"iwlist {self.__interface} scan | grep -ioE \'ssid:\"{ssid}\"\'"
@@ -228,22 +240,24 @@ class WiFiFinder:
 
         Return true if connected
         """
-        cmd = f"nmcli d wifi connect {ssid} password {password}"
+        cmd = f"nmcli d wifi connect {ssid} password {password} ifname {self.__interface}"
         try:
             if os.system(cmd) != 0: # This will run the command and check connection
                 raise Exception()
         except:
             raise # Not Connected
         else:
+            cmd = f"sudo ifconfig {self.__interface} {self.__interface_ip}/24"
+            os.system(cmd)
             return True # Connected
 
 class D2RS:
-    def __init__(self, host:str, port:int, interface="wlxd8ec5e0a30b5", ssid:str="TELLO-98FD38", password="TELLOBISG") -> None:
+    def __init__(self, host:str, port:int, wifi:dict = {}) -> None:
         self.__host = host
         self.__port = port
-        self.__ssid = ssid
-        self.__password = password
-        self.__wifi = WiFiFinder(interface)
+        self.__ssid = wifi['ssid']
+        self.__password = wifi['password']
+        self.__wifi = WiFiFinder(wifi['interface'], wifi['ip'])
 
     def land_request(self, timeout=0.5):
         """

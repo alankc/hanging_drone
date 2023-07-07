@@ -291,7 +291,7 @@ class GlobalStateMachine:
             self.__ed.quit()
             time.sleep(5)
             print("DELETING EASY DRONE")
-            self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'])
+            self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'], self.__parameters['WiFi'])
             self.__state = self.S_WAITING_RS_TAKEOFF
             self.__curr_state_method = self.state_waiting_rs_takeoff
 
@@ -387,7 +387,7 @@ class GlobalStateMachine:
         """
         Mandatory initial setup
         """
-        self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'])
+        self.__ed = EasyDrone(True, self.__parameters['Camera']['stream'], self.__parameters['Control']['pid'], self.__parameters['WiFi'])
 
         self.__v = Vision()
         if 'fast' in self.__parameters['Vision']:
@@ -411,7 +411,7 @@ class GlobalStateMachine:
 
         pwifi = self.__parameters['WiFi']
         prs = self.__parameters['RechargeStation']
-        self.__d2rs = D2RS(prs['ip'], prs['port'], pwifi['interface'], pwifi['ssid'], pwifi['password'])
+        self.__d2rs = D2RS(prs['ip'], prs['port'], pwifi)
 
         self.__desired_fps = self.__parameters['Control']['desired_fps']
 

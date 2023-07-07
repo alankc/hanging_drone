@@ -18,7 +18,7 @@ from simple_pid import PID
 from pyfakewebcam import FakeWebcam
 
 class EasyDrone(Thread):
-    def __init__(self, get_log_data:bool = True, pub_video_stream:str = None, pid:dict = {}) -> None:
+    def __init__(self, get_log_data:bool = True, pub_video_stream:str = None, pid:dict = {}, wifi:dict = {}) -> None:
         
         super(EasyDrone, self).__init__()
 
@@ -32,6 +32,8 @@ class EasyDrone(Thread):
         self.__start_yaw = 0
         self.__last_yaw = 0 #last yaw
         self.__acc_yaw = 0 #accumulated yaw
+        self.__interface = wifi['interface']
+        self.__interface_ip = wifi['ip']
 
         if not (pub_video_stream is None):
             self.__camera = FakeWebcam(pub_video_stream, 960, 720)
@@ -111,7 +113,7 @@ class EasyDrone(Thread):
         """
         Connect to the drone
         """
-        self.__drone = tellopy.Tello()
+        self.__drone = tellopy.Tello(interface=self.__interface, interface_ip=self.__interface_ip)
         self.__drone.connect()
         self.__drone.wait_for_connection(60.0)
 
