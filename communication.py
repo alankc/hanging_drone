@@ -215,7 +215,7 @@ class WiFiFinder:
         #TURN ON THE INTERFACE
         os.system(f"sudo ifconfig {self.__interface} up")
 
-        time.sleep(1)
+        time.sleep(2)
 
         command = f"iwlist {self.__interface} scan | grep -ioE \'ssid:\"{ssid}\"\'"
         result = os.popen(command)

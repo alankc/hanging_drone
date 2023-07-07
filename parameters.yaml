@@ -14,7 +14,7 @@ Camera:
   pitch: -13
   stream: null
 YOLO:
-  path: yolo_dataset/mixed.pt
+  path: yolo_dataset/indoor.pt
   #path: yolo_dataset/indoor.pt
 Control:
   pid:
@@ -66,13 +66,13 @@ Control:
 WiFi:
   #interface: wlp61s0
 
-  interface: wlxd8ec5e0a30b5
-  ssid: TELLO-98FC9A
-  ip: 192.168.10.20
+  #interface: wlxd8ec5e0a30b5
+  #ssid: TELLO-98FC9A
+  #ip: 192.168.10.20
 
-  #interface: wlx0c9d92b767ea
-  #ssid: TELLO-98FD38
-  #ip: 192.168.10.30
+  interface: wlx0c9d92b767ea
+  ssid: TELLO-98FD38
+  ip: 192.168.10.30
 
   password: TELLOBISG
 RechargeStation:
