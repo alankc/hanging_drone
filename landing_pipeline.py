@@ -30,6 +30,10 @@ class LandingPipeline:
         self.__ret_status = self.RUNNING
         self.__ty = ty
         self.__drone_hook_center = drone_hook_center
+
+        #NEW APPROACH FOR AVERAGES
+        self.__prev_error_cx = deque(maxlen=5)
+        self.__prev_error_cy = deque(maxlen=5)
     
     def reset(self):
         """
@@ -80,10 +84,6 @@ class LandingPipeline:
 
                 self.__k_ref = k_ref
                 self.__d_ref = d_ref
-                
-                #NEW APPROACH FOR AVERAGES
-                self.__prev_error_cx = deque(maxlen=5)
-                self.__prev_error_cy = deque(maxlen=5)
 
                 self.__state = 1
                 self.__curr_state_method = self.state_1
@@ -149,6 +149,9 @@ class LandingPipeline:
                 self.__k_start = k_curr
                 self.__d_start = d_curr
 
+                #NEW APPROACH FOR AVERAGES
+                self.__prev_error_cx = deque(maxlen=5)
+
                 #save current pose
                 self.__p_start = self.__ed.get_curr_pos()
 
@@ -192,7 +195,8 @@ class LandingPipeline:
             if len(error) > 1:
                 #computing mean error
                 mean_error = np.mean(error, axis=0)
-                error_cx = mean_error[0]
+                self.__prev_error_cx.append(mean_error[0])
+                error_cx = np.mean(self.__prev_error_cx)
 
                 #computing control output based on features matched
                 ctrl_s_yaw = np.round(self.__ed.pid_s_yaw(error_cx), 2)
