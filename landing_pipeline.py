@@ -402,6 +402,27 @@ class LandingPipeline:
         if speed_y > self.__max_speed_y :
             self.__max_speed_y  = speed_y
 
+        #current error in Y posiion
+        pos_error = (self.__ed.pid_pitch.setpoint - y) ** 2
+        pos_error = pos_error + (self.__ed.pid_roll.setpoint - x) ** 2
+        pos_error = (pos_error + (self.__ed.pid_throttle.setpoint - z) ** 2) ** 0.5
+
+        #Reached a position around 5 cm the destination and speed below 0.1 max speed. 
+        #Didn't hit the branch, so return fail
+        print(f"({pos_error} < 10)", flush=True)
+        
+        #(3*3 + 3*3 + 3*3)^0.5 = 5.2
+        if (pos_error < 5.2):
+            print("*************************************************")
+            print("*************************************************")
+            print("******* LAND FAIL - DIDN'T HIT THE BRANCH *******")
+            print("*************************************************")
+            print("*************************************************")
+            self.__state = 9
+            self.__curr_state_method = self.state_9
+            return
+        
+
         # abs(setpoint - curr) < 0.8 (setpoint - start)
         pid_error_test = abs(self.__ed.pid_pitch.setpoint - y) < 0.8 * abs(self.__ed.pid_pitch.setpoint - self.__p_end[0])
         #current speed < 10% of the maximum speed and the drone have moved at lest 20% forward

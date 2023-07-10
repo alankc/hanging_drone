@@ -66,11 +66,11 @@ Control:
 WiFi:
   #interface: wlp61s0
 
-  #interface: wlxd8ec5e0a30b5
+  #interface: wlx0c9d92b767ea
   #ssid: TELLO-98FC9A
   #ip: 192.168.10.20
 
-  interface: wlx0c9d92b767ea
+  interface: wlxd8ec5e0a30b5
   ssid: TELLO-98FD38
   ip: 192.168.10.30
 
