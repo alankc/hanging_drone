@@ -209,13 +209,13 @@ class WiFiFinder:
         for r in results:
             os.system(f"nmcli con delete {r}")
 
-        #TURN OFF THE INTERFACE
-        os.system(f"sudo ifconfig {self.__interface} down")
+        if len(results) > 0:
+            #TURN OFF THE INTERFACE
+            os.system(f"sudo ifconfig {self.__interface} down")
+            #TURN ON THE INTERFACE
+            os.system(f"sudo ifconfig {self.__interface} up")
         
-        #TURN ON THE INTERFACE
-        os.system(f"sudo ifconfig {self.__interface} up")
-
-        time.sleep(2)
+        time.sleep(1)
 
         command = f"iwlist {self.__interface} scan | grep -ioE \'ssid:\"{ssid}\"\'"
         result = os.popen(command)
