@@ -7,6 +7,7 @@ from easydrone import EasyDrone
 from stereo import Stereo
 from vision import Vision
 from yolo_detector import YOLODetector
+from collections import deque
 
 class LandingPipeline:
 
@@ -79,6 +80,10 @@ class LandingPipeline:
 
                 self.__k_ref = k_ref
                 self.__d_ref = d_ref
+                
+                #NEW APPROACH FOR AVERAGES
+                self.__prev_error_cx = deque(maxlen=5)
+                self.__prev_error_cy = deque(maxlen=5)
 
                 self.__state = 1
                 self.__curr_state_method = self.state_1
@@ -112,10 +117,17 @@ class LandingPipeline:
 
         #at least 2 feature matched
         if len(error) > 1:
-            #computing mean error
+            #old computing mean error
+            #mean_error = np.mean(error, axis=0)
+            #error_cx = mean_error[0]
+            #error_cy = mean_error[1]
+
+            #computing mean error (window of 5 measurements)
             mean_error = np.mean(error, axis=0)
-            error_cx = mean_error[0]
-            error_cy = mean_error[1]
+            self.__prev_error_cx.append(mean_error[0])
+            self.__prev_error_cy.append(mean_error[1])
+            error_cx = np.mean(self.__prev_error_cx)
+            error_cy = np.mean(self.__prev_error_cy)
 
             #computing control output based on features matched
             ctrl_s_yaw = np.round(self.__ed.pid_s_yaw(error_cx), 2)
@@ -324,7 +336,7 @@ class LandingPipeline:
         self.__ed.set_throttle(ctrl_throttle)
 
         #if height is good enought, adjust the x position
-        if (abs(error_cz) < 2) and (abs(ctrl_throttle) < 0.1):
+        if (abs(error_cz) < 3) and (abs(ctrl_throttle) < 0.15):
             ctrl_roll = np.round(self.__ed.pid_roll(x), 2)
             self.__ed.set_roll(ctrl_roll)
 
@@ -407,10 +419,8 @@ class LandingPipeline:
         pos_error = pos_error + (self.__ed.pid_roll.setpoint - x) ** 2
         pos_error = (pos_error + (self.__ed.pid_throttle.setpoint - z) ** 2) ** 0.5
 
-        #Reached a position around 5 cm the destination and speed below 0.1 max speed. 
-        #Didn't hit the branch, so return fail
-        print(f"({pos_error} < 10)", flush=True)
-        
+        #Reached a position around 3 cm the destination and speed below 0.1 max speed. 
+        #Didn't hit the branch, so return fail       
         #(3*3 + 3*3 + 3*3)^0.5 = 5.2
         if (pos_error < 5.2):
             print("*************************************************")
