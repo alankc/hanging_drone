@@ -70,34 +70,39 @@ KI= 0.008
 KD= 0.00825
 """
 
-KP  = 0.2 / 20
+KP  = 0.02
 PCR = 2.5
 TI  = PCR * 0.5
-TD  = PCR * 0.33
+TD  = 2 * PCR * 0.33
+
+KP  = 0.03
+KI  = 0.00003
+KD  = 0.045
 
 print(f"kp: {KP}")
-print(f"ki: {KP/TI}")
-print(f"kd: {KP*TD}")
+print(f"ki: {KI}")
+print(f"kd: {KD}")
 
-pid = PID(Kp=KP, Ki=KP/TI, Kd=KP*TD, proportional_on_measurement=False, differential_on_measurement=False)
+pid = PID(Kp=KP, Ki=KI, Kd=KD, proportional_on_measurement=False, differential_on_measurement=False)
 pid.output_limits = (-0.3, 0.3) 
 pid.setpoint = 0
 pid.sample_time = None
 pid.set_auto_mode(True, last_output=0)
 
 run_control = False
-ed = EasyDrone(True)
+ed = EasyDrone(True, None, {}, {'interface':'wlxd8ec5e0a30b5', 'ip':''})
 system_set_ctrl = lambda ctrl: ed.rc_control(throttle=ctrl)
 system_get_out =  lambda : ed.get_curr_pos_corrected()[2]
 e = Event()
 
 freq = 25
 fps_controller = 0
-x_time = collections.deque(maxlen=300)
-for t in range(300):
+deque_len = 400
+x_time = collections.deque(maxlen=deque_len)
+for t in range(deque_len):
     x_time.append(np.round(t * 1.0/freq, 2))
-y_setpoint = collections.deque(np.zeros(300))
-y_read = collections.deque(np.zeros(300))
+y_setpoint = collections.deque(np.zeros(deque_len))
+y_read = collections.deque(np.zeros(deque_len))
 
 def controller():
     global run_control, system_get_out, pid, system_set_ctrl, y_read, e, freq, fps_controller
@@ -186,14 +191,14 @@ if __name__ == "__main__":
             data = system_get_out()
             pid.setpoint = data + setpoint
             
-            y_read = collections.deque(maxlen=300)
-            y_setpoint = collections.deque(maxlen=300)
-            for i in range(300):
+            y_read = collections.deque(maxlen=deque_len)
+            y_setpoint = collections.deque(maxlen=deque_len)
+            for i in range(deque_len):
                 y_setpoint.append(pid.setpoint)
                 y_read.append(data)
 
-            x_time = collections.deque(maxlen=300)
-            for t in range(300):
+            x_time = collections.deque(maxlen=deque_len)
+            for t in range(deque_len):
                 x_time.append(np.round(t * 1.0/freq, 2))
 
             run_control = True
@@ -211,6 +216,6 @@ if __name__ == "__main__":
             break
     
     print(f"kp: {KP}")
-    print(f"ki: {KP/TI}")
-    print(f"kd: {KP*TD}")
+    print(f"ki: {KI}")
+    print(f"kd: {KD}")
     

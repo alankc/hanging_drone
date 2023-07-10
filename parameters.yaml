@@ -14,7 +14,7 @@ Camera:
   pitch: -13
   stream: null
 YOLO:
-  path: yolo_dataset/indoor.pt
+  path: yolo_dataset/mixed.pt
   #path: yolo_dataset/indoor.pt
 Control:
   pid:
@@ -36,9 +36,13 @@ Control:
       #ki: 0.025
       #kd: 0.016666666666666666
       #some overshot
-      kp: 0.0165
-      ki: 0.0132
-      kd: 0.0136125
+      #kp: 0.0165
+      #ki: 0.0132
+      #kd: 0.0136125
+      #newest
+      kp: 0.03
+      ki: 0.00003
+      kd: 0.045
       min: -0.3
       max: 0.3
     pitch:
