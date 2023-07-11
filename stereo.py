@@ -13,11 +13,11 @@ class Stereo:
     def __init__(self) -> None:
         pass
 
-    def set_camera_params(self, fx:np.float32, fy:np.float32, angle:np.float32, cx:np.uint32, cy:np.uint32):
+    def set_camera_params(self, fx:np.float32, fy:np.float32, angle:np.float32, cx:np.float32, cy_aligned:np.float32):
         self.fx = fx
         self.fy = fy
         self.cx = cx
-        self.cy = cy
+        self.cy_aligned = cy_aligned
         self.angle = angle * np.pi / 180
     
     def compute_relative_depth_filtered(self, ty, kp1, kp2, matches, rect1, rect2):
@@ -56,7 +56,7 @@ class Stereo:
                 depth_z = FY_TY / disparity #depth at ty/2
                 #x1 and x2 must have an negligible difference
                 pos_x = depth_z * x2 / self.fx
-                pos_y = ty * (self.cy - (y1 + y2) * 0.5) / disparity - ty/2 #The distance is to the point betwen y1 and y2, then remove ty/2 
+                pos_y = ty * (self.cy_aligned - (y1 + y2) * 0.5) / disparity - ty/2 #The distance is to the point betwen y1 and y2, then remove ty/2 
 
                 #print(f"{pos_y} {pos_z} {depth_x}".replace('.',','))
                 #drone's mvo.Y is pos_x
@@ -159,7 +159,7 @@ class Stereo:
             depth_z = FY_TY / disparity #depth at ty/2
             #x1 and x2 must have an negligible difference
             pos_x = depth_z * (x2 - self.cx) / self.fx
-            pos_y = ty * (self.cy - (y1 + y2) * 0.5) / disparity - ty/2 #The distance is to the point betwen y1 and y2, then remove ty/2 
+            pos_y = ty * (self.cy_aligned - (y1 + y2) * 0.5) / disparity - ty/2 #The distance is to the point betwen y1 and y2, then remove ty/2 
 
             #print(f"{pos_y} {pos_z} {depth_x}".replace('.',','))
             #drone's mvo.Y is pos_x
@@ -203,12 +203,12 @@ class Stereo:
         dz = 1
 
         A2 = np.array([[self.fx,  0, self.cx, 0],
-                       [ 0, self.fy, self.cy, 0],
+                       [ 0, self.fy, self.cy_aligned, 0],
                        [ 0,  0,  1, 0]], dtype=np.float64)
             
         # Inverted Camera Calibration Intrinsics Matrix
         A1 = np.array([[1/self.fx,    0, -self.cx/self.fx],
-                       [   0, 1/self.fy, -self.cy/self.fy],
+                       [   0, 1/self.fy, -self.cy_aligned/self.fy],
                        [   0,    0,      0],
                        [   0,    0,      1]], dtype=np.float64)
         
