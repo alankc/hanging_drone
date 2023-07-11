@@ -315,11 +315,30 @@ class GlobalStateMachine:
         self.__image_s = self.__image.copy()
 
         result = self.__lp.run(self.__image, self.__image_s)
-        if (result == self.__lp.SUCCESS) or (result == self.__lp.FAIL):
+        if result == self.__lp.SUCCESS:
             self.__state = self.S_MANUAL
             self.__curr_state_method = self.state_manual
             self.__lp = None
             self.__ed.rc_control() #STOPING all controllers
+        
+        elif result == self.__lp.FAIL:
+            self.__state = self.S_GO_TO
+            self.__curr_state_method = self.state_go_to
+            self.__ed.rc_control()
+
+            start_pos = self.__lp.get_p_start()
+            (sy, sx, sz) = self.__ed.rotate_pos(start_pos)
+
+            curr_pos = self.__ed.get_curr_pos_corrected()
+            (cy, cx, cz) = curr_pos
+
+            x = sx - cx
+            y = sy - cy
+            z = sz - cz
+
+            self.__ed.PID_reset()
+            self.__ed.attitude_reset()
+            self.__ed.set_destination(x, y, z, 0)
 
         ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f}", -1)
         cv2.imshow('Camera', self.__image_s)

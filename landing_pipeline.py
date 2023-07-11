@@ -43,6 +43,9 @@ class LandingPipeline:
         self.__curr_state_method = self.state_0
         self.__ret_status = self.RUNNING
 
+    def get_p_start(self):
+        return self.__p_start
+    
     def state_0(self):
         """
         Uses YOLO to detect possible branches combined with picture-based PIDs 
@@ -426,6 +429,7 @@ class LandingPipeline:
         #Reached a position around 3 cm the destination and speed below 0.1 max speed. 
         #Didn't hit the branch, so return fail       
         #(3*3 + 3*3 + 3*3)^0.5 = 5.2
+        print(f"POS ERROR={pos_error}", flush=True)
         if (pos_error < 5.2):
             print("*************************************************")
             print("*************************************************")
@@ -439,7 +443,10 @@ class LandingPipeline:
         
 
         # abs(setpoint - curr) < 0.8 (setpoint - start)
-        pid_error_test = abs(self.__ed.pid_pitch.setpoint - y) < 0.8 * abs(self.__ed.pid_pitch.setpoint - self.__p_end[0])
+        pid_error_test1 = abs(self.__ed.pid_pitch.setpoint - y) < 0.8 * abs(self.__ed.pid_pitch.setpoint - self.__p_end[0])
+        pid_error_test2 = self.__ed.pid_pitch.setpoint - y > 5
+        pid_error_test = pid_error_test1 and pid_error_test2
+        print(f"PID TESTS= {pid_error_test1} and {self.__ed.pid_pitch.setpoint - y}", flush=True)
         #current speed < 10% of the maximum speed and the drone have moved at lest 20% forward
         #this 10% is just to ensure because sometimes the drone moves a little back
         if (speed_y < (0.01 * self.__max_speed_y))  and pid_error_test:
