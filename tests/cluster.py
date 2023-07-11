@@ -134,6 +134,23 @@ if __name__ == "__main__":
                         max_derivate = d
                         best_model = kmeans_prev
 
+                pred = best_model.labels_
+                data_by_cluster = [[] for i in range(max_n_cluster)] 
+        
+                #selecting the cluster with the smallest depth (y coordinate of real world) distance
+                for i in range(len(pred)):
+                    data_by_cluster[pred[i]].append(data[i][1])
+
+                mean_by_cluster = [np.mean(i) for i in data_by_cluster]
+                print(f"Mean by Cluster: {mean_by_cluster}")
+                index = np.argmin(mean_by_cluster)
+                print(f"Best index: {index}")
+
+                print("--------- DATA ---------")
+                for i in range(len(pred)):
+                    if index == pred[i]:
+                        print(data[i])
+                print("------------------------")
 
                 ax.scatter(x_out, depth_out, s=300, c=best_model.labels_)
                 print("number of cluster found: {}".format(len(set(best_model.labels_))))
