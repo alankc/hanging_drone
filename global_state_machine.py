@@ -223,6 +223,7 @@ class GlobalStateMachine:
                 self.__curr_state_method = self.state_go_to
                 self.__ed.PID_reset()
                 self.__ed.attitude_reset()
+                self.__ed.save_quaternion()
                 self.__ed.set_destination(x, y, z, yaw)
 
         elif key == ord(" "):# Clear selected rectangle
@@ -337,7 +338,6 @@ class GlobalStateMachine:
             z = sz - cz
 
             self.__ed.PID_reset()
-            self.__ed.attitude_reset()
             self.__ed.set_destination(x, y, z, 0)
 
         ut.draw_text(self.__image_s, f"FPS={self.__fps:.1f}", -1)

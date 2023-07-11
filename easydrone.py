@@ -175,7 +175,7 @@ class EasyDrone(Thread):
         y = forward and backward
         z = up and down
         """
-        self.save_quaternion()
+        #self.save_quaternion()
         (cy, cx, cz) = self.get_curr_pos_corrected()
         cyaw = self.get_curr_yaw()
 
