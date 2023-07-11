@@ -6,7 +6,7 @@ import numpy as np
 import sys
 import os
 
-sys.path.insert(0, '/home/x/Documents/Experiments-RMTT/landing_system/')
+sys.path.insert(0, '../')
 from vision import Vision
 from stereo import Stereo
 import utils as ut
@@ -61,8 +61,8 @@ if __name__ == "__main__":
     v.set_fast_detector(nonmaxSuppression=1, type=2, threshold=30)
     v.set_bf_matcher()
 
-    intrinsics_path = "/home/x/Documents/Experiments-RMTT/landing_system/drone/intrinsics.pkl"
-    dist_path = "/home/x/Documents/Experiments-RMTT/landing_system/drone/dist.pkl"
+    intrinsics_path = "../drone/intrinsics.pkl"
+    dist_path = "../drone/dist.pkl"
     camera_pitch = -13
 
     #loading camera parammters
