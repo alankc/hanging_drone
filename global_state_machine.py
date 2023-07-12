@@ -70,20 +70,28 @@ class GlobalStateMachine:
         print("takeoff_request", flush=True)
         res_ssid = self.__d2rs.takeoff_request(0.5)
         if res_ssid:
-            count = 30
+            count = 1
             check = False
-            while not check and count > 0:
-        
-                cv2.imshow('Camera', frame)
+            while not check and count <= 30:
+                
+                attempt_str = f"Attempt {count} - Connecting to WiFi: {res_ssid}"
+                
+                #SCREEN
+                frame_s = frame.copy()
+                ut.draw_text(frame_s, attempt_str, -2)
+                cv2.imshow('Camera', frame_s)
                 key = cv2.waitKey(10) & 0xFF
                 if key == 27:
                     exit(0)
 
-                print(f"{30 - count} Trying to connect to Wifi: {res_ssid}")
-                check = self.__d2rs.wifi_conect(res_ssid)
-                count = count - 1
+                #TERMINAL
+                print(attempt_str)
 
-            if count == 0 and not check:
+                #RUN
+                check = self.__d2rs.wifi_conect(res_ssid)
+                count = count + 1
+
+            if not check:
                 print("Failed to connect wifi")
             else:
                 print("Ready to takeoff")
