@@ -156,18 +156,19 @@ class Stereo:
 
             # compute disparity
             disparity = np.abs(y1 - y2)
-            depth_z = FY_TY / disparity #depth at ty/2
-            #x1 and x2 must have an negligible difference
-            pos_x = depth_z * (x2 - self.cx) / self.fx
-            pos_y = ty * (self.cy_aligned - (y1 + y2) * 0.5) / disparity - ty/2 #The distance is to the point betwen y1 and y2, then remove ty/2 
+            if disparity > 0:
+                depth_z = FY_TY / disparity #depth at ty/2
+                #x1 and x2 must have an negligible difference
+                pos_x = depth_z * (x2 - self.cx) / self.fx
+                pos_y = ty * (self.cy_aligned - (y1 + y2) * 0.5) / disparity - ty/2 #The distance is to the point betwen y1 and y2, then remove ty/2 
 
-            #print(f"{pos_y} {pos_z} {depth_x}".replace('.',','))
-            #drone's mvo.Y is pos_x
-            #drone's mvo.X is depth_z
-            #drone's mvo.Z is pos_y
-            depth_out.append(depth_z)
-            x_out.append(pos_x)
-            y_out.append(pos_y)
+                #print(f"{pos_y} {pos_z} {depth_x}".replace('.',','))
+                #drone's mvo.Y is pos_x
+                #drone's mvo.X is depth_z
+                #drone's mvo.Z is pos_y
+                depth_out.append(depth_z)
+                x_out.append(pos_x)
+                y_out.append(pos_y)
 
         #if the filter is required and the variation in depth is bigger than 50 cm       
         if kfilter and np.abs(max(depth_out) - min(depth_out)) > kdist and len(depth_out) > 3:
