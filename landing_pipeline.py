@@ -243,10 +243,30 @@ class LandingPipeline:
         """
         Compute the landing site position
         """
+        if len(self.__good_matches) < 3:
+            print("*************************************************")
+            print("*************************************************")
+            print("********* INSUFFICIENT NUMBER OF POINTS *********")
+            print("*************************************************")
+            print("*************************************************")
+            self.__state = 9
+            self.__curr_state_method = self.state_9
+            return
+        
         #compute relative position
         ty = self.__p_end[2] - self.__p_start[2]
         # x, y in the image and depth 
         x_out, y_out, depth_out, yaw_out, roll_out  = self.__s.compute_relative_depth(ty, self.__k_start, self.__k_end, self.__good_matches)
+
+        if (len(x_out) == 0) and (len(y_out) == 0) and (len(depth_out) == 0):
+            print("*************************************************")
+            print("*************************************************")
+            print("*********** UNABLE TO FILTER VARIANCE  **********")
+            print("*************************************************")
+            print("*************************************************")
+            self.__state = 9
+            self.__curr_state_method = self.state_9
+            return
 
         if abs(roll_out) > 15: #cant land
             print("*************************************************")

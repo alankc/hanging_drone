@@ -66,7 +66,7 @@ class Stereo:
         
         return depth
     
-    def __k_means_filter(self, depth, x, y):
+    def __k_means_filter(self, depth, x, y, cluster_range):
         """
         k_means filter to select the cluster nearest the drone
 
@@ -76,14 +76,14 @@ class Stereo:
         data = np.array(data)
 
         max_n_cluster = 2
-        max_derivate = 0
+        max_derivate = -np.inf
         sil_coeff = deque(maxlen=3)
         sil_coeff.append(0)
         best_model = None
         curr_kmeans = None
         prev_kmeans = None
         #selecting the number of clusters
-        for n_cluster in range(2, 8):
+        for n_cluster in range(2, cluster_range):
             prev_kmeans = curr_kmeans
             curr_kmeans = KMeans(n_init=1000, n_clusters=n_cluster, max_iter=1000, algorithm='lloyd').fit(data)
             curr_label  = curr_kmeans.labels_
@@ -169,10 +169,21 @@ class Stereo:
             x_out.append(pos_x)
             y_out.append(pos_y)
 
-        #if the filter is required and the variation in depth is bigger than 50 cm
-        if kfilter and np.abs(max(depth_out) - min(depth_out)) > kdist and len(depth_out) > 10:
-            depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out)
+        #if the filter is required and the variation in depth is bigger than 50 cm       
+        if kfilter and np.abs(max(depth_out) - min(depth_out)) > kdist and len(depth_out) > 3:
 
+            if len(depth_out) > 10:
+                depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, 8)
+            else:
+                depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, len(depth_out) - 1)
+
+            #After applying k-means do not have enough data
+            if len(depth_out) < 2:
+                return  [],[],[], 0, 0
+                        
+        elif np.abs(max(depth_out) - min(depth_out)) > kdist: #variance too big and kfilter = false
+            return  [],[],[], 0, 0
+        
         #compute the yaw
         try:
             f_aux = lambda x, a, b: a * x + b
