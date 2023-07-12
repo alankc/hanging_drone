@@ -75,8 +75,8 @@ PCR = 2.5
 TI  = PCR * 0.5
 TD  = 2 * PCR * 0.33
 
-KP  = 0.03
-KI  = 0.00003
+KP  = 0.008
+KI  = 0.000001
 KD  = 0.045
 
 print(f"kp: {KP}")
@@ -84,20 +84,21 @@ print(f"ki: {KI}")
 print(f"kd: {KD}")
 
 pid = PID(Kp=KP, Ki=KI, Kd=KD, proportional_on_measurement=False, differential_on_measurement=False)
-pid.output_limits = (-0.3, 0.3) 
+pid.output_limits = (-0.5, 0.5) 
 pid.setpoint = 0
 pid.sample_time = None
 pid.set_auto_mode(True, last_output=0)
 
 run_control = False
 ed = EasyDrone(True, None, {}, {'interface':'wlxd8ec5e0a30b5', 'ip':''})
-system_set_ctrl = lambda ctrl: ed.rc_control(throttle=ctrl)
-system_get_out =  lambda : ed.get_curr_pos_corrected()[2]
+system_set_ctrl = lambda ctrl: ed.rc_control(roll=ctrl)
+system_get_out =  lambda : ed.get_curr_pos_corrected()[1]
 e = Event()
 
 freq = 25
 fps_controller = 0
 deque_len = 400
+curr_error = 0
 x_time = collections.deque(maxlen=deque_len)
 for t in range(deque_len):
     x_time.append(np.round(t * 1.0/freq, 2))
@@ -105,7 +106,7 @@ y_setpoint = collections.deque(np.zeros(deque_len))
 y_read = collections.deque(np.zeros(deque_len))
 
 def controller():
-    global run_control, system_get_out, pid, system_set_ctrl, y_read, e, freq, fps_controller
+    global run_control, system_get_out, pid, system_set_ctrl, y_read, e, freq, fps_controller, curr_error
     
     while not e.is_set():
 
@@ -124,6 +125,7 @@ def controller():
             ctrl = pid(data)
             system_set_ctrl(ctrl)
             y_read.append(data)
+            curr_error = data - pid.setpoint
         
         else:
             time_start = time.time()
@@ -171,6 +173,7 @@ if __name__ == "__main__":
 
         ut.draw_text(image, f"    FPS SCREEN = {fps:.2f}", -1)
         ut.draw_text(image, f"FPS CONTROLLER = {fps_controller:.2f}", -2)
+        ut.draw_text(image, f"         ERROR = {curr_error:.2f}", -3)
         
         cv2.imshow('Camera', image)
         
