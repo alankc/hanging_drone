@@ -73,6 +73,12 @@ class GlobalStateMachine:
             count = 30
             check = False
             while not check and count > 0:
+        
+                cv2.imshow('Camera', frame)
+                key = cv2.waitKey(10) & 0xFF
+                if key == 27:
+                    exit(0)
+
                 print(f"{30 - count} Trying to connect to Wifi: {res_ssid}")
                 check = self.__d2rs.wifi_conect(res_ssid)
                 count = count - 1
