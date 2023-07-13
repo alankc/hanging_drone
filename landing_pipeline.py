@@ -498,7 +498,10 @@ class LandingPipeline:
 
             self.__ed.rc_control(pitch=0.5)
             time.sleep(0.5)
-            self.__ed.set_throttle(-0.5)
+            if self.__ed.get_curr_pos_corrected()[2] < self.__ed.pid_throttle.setpoint:
+                self.__ed.set_throttle(0.2)
+            else:
+                self.__ed.set_throttle(-0.5)
             time.sleep(0.5)
             
             self.__impact_time = time.time()
