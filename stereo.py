@@ -83,16 +83,15 @@ class Stereo:
         curr_kmeans = None
         prev_kmeans = None
         #selecting the number of clusters
-        for n_cluster in range(2, cluster_range):
+        for n_cluster in range(2, cluster_range + 1):
             prev_kmeans = curr_kmeans
             curr_kmeans = KMeans(n_init=1000, n_clusters=n_cluster, max_iter=1000, algorithm='lloyd').fit(data)
             curr_label  = curr_kmeans.labels_
 
-            if len(sil_coeff) < 2: #At least 3 elements in the deque to compute second derivate
-                sil_coeff.append(silhouette_score(data, curr_label, metric='euclidean'))
-                continue
-
             sil_coeff.append(silhouette_score(data, curr_label, metric='euclidean'))
+
+            if len(sil_coeff) < 3: #At least 3 elements in the deque to compute second derivate
+                continue
 
             derivate = sil_coeff[2] + sil_coeff[0] - 2 * sil_coeff[1]
             if derivate > max_derivate:
@@ -174,9 +173,9 @@ class Stereo:
         if kfilter and np.abs(max(depth_out) - min(depth_out)) > kdist and len(depth_out) > 3:
 
             if len(depth_out) > 10:
-                depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, 8)
+                depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, 7)
             else:
-                depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, len(depth_out) - 1)
+                depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, 4)
 
             #After applying k-means do not have enough data
             if len(depth_out) < 2:
