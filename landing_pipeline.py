@@ -44,8 +44,8 @@ class LandingPipeline:
         self.__drone_hook_center = drone_hook_center
 
         #NEW APPROACH FOR AVERAGES
-        self.__prev_error_cx = deque(maxlen=5)
-        self.__prev_error_cy = deque(maxlen=5)
+        self.__prev_error_cx = deque(maxlen=10)
+        self.__prev_error_cy = deque(maxlen=10)
     
     def reset(self):
         """
