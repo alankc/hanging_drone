@@ -215,6 +215,7 @@ class WiFiFinder:
             #TURN ON THE INTERFACE
             os.system(f"sudo ifconfig {self.__interface} up")
         
+        os.system("nmcli device wifi rescan")
         time.sleep(1)
 
         command = f"iwlist {self.__interface} scan | grep -ioE \'ssid:\"{ssid}\"\'"
