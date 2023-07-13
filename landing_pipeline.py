@@ -326,7 +326,7 @@ class LandingPipeline:
         drone_yaw = self.__ed.get_curr_yaw()
 
         #Adjust constants in in world's coordinates
-        y_adjust = 20 + np.abs(self.__p_start[0] - self.__p_end[0])
+        y_adjust = 25 + np.abs(self.__p_start[0] - self.__p_end[0]) #originally 20, 25 for the new hook
 
         #Setting PID's setpoints in world's coordinates
         self.__ed.pid_pitch.setpoint     = drone_y + y_pos + y_adjust
