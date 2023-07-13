@@ -24,7 +24,7 @@ class LandingPipeline:
     S_NAVIGATION = 6
     S_LANDING_DETECTION = 7
     S_LANDING = 8
-    S_SUCESS = 9
+    S_SUCCESS = 9
     S_FAIL = 10
 
     def __init__(self, ed:EasyDrone, s:Stereo, v:Vision, yd:YOLODetector, k_ref, d_ref, cx, cy, odom_file, ty:float, drone_hook_center:float) -> None:
@@ -38,7 +38,7 @@ class LandingPipeline:
         self.__cy = cy
         self.__odom_file = odom_file
         self.__state = self.S_YOLO
-        self.__curr_state_method = self.state_0
+        self.__curr_state_method = self.state_yolo
         self.__ret_status = self.RUNNING
         self.__ty = ty
         self.__drone_hook_center = drone_hook_center
@@ -52,13 +52,13 @@ class LandingPipeline:
         Reset to state 0
         """
         self.__state = self.S_YOLO
-        self.__curr_state_method = self.state_0
+        self.__curr_state_method = self.state_yolo
         self.__ret_status = self.RUNNING
 
     def get_p_start(self):
         return self.__p_start
     
-    def state_0(self):
+    def state_yolo(self):
         """
         Uses YOLO to detect possible branches combined with picture-based PIDs 
         to centralize YOLO's rectangle in the midle of the screen
@@ -72,7 +72,7 @@ class LandingPipeline:
             self.__k_ref = self.__k_ref_i
             self.__d_ref = self.__d_ref_i
             self.__state = self.S_FEATURES_1
-            self.__curr_state_method = self.state_1
+            self.__curr_state_method = self.state_features_1
             return
 
         pt1, pt2, conf = self.__yd.detect_best(self.__image, confidence=0.4)
@@ -105,7 +105,7 @@ class LandingPipeline:
                 print("-----------------------------------------------")
 
                 self.__state = self.S_FEATURES_1
-                self.__curr_state_method = self.state_1
+                self.__curr_state_method = self.state_features_1
 
             #drawing the point in image that must be in the center
             ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy + error_cy)))
@@ -119,7 +119,7 @@ class LandingPipeline:
             self.__ed.pid_s_throttle.set_auto_mode(enabled=True, last_output=0)   
 
 
-    def state_1(self):
+    def state_features_1(self):
         """
         Centralizes the picture with the features using the features detected before
 
@@ -182,7 +182,7 @@ class LandingPipeline:
                 print(f" Start Position: {self.__p_start} ")
                 print("-----------------------------------------------")
                 self.__state = self.S_FEATURES_2
-                self.__curr_state_method = self.state_2  
+                self.__curr_state_method = self.state_features_2  
 
         else:
             self.__ed.set_yaw(0)
@@ -192,7 +192,7 @@ class LandingPipeline:
             self.__ed.pid_s_throttle.set_auto_mode(enabled=True, last_output=0)     
             
     #state 2: center cx and move up
-    def state_2(self):
+    def state_features_2(self):
         """
         Moves the drone TY cm up while keeping the features centralized
 
@@ -245,7 +245,7 @@ class LandingPipeline:
                     print(f" End Position: {self.__p_end} ")
                     print("-----------------------------------------------")
                     self.__state = self.S_ESTIMATION
-                    self.__curr_state_method = self.state_3
+                    self.__curr_state_method = self.state_estimation
 
             else: # YES, it is necessary, do not remove!
                 self.__ed.set_yaw(0)
@@ -255,7 +255,7 @@ class LandingPipeline:
             self.__ed.set_yaw(0)
             self.__ed.pid_s_yaw.set_auto_mode(enabled=True, last_output=0)
 
-    def state_3(self):
+    def state_estimation(self):
         """
         Compute the landing site position
         """
@@ -266,7 +266,7 @@ class LandingPipeline:
             print("*************************************************")
             print("*************************************************")
             self.__state = self.S_FAIL
-            self.__curr_state_method = self.state_10
+            self.__curr_state_method = self.state_fail
             return
         
         #compute relative position
@@ -281,7 +281,7 @@ class LandingPipeline:
             print("*************************************************")
             print("*************************************************")
             self.__state = self.S_FAIL
-            self.__curr_state_method = self.state_10
+            self.__curr_state_method = self.state_fail
             return
 
         if abs(roll_out) > 15: #cant land
@@ -291,7 +291,7 @@ class LandingPipeline:
             print("*************************************************")
             print("*************************************************")
             self.__state = self.S_FAIL
-            self.__curr_state_method = self.state_10
+            self.__curr_state_method = self.state_fail
             return
         
         """ V1
@@ -356,9 +356,9 @@ class LandingPipeline:
         print(f"{dlp}")
         print("-----------------------------------------------")
         self.__state = self.S_HEIGHT_AND_X
-        self.__curr_state_method = self.state_4
+        self.__curr_state_method = self.state_height_and_x
 
-    def state_4(self):
+    def state_height_and_x(self):
         """
         Adjust height and x position
         """
@@ -394,7 +394,7 @@ class LandingPipeline:
                 print(f"error_z={np.round(error_cz, 1)}")
                 print("-----------------------------------------------")
                 self.__state = self.S_INITIAL_MOVEMENT
-                self.__curr_state_method = self.state_5
+                self.__curr_state_method = self.state_initial_movement
 
         else:
             self.__ed.set_roll(0)
@@ -403,7 +403,7 @@ class LandingPipeline:
         ut.draw_text(self.__image_s, f"error_x={np.round(error_cx, 1)}", 0)
         ut.draw_text(self.__image_s, f"error_z={np.round(error_cz, 1)}", 1)
 
-    def state_5(self):
+    def state_initial_movement(self):
         """
         Initial movement towards the landing site to get the first value of __max_speed_y
         """
@@ -433,10 +433,10 @@ class LandingPipeline:
         print("-----------------------------------------------")
 
         self.__state = self.S_NAVIGATION
-        self.__curr_state_method = self.state_6
+        self.__curr_state_method = self.state_navigation
         self.__max_speed_y = self.__ed.get_curr_velocity_corrected()[0]
 
-    def state_6(self):
+    def state_navigation(self):
         """
         Navigation towards the landing site 
         """
@@ -478,7 +478,7 @@ class LandingPipeline:
             print("*************************************************")
             print("*************************************************")
             self.__state = self.S_FAIL
-            self.__curr_state_method = self.state_10
+            self.__curr_state_method = self.state_fail
             return
         
 
@@ -508,14 +508,14 @@ class LandingPipeline:
             print("-----------------------------------------------")
 
             self.__state = self.S_LANDING_DETECTION
-            self.__curr_state_method = self.state_7
+            self.__curr_state_method = self.state_landing_detection
 
         ut.draw_text(self.__image_s, f"landing_pos = {self.__dlp[0]:.1f} {self.__dlp[1]:.1f} {self.__dlp[2]:.1f} {self.__dlp[3]:.1f}", 0)
         ut.draw_text(self.__image_s, f"curr_pos    = {x:.1f} {y:.1f} {z:.1f} {yaw:.1f}", 1)
         ut.draw_text(self.__image_s, f"max_speed   = {np.round(self.__max_speed_y, 1)}", 2)
         ut.draw_text(self.__image_s, f"curr_speed  = {np.round(speed_y, 1)}", 3)
     
-    def state_7(self):
+    def state_landing_detection(self):
         """
         Detection of the landing
         """
@@ -542,7 +542,7 @@ class LandingPipeline:
             print("*************************************************")
             print("*************************************************")
             self.__state = self.S_FAIL
-            self.__curr_state_method = self.state_10
+            self.__curr_state_method = self.state_fail
             return
         
         if dt >= 5.0:
@@ -551,10 +551,10 @@ class LandingPipeline:
             print(f" STATE {self.__state} END")
             print("-----------------------------------------------")
             self.__state = self.S_LANDING
-            self.__curr_state_method = self.state_8
+            self.__curr_state_method = self.state_landing
 
 
-    def state_8(self):
+    def state_landing(self):
         """
         Lands the drone after hitting the landing site
         
@@ -588,16 +588,16 @@ class LandingPipeline:
         print(f" STATE {self.__state} END")
         print("-----------------------------------------------")
 
-        self.__state = self.S_SUCESS
-        self.__curr_state_method = self.state_9
+        self.__state = self.S_SUCCESS
+        self.__curr_state_method = self.state_success
 
-    def state_9(self):
+    def state_success(self):
         """
         Informs a successful landing
         """
         self.__ret_status = self.SUCCESS
 
-    def state_10(self):
+    def state_fail(self):
         """
         Informs a failed landing
         """
