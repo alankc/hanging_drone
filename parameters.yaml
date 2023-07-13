@@ -19,9 +19,12 @@ YOLO:
 Control:
   pid:
     screen_yaw:
-      kp: -0.002
-      ki: -0.0001
-      kd: -0.0005
+      #kp: -0.002
+      #ki: -0.0001
+      #kd: -0.0005
+      kp: -0.001
+      ki: -0.0005
+      kd: -0.002
       min: -0.3
       max: 0.3
     screen_throttle:
