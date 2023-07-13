@@ -88,6 +88,10 @@ class LandingPipeline:
                 self.__k_ref = k_ref
                 self.__d_ref = d_ref
 
+                print("-----------------------------------------------")
+                print(f" STATE {self.__state} END")
+                print("-----------------------------------------------")
+
                 self.__state = 1
                 self.__curr_state_method = self.state_1
 
@@ -162,7 +166,7 @@ class LandingPipeline:
                 self.__ed.pid_throttle.setpoint = self.__p_start[2] + self.__ty
 
                 print("-----------------------------------------------")
-                print( " STATE 0 END")
+                print(f" STATE {self.__state} END")
                 print(f" Start Position: {self.__p_start} ")
                 print("-----------------------------------------------")
                 self.__state = 2
@@ -225,7 +229,7 @@ class LandingPipeline:
                     self.__ed.save_quaternion()
                         
                     print("-----------------------------------------------")
-                    print( " STATE 1 END")
+                    print(f" STATE {self.__state} END")
                     print(f" End Position: {self.__p_end} ")
                     print("-----------------------------------------------")
                     self.__state = 3
@@ -249,8 +253,8 @@ class LandingPipeline:
             print("********* INSUFFICIENT NUMBER OF POINTS *********")
             print("*************************************************")
             print("*************************************************")
-            self.__state = 9
-            self.__curr_state_method = self.state_9
+            self.__state = 10
+            self.__curr_state_method = self.state_10
             return
         
         #compute relative position
@@ -264,8 +268,8 @@ class LandingPipeline:
             print("*********** UNABLE TO FILTER VARIANCE  **********")
             print("*************************************************")
             print("*************************************************")
-            self.__state = 9
-            self.__curr_state_method = self.state_9
+            self.__state = 10
+            self.__curr_state_method = self.state_10
             return
 
         if abs(roll_out) > 15: #cant land
@@ -274,8 +278,8 @@ class LandingPipeline:
             print("************** ROLL ANGLE TOO BIG ***************")
             print("*************************************************")
             print("*************************************************")
-            self.__state = 9
-            self.__curr_state_method = self.state_9
+            self.__state = 10
+            self.__curr_state_method = self.state_10
             return
         
         """ V1
@@ -334,7 +338,7 @@ class LandingPipeline:
         #################
 
         print("-----------------------------------------------")
-        print( " STATE 2 END")
+        print(f" STATE {self.__state} END")
         print(f"{min_pos}")
         print(f"{max_pos}")
         print(f"{dlp}")
@@ -373,7 +377,7 @@ class LandingPipeline:
                 self.__ed.pid_throttle.set_auto_mode(enabled=True, last_output=0)
                 self.__ed.pid_roll.set_auto_mode(enabled=True, last_output=0)
                 print("-----------------------------------------------")
-                print( " STATE 3 END")
+                print(f" STATE {self.__state} END")
                 print(f"error_x={np.round(error_cx, 1)}")
                 print(f"error_z={np.round(error_cz, 1)}")
                 print("-----------------------------------------------")
@@ -411,6 +415,10 @@ class LandingPipeline:
 
         #ensure initial movement
         time.sleep(0.5)
+
+        print("-----------------------------------------------")
+        print(f" STATE {self.__state} END")
+        print("-----------------------------------------------")
 
         self.__state = 6
         self.__curr_state_method = self.state_6
@@ -450,15 +458,15 @@ class LandingPipeline:
         #Didn't hit the branch, so return fail       
         #(3*3 + 3*3 + 3*3)^0.5 = 5.2
         print(f"POS ERROR= {pos_error}", flush=True)
-        if (pos_error < 5.2):
+        if (pos_error < 5):
             print("*************************************************")
             print("*************************************************")
             print("******* LAND FAIL - DIDN'T HIT THE BRANCH *******")
             print(f"************ POSITION ERROR: {pos_error:.2f} *************")
             print("*************************************************")
             print("*************************************************")
-            self.__state = 9
-            self.__curr_state_method = self.state_9
+            self.__state = 10
+            self.__curr_state_method = self.state_10
             return
         
 
@@ -473,13 +481,20 @@ class LandingPipeline:
         #current speed < 10% of the maximum speed and the drone have moved at lest 20% forward
         #this 10% is just to ensure because sometimes the drone moves a little back
         if (speed_y < (0.01 * self.__max_speed_y))  and pid_error_test:
+
+            self.__minimum_height= self.__ed.get_curr_pos_corrected()[2] + 4 * self.__drone_hook_center
+
             self.__ed.rc_control(pitch=0.5)
-            time.sleep(1)
-            self.__ed.set_throttle(-1)
             time.sleep(0.5)
+            self.__ed.set_throttle(-0.5)
+            time.sleep(0.5)
+            
+            self.__impact_time = time.time()
+            
             print("-----------------------------------------------")
-            print( " STATE 5 END")
+            print(f" STATE {self.__state} END")
             print("-----------------------------------------------")
+
             self.__state = 7
             self.__curr_state_method = self.state_7
 
@@ -487,8 +502,44 @@ class LandingPipeline:
         ut.draw_text(self.__image_s, f"curr_pos    = {x:.1f} {y:.1f} {z:.1f} {yaw:.1f}", 1)
         ut.draw_text(self.__image_s, f"max_speed   = {np.round(self.__max_speed_y, 1)}", 2)
         ut.draw_text(self.__image_s, f"curr_speed  = {np.round(speed_y, 1)}", 3)
-
+    
     def state_7(self):
+        self.__ed.rc_control(throttle=-0.8)
+
+        curr_height = self.__ed.get_curr_pos_corrected()[2]
+        dt = time.time() - self.__impact_time
+
+        ut.draw_text(self.__image_s, f"      Height = {np.round(curr_height, 1)}", 0)
+        ut.draw_text(self.__image_s, f"Height Limit = {np.round(self.__minimum_height, 1)}", 1)
+        ut.draw_text(self.__image_s, f"  Time Count = {np.round(dt, 1)}", 2)
+        
+        print("-------------------------------------------------------")
+        print(f"      Height = {np.round(curr_height, 1)}")
+        print(f"Height Limit = {np.round(self.__minimum_height, 1)}")
+        print(f"  Time Count = {np.round(dt, 1)}", flush=True)
+        print("-------------------------------------------------------")
+
+        if curr_height <= self.__minimum_height:
+            print("*************************************************")
+            print("*************************************************")
+            print("******* LAND FAIL - DIDN'T HIT THE BRANCH *******")
+            print(f"**************** HEIGHT ERROR ******************")
+            print("*************************************************")
+            print("*************************************************")
+            self.__state = 10
+            self.__curr_state_method = self.state_10
+            return
+        
+        if dt >= 5.0:
+            self.__ed.rc_control()
+            print("-----------------------------------------------")
+            print(f" STATE {self.__state} END")
+            print("-----------------------------------------------")
+            self.__state = 8
+            self.__curr_state_method = self.state_8
+
+
+    def state_8(self):
         """
         Lands the drone after hitting the landing site
         
@@ -518,16 +569,20 @@ class LandingPipeline:
                 f.write(f"{self.__odometry[i]}\n")
             f.close()
 
-        self.__state = 8
-        self.__curr_state_method = self.state_8
+        print("-----------------------------------------------")
+        print(f" STATE {self.__state} END")
+        print("-----------------------------------------------")
 
-    def state_8(self):
+        self.__state = 9
+        self.__curr_state_method = self.state_9
+
+    def state_9(self):
         """
         Informs a successful landing
         """
         self.__ret_status = self.SUCCESS
 
-    def state_9(self):
+    def state_10(self):
         """
         Informs a failed landing
         """
