@@ -171,18 +171,22 @@ class Stereo:
 
         #if the filter is required and the variation in depth is bigger than 50 cm       
         if kfilter and np.abs(max(depth_out) - min(depth_out)) > kdist and len(depth_out) > 3:
-
-            if len(depth_out) > 10:
-                depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, 7)
-            else:
-                depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, 4)
-
-            #After applying k-means do not have enough data
-            if len(depth_out) < 2:
-                return  [],[],[], 0, 0
+            try:
+                
+                if len(depth_out) > 10:
+                    depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, 7)
+                else:
+                    depth_out, x_out, y_out = self.__k_means_filter(depth_out, x_out, y_out, 4)
+                
+                #After applying k-means do not have enough data
+                if len(depth_out) < 2:
+                    return  [],[],[], 0, 0
                         
-        elif np.abs(max(depth_out) - min(depth_out)) > kdist: #variance too big and kfilter = false
-            return  [],[],[], 0, 0
+                elif np.abs(max(depth_out) - min(depth_out)) > kdist: #variance too big and kfilter = false
+                    return  [],[],[], 0, 0
+                
+            except:
+                return  [],[],[], 0, 0
         
         #compute the yaw
         try:
