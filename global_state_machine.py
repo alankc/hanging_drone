@@ -67,7 +67,6 @@ class GlobalStateMachine:
         if key == 27:
             exit(0)
 
-        print("takeoff_request", flush=True)
         res_ssid = self.__d2rs.takeoff_request(0.5)
         if res_ssid:
             count = 1
