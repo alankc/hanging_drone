@@ -11,7 +11,7 @@ This work's approach allows a Tello Drone to land in strategic locations for dat
 
 **See the demonstration video:**
 
-[<img src="https://img.youtube.com/vi/Nel9mjfUpjM/maxresdefault.jpg" width="50%">](https://youtu.be/Nel9mjfUpjM)
+[<img src="https://img.youtube.com/vi/-aCFcoKEJI8/maxresdefault.jpg" width="50%">](https://youtu.be/-aCFcoKEJI8)
 
 
 ## Citation
