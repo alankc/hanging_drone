@@ -29,13 +29,14 @@ This work's approach allows a Tello Drone to land in strategic locations for dat
 
 ## Requirements
 
-Install the [TelloPy](https://github.com/hanyazou/TelloPy) library and replace the original tello.py file by the 
+Install the [TelloPy](https://github.com/hanyazou/TelloPy) library and replace the original tello.py file with the [tello.py](extra/tello.py) (provided in this repository) modified to work with multiple drones. keep in mind that each drone must be connected to a dedicated WiFi interface.
+
 
 ```bash
-pip install -r requirements.txt
+$ git clone https://github.com/alankc/landing_pipeline
+$ cd landing_pipeline
+$ pip install -r requirements.txt
 ```
-
-
 
 ## Usage
 
