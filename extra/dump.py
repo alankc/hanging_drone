@@ -1,3 +1,7 @@
+"""
+Program used to generate the first YAML file
+"""
+
 import yaml
 import pickle
 
