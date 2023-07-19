@@ -33,9 +33,9 @@ Install the [TelloPy](https://github.com/hanyazou/TelloPy) library and replace t
 
 
 ```bash
-$ git clone https://github.com/alankc/landing_pipeline
-$ cd landing_pipeline
-$ pip install -r requirements.txt
+git clone https://github.com/alankc/landing_pipeline
+cd landing_pipeline
+pip install -r requirements.txt
 ```
 
 ## Usage
