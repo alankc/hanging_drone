@@ -29,6 +29,14 @@ This work's approach allows a Tello Drone to land in strategic locations for dat
 
 ## Requirements
 
+Install the [TelloPy](https://github.com/hanyazou/TelloPy) library and replace the original tello.py file by the 
+
+```bash
+pip install -r requirements.txt
+```
+
+
+
 ## Usage
 
 ### Running the system
