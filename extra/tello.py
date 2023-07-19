@@ -1,3 +1,6 @@
+"""
+Tello library modified to work with multiple drones. Each drone connected to a dedicated WiFi interface.
+"""
 import threading
 import socket
 import time
