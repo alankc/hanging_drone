@@ -26,6 +26,21 @@ This work's approach allows a Tello Drone to land in strategic locations for dat
     pages     = {}
 }
 ```
+
 ## Requirements
 
 ## Usage
+
+### Running the system
+
+### Control Modes
+
+#### Waiting Connection
+
+#### Manual Control
+
+#### Manual Land
+
+#### Autonomous Landing
+
+#### Go To
