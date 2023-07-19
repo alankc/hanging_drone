@@ -5,6 +5,8 @@ Official implementation of **[Hanging Drone: An Approach to UAV Landing for Moni
 
 This work's approach allows a Tello Drone to land in strategic locations for data acquisition, resulting in significantly less battery consumption. The method uses principles from stereo vision through a monocular camera motion to estimate the relative position of a selected landing site, allowing a drone to hang itself by a hook in an artificial (e.g., aluminum frame, power line) or natural (e.g., tree branch) location. However, the system is limited to static landing sites where the FAST feature detector algorithm can detect features.
 
+<img src="drone/drone_image.png" width="50%">
+
 See demonstration video
 
 [<img src="https://img.youtube.com/vi/Nel9mjfUpjM/maxresdefault.jpg" width="50%">](https://youtu.be/Nel9mjfUpjM)
