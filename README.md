@@ -53,9 +53,8 @@ To run the system with a custom parameters file use:
 python main.py -p your_file.yaml
 ```
 
-### Control Modes
 
-#### Waiting Connection
+### Waiting Connection
 In the waiting connection state, the drone is going to ask for a drone to the battery recharge station.
 
 If it does not receive drone information, the system will try to connect to the drone informed by the parameters.yaml
@@ -65,7 +64,7 @@ If it does not receive drone information, the system will try to connect to the 
 | :-: | :- |
 | ESC | Exit|
 
-#### Manual Control
+### Manual Control
 
 In this mode, you can navigate the drone manually, start the autonomous landing, and much more.
 
@@ -74,7 +73,6 @@ See the map of keys and a list explaining each key/function.
 <img src="drone/keyboard.png" width="50%">
 
 <a href="https://commons.wikimedia.org/wiki/File:KB_United_States-NoAltGr.svg">This file was derived from: KB United States.svg</a>, <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>, via Wikimedia Commons
-
 
 **General Options**
 | Key | Function |
@@ -106,8 +104,10 @@ See the map of keys and a list explaining each key/function.
 During the flight you can also select a location to land with the mouse, just start selecting the polygon with a left click.
 Keys 2 and 3 are related to this option. After you select the landing site you can press 2 to the drone to try to hang itself there.
 
-#### Manual Land
+### Waiting Manual Land Response
 
-#### Autonomous Landing
+### Manual Land
 
-#### Go To
+### Autonomous Landing
+
+### Go To
