@@ -81,6 +81,8 @@ See the map of keys and a list explaining each key/function.
 | 1 | Runs landing pipeline with Yolo (autonomous mode)|
 | 2 | Runs landing pipeline with the selected shape (autonomous mode)|
 | 3 | Reset the selected shape|
+| q | land |
+| e | takeoff |
 | m | Send a land request to recharge station|
 | g | Open destination window|
 | SPACE | Switch between autonomous and manual|
@@ -89,8 +91,6 @@ See the map of keys and a list explaining each key/function.
 | Key | Function |
 | :-: | :- |
 | Left Hand |
-| q | land |
-| e | takeoff |
 | w | up |
 | s | down |
 | a | rotate counterclockwise |
@@ -104,9 +104,43 @@ See the map of keys and a list explaining each key/function.
 During the flight you can also select a location to land with the mouse, just start selecting the polygon with a left click.
 Keys 2 and 3 are related to this option. After you select the landing site you can press 2 to the drone to try to hang itself there.
 
-### Waiting Manual Land Response
+### Waiting Manual Land Permission
+
+After pressing the key **m**, in the manual control mode, the system tries to get permission from the recharge station to land and change batteries.
+
+**General Options**
+| Key | Function |
+| :-: | :- |
+| ESC | Land and Exit|
+| SPACE | Switch to manual|
 
 ### Manual Land
+
+After the system receives permission to land in the previous state, the operator can land the drone on the recharge station.
+
+Note that this type of landing is unrelated to the autonomous landing using the hook.
+
+**General Options**
+| Key | Function |
+| :-: | :- |
+| ESC | Land and Exit|
+| q | Land|
+| e | Disconnect from the drone |
+| SPACE | Switch to manual|
+
+**Movement Options**
+| Key | Function |
+| :-: | :- |
+| Left Hand |
+| w | up |
+| s | down |
+| a | rotate counterclockwise |
+| d | rotate clockwise |
+|Right Hand|
+| i | forward |
+| k | backward |
+| j | left |
+| l | right |
 
 ### Autonomous Landing
 
