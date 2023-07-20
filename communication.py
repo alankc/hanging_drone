@@ -203,6 +203,8 @@ class WiFiFinder:
         Return true if connected
         """
 
+        #nmcli con add con-name DRONE type wifi ifname wlp61s0 ssid SoneraGateway08-76-FF-82-00-67 -- wifi-sec.key-mgmt wpa-psk wifi-sec.psk "6B04AC7063" ipv4.method manual ipv4.address 192.168.1.151/24 ipv4.dns 8.8.8.8,8.8.8.4 ipv4.gateway 192.168.1.1
+
         #Remove SSID from known list to avoid wrong interface connect to it
         cmd = "nmcli connection show | grep {ssid} | grep -E -o '[0-9a-f\-]{36}'".replace("{ssid}", ssid)
         results = list(os.popen(cmd))
