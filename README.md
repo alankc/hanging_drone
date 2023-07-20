@@ -60,6 +60,39 @@ python main.py -p your_file.yaml
 #### Waiting Connection
 
 #### Manual Control
+The manual mode is full of options. See the map of keys and a list explaining each key/function.
+
+<img src="drone/keyboard.png" width="50%">
+
+**General Options**
+| Key | Function |
+| :-: | :- |
+| ESC | Land and Exit|
+| 1 | Runs landing pipeline with Yolo (autonomous mode)|
+| 2 | Runs landing pipeline with the selected shape (autonomous mode)|
+| 3 | Reset the selected shape|
+| m | Send a land request to recharge station|
+| g | Open destination window|
+| SPACE | Switch between autonomous and manual|
+
+**Movement Options**
+| Key | Function |
+| :-: | :- |
+| Left Hand |
+| q | land |
+| e | takeoff |
+| w | up |
+| s | down |
+| a | rotate counterclockwise |
+| d | rotate clockwise |
+|Right Hand|
+| i | forward |
+| k | backward |
+| j | left |
+| l | right |
+
+During the flight you can also select a location to land with the mouse, just start selecting the polygon with a left click.
+Keys 2 and 3 are related to this option. After you select the landing site you can press 2 to the drone to try to hang itself there.
 
 #### Manual Land
 
