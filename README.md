@@ -38,7 +38,7 @@ cd landing_pipeline
 pip install -r requirements.txt
 ```
 
-## Usage
+## Running the system
 
 The file parameters.yaml contains a series of parameters used by the system. To run the system with these default parameters just run:
 
@@ -52,8 +52,6 @@ To run the system with a custom parameters file use:
 ```bash
 python main.py -p your_file.yaml
 ```
-
-### Running the system
 
 ### Control Modes
 
