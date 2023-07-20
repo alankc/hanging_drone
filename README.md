@@ -73,6 +73,9 @@ See the map of keys and a list explaining each key/function.
 
 <img src="drone/keyboard.png" width="50%">
 
+<a href="https://commons.wikimedia.org/wiki/File:KB_United_States-NoAltGr.svg">This file was derived from: KB United States.svg</a>, <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>, via Wikimedia Commons
+
+
 **General Options**
 | Key | Function |
 | :-: | :- |
