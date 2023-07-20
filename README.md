@@ -144,4 +144,20 @@ Note that this type of landing is unrelated to the autonomous landing using the 
 
 ### Autonomous Landing
 
+After the user presses keys **1** or **2** in the manual control, the system starts the autonomous landing using the hook.
+
+**General Options**
+| Key | Function |
+| :-: | :- |
+| ESC | Land and Exit|
+| SPACE | Switch between autonomous and manual|
+
 ### Go To
+
+After the user presses key **g** in the manual control, the system is going to open a window where the user can inform a relative position. Then the drone is going to navigate to this position autonomously.
+
+**General Options**
+| Key | Function |
+| :-: | :- |
+| ESC | Land and Exit|
+| SPACE | Returno to manual mode |
