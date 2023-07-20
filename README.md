@@ -58,9 +58,20 @@ python main.py -p your_file.yaml
 ### Control Modes
 
 #### Waiting Connection
+In the waiting connection state, the drone is going to ask for a drone to the battery recharge station.
+
+If it does not receive drone information, the system will try to connect to the drone informed by the parameters.yaml
+
+**General Options**
+| Key | Function |
+| :-: | :- |
+| ESC | Exit|
 
 #### Manual Control
-The manual mode is full of options. See the map of keys and a list explaining each key/function.
+
+In this mode, you can navigate the drone manually, start the autonomous landing, and much more.
+
+See the map of keys and a list explaining each key/function.
 
 <img src="drone/keyboard.png" width="50%">
 
