@@ -243,27 +243,22 @@ class WiFiFinder:
 
         Return true if connected
         """
-        cmd = f"nmcli d wifi connect {ssid} password {password} ifname {self.__interface}"
         try:
+            #creating static ip connection with the drone
+            #it has to be this way to linux updates the route table
+            gtw = self.__interface_ip.split(".")
+            cmd  = f"nmcli con add con-name {ssid} type wifi ifname {self.__interface} ssid {ssid} "
+            cmd += f"-- wifi-sec.key-mgmt wpa-psk wifi-sec.psk {password} ipv4.method manual ipv4.address {self.__interface_ip}/24 "
+            cmd += f"ipv4.gateway {gtw[0]}.{gtw[1]}.{gtw[2]}.1"
+            if os.system(cmd) != 0: # This will run the command and check connection
+                raise Exception()
+            
+            cmd = f"nmcli connection up {ssid}"
             if os.system(cmd) != 0: # This will run the command and check connection
                 raise Exception()
         except:
             raise # Not Connected
         else:
-            cmd = f"sudo ifconfig {self.__interface} {self.__interface_ip}/24"
-            os.system(cmd)
-            """
-            net_adrr = self.__interface_ip.split(".")
-
-            cmd = f"sudo ip route add {net_adrr[0]}.{net_adrr[1]}.{net_adrr[2]}.0 dev {self.__interface}"
-            os.system(cmd)
-
-            cmd = f"sudo ip route add default via {net_adrr[0]}.{net_adrr[1]}.{net_adrr[2]}.0"
-            os.system(cmd)
-
-            cmd = f"sudo ip route add link-local via {net_adrr[0]}.{net_adrr[1]}.{net_adrr[2]}.0"
-            os.system(cmd)
-            """
             return True # Connected
 
 class D2RS:
