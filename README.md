@@ -40,6 +40,19 @@ pip install -r requirements.txt
 
 ## Usage
 
+The file parameters.yaml contains a series of parameters used by the system. To run the system with these default parameters just run:
+
+```bash
+python main.py
+```
+
+If you need to change parameters, you can either edit the parameters on parameters.yaml or create your own parameter file.
+To run the system with a custom parameters file use:
+
+```bash
+python main.py -p your_file.yaml
+```
+
 ### Running the system
 
 ### Control Modes
