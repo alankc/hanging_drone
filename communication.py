@@ -250,6 +250,18 @@ class WiFiFinder:
         else:
             cmd = f"sudo ifconfig {self.__interface} {self.__interface_ip}/24"
             os.system(cmd)
+            """
+            net_adrr = self.__interface_ip.split(".")
+
+            cmd = f"sudo ip route add {net_adrr[0]}.{net_adrr[1]}.{net_adrr[2]}.0 dev {self.__interface}"
+            os.system(cmd)
+
+            cmd = f"sudo ip route add default via {net_adrr[0]}.{net_adrr[1]}.{net_adrr[2]}.0"
+            os.system(cmd)
+
+            cmd = f"sudo ip route add link-local via {net_adrr[0]}.{net_adrr[1]}.{net_adrr[2]}.0"
+            os.system(cmd)
+            """
             return True # Connected
 
 class D2RS:
