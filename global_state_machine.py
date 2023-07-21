@@ -437,7 +437,8 @@ class GlobalStateMachine:
         self.__cx = sp['cx']
         self.__cy = sp['cy_aligned']
 
-        self.__out_file = self.__parameters['Control']['folder_odom']
+        if self.__parameters['Control']['folder_odom']:
+            self.__out_file = open(self.__parameters['Control']['folder_odom'], "a")
 
         self.__yd = YOLODetector(self.__parameters['YOLO']['path'])
 
