@@ -346,6 +346,7 @@ class LandingPipeline:
             self.__odometry.append(min_pos)
             self.__odometry.append(max_pos)
             self.__odometry.append(dlp)
+            self.__odometry.append(y_adjust)
             self.__odometry.append((0, drone_x, drone_y, drone_z, drone_yaw))
         #################
 
