@@ -572,7 +572,8 @@ class LandingPipeline:
         self.__ed.land()
         time.sleep(5)
 
-        if not (self.__odom_file is None):
+        import io
+        if isinstance(self.__odom_file, io.TextIOWrapper):
             f = self.__odom_file
             
             f.write("====================== HEADER ======================\n")
