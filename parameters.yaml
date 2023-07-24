@@ -79,7 +79,7 @@ Control:
       kd: 0.01
       min: -0.5
       max: 0.5
-  folder_odom: exp3/17.txt
+  folder_odom: null
   ty: 10
   drone_hook_center: -8 #-8 for the printed hook, -5 for steel hook
   desired_fps: 25
