@@ -437,6 +437,7 @@ class GlobalStateMachine:
         self.__cx = sp['cx']
         self.__cy = sp['cy_aligned']
 
+        self.__out_file = None
         if self.__parameters['Control']['folder_odom']:
             self.__out_file = open(self.__parameters['Control']['folder_odom'], "a")
 
