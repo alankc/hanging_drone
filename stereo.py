@@ -19,6 +19,58 @@ class Stereo:
         self.cx = cx
         self.cy_aligned = cy_aligned
         self.angle = angle * np.pi / 180
+
+        roll = 0
+        pitch = self.angle
+        yaw = 0
+        dx = 0
+        dy = 0
+        dz = 1
+
+        A2 = np.array([[self.fx,  0, self.cx, 0],
+                       [ 0, self.fy, self.cy_aligned, 0],
+                       [ 0,  0,  1, 0]], dtype=np.float64)
+            
+        # Inverted Camera Calibration Intrinsics Matrix
+        A1 = np.array([[1/self.fx,    0, -self.cx/self.fx],
+                       [   0, 1/self.fy, -self.cy_aligned/self.fy],
+                       [   0,    0,      0],
+                       [   0,    0,      1]], dtype=np.float64)
+        
+        # Rotation matrices around the X, Y, and Z axis
+        c = np.cos(pitch)
+        s = np.sin(pitch)
+        RX = np.array([[1, 0,  0, 0],
+                       [0, c, -s, 0],
+                       [0, s,  c, 0],
+                       [0, 0,  0, 1]], dtype=np.float64)
+        
+        c = np.cos(yaw)
+        s = np.sin(yaw)
+        RY = np.array([[ c, 0, s, 0],
+                       [ 0, 1, 0, 0],
+                       [-s, 0, c, 0],
+                       [ 0, 0, 0, 1]], dtype=np.float64)
+
+        c = np.cos(roll)
+        s = np.sin(roll)
+        RZ = np.array([[c, -s, 0, 0],
+                       [s,  c, 0, 0],
+                       [0,  0, 1, 0],
+                       [0,  0, 0, 1]], dtype=np.float64)        
+
+        R = RZ @ RY @ RX
+        
+        T = np.array([[1, 0, 0, dx],
+                      [0, 1, 0, dy],
+                      [0, 0, 1, dz],
+                      [0, 0, 0,  1]], dtype=np.float64) 
+        
+        # Compose rotation matrix with (RX, RY, RZ)
+        R = RZ @ RY @ RX
+
+        # Final transformation matrix
+        self.__H = A2 @ (T @ (R @ A1))
     
     def compute_relative_depth_filtered(self, ty, kp1, kp2, matches, rect1, rect2):
         """
@@ -210,60 +262,8 @@ class Stereo:
         """
         Rotate the image considering the camera pitch
         """
-        roll = 0
-        pitch = self.angle
-        yaw = 0
-        dx = 0
-        dy = 0
-        dz = 1
-
-        A2 = np.array([[self.fx,  0, self.cx, 0],
-                       [ 0, self.fy, self.cy_aligned, 0],
-                       [ 0,  0,  1, 0]], dtype=np.float64)
-            
-        # Inverted Camera Calibration Intrinsics Matrix
-        A1 = np.array([[1/self.fx,    0, -self.cx/self.fx],
-                       [   0, 1/self.fy, -self.cy_aligned/self.fy],
-                       [   0,    0,      0],
-                       [   0,    0,      1]], dtype=np.float64)
-        
-        # Rotation matrices around the X, Y, and Z axis
-        c = np.cos(pitch)
-        s = np.sin(pitch)
-        RX = np.array([[1, 0,  0, 0],
-                       [0, c, -s, 0],
-                       [0, s,  c, 0],
-                       [0, 0,  0, 1]], dtype=np.float64)
-        
-        c = np.cos(yaw)
-        s = np.sin(yaw)
-        RY = np.array([[ c, 0, s, 0],
-                       [ 0, 1, 0, 0],
-                       [-s, 0, c, 0],
-                       [ 0, 0, 0, 1]], dtype=np.float64)
-
-        c = np.cos(roll)
-        s = np.sin(roll)
-        RZ = np.array([[c, -s, 0, 0],
-                       [s,  c, 0, 0],
-                       [0,  0, 1, 0],
-                       [0,  0, 0, 1]], dtype=np.float64)        
-
-        R = RZ @ RY @ RX
-        
-        T = np.array([[1, 0, 0, dx],
-                      [0, 1, 0, dy],
-                      [0, 0, 1, dz],
-                      [0, 0, 0,  1]], dtype=np.float64) 
-        
-        # Compose rotation matrix with (RX, RY, RZ)
-        R = RZ @ RY @ RX
-
-        # Final transformation matrix
-        H = A2 @ (T @ (R @ A1))
-
         # Apply matrix transformation
         shape = (input.shape[1], input.shape[0])
         #return cv2.warpPerspective(input, H, shape, None, cv2.INTER_LANCZOS4)
         #return cv2.warpPerspective(input, H, shape, None, cv2.INTER_LINEAR)
-        return cv2.warpPerspective(input, H, shape, None, cv2.INTER_CUBIC)
+        return cv2.warpPerspective(input, self.__H, shape, None, cv2.INTER_CUBIC)
