@@ -573,6 +573,14 @@ class LandingPipeline:
         self.__ed.land()
         time.sleep(5)
 
+        print("-----------------------------------------------")
+        print(f" STATE {self.__state} END")
+        print("-----------------------------------------------")
+
+        self.__state = self.S_SUCCESS
+        self.__curr_state_method = self.state_success
+
+    def write_odom(self):
         import io
         if isinstance(self.__odom_file, io.TextIOWrapper):
             f = self.__odom_file
@@ -583,23 +591,21 @@ class LandingPipeline:
             f.write("X = left and right\n")
             f.write("Y = foraward backward\n")
             f.write("Z = height\n")
-            f.write("=====================================================\n")
+            if self.__state == self.S_SUCCESS:
+                f.write("====================== SUCCESS ======================\n")
+            else:
+                f.write("======================== FAIL =======================\n")
 
             for i in range(len(self.__odometry)):
                 f.write(f"{self.__odometry[i]}\n")
+
             f.close()
-
-        print("-----------------------------------------------")
-        print(f" STATE {self.__state} END")
-        print("-----------------------------------------------")
-
-        self.__state = self.S_SUCCESS
-        self.__curr_state_method = self.state_success
 
     def state_success(self):
         """
         Informs a successful landing
         """
+        self.write_odom()
         self.__ret_status = self.SUCCESS
 
     def state_fail(self):
@@ -611,6 +617,7 @@ class LandingPipeline:
         print("***************** LAND FAIL *********************")
         print("*************************************************")
         print("*************************************************")
+        self.write_odom()
         self.__ret_status = self.FAIL
 
     def run(self, image, image_s):
