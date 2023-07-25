@@ -40,7 +40,7 @@ class Vision:
         #ORB detector
         self.__detector = cv2.ORB_create()
 
-        #detect and compute using SIFT
+        #detect and compute using SIFT 
         self.__detec_and_compute = lambda img, m = None: self.__detector.detectAndCompute(img, mask = m)
 
     def set_sift_detector(self):
