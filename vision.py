@@ -28,8 +28,12 @@ class Vision:
         #BRISK descriptor extractor
         self.__desc_extractor= cv2.BRISK_create()
 
+        # create a mask
+        #m = np.zeros((720, 960), np.uint8)
+        #m[100:175, 0:958] = 255
+
         #Combine the FAST detector with the brisk extractor
-        self.__detec_and_compute = lambda img: self.__desc_extractor.compute(img, self.__detector.detect(img))
+        self.__detec_and_compute = lambda img, m = None: self.__desc_extractor.compute(img, self.__detector.detect(img, mask = m))
 
     def set_orb_detector(self):
         self.__detector_type = Vision.__DETECTOR_TYPE_ORB
@@ -37,7 +41,7 @@ class Vision:
         self.__detector = cv2.ORB_create()
 
         #detect and compute using SIFT
-        self.__detec_and_compute = lambda img: self.__detector.detectAndCompute(img, None)
+        self.__detec_and_compute = lambda img, m = None: self.__detector.detectAndCompute(img, mask = m)
 
     def set_sift_detector(self):
         self.__detector_type = Vision.__DETECTOR_TYPE_SIFT
@@ -46,7 +50,7 @@ class Vision:
         self.__detector = cv2.SIFT_create(nfeatures=0, nOctaveLayers=3, contrastThreshold=0.02, edgeThreshold=25, sigma=1)
 
         #detect and compute using SIFT
-        self.__detec_and_compute = lambda img: self.__detector.detectAndCompute(img, None)
+        self.__detec_and_compute = lambda img, m = None: self.__detector.detectAndCompute(img, mask = m)
 
     def set_bf_matcher(self):
         #if SIFT
