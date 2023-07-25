@@ -134,7 +134,7 @@ class LandingPipeline:
                 y2 = int(pt2[1])
                 m = np.zeros((720, 960), np.uint8)
                 m[y1:y2, 0:960] = 255
-                ut.draw_yolo_rectangle(self.__image_s, pt1, pt2, conf)
+                ut.draw_yolo_rectangle(self.__image_s, (0, y1), (960, y2), conf)
 
         #detect features in the current image
         k, d = self.__v.detect_features(self.__image, m)
@@ -223,7 +223,8 @@ class LandingPipeline:
                     y2 = int(pt2[1])
                     m = np.zeros((720, 960), np.uint8)
                     m[y1:y2, 0:960] = 255
-                    ut.draw_yolo_rectangle(self.__image_s, pt1, pt2, conf)
+                    #ut.draw_yolo_rectangle(self.__image_s, pt1, pt2, conf)
+                    ut.draw_yolo_rectangle(self.__image_s, (0, y1), (960, y2), conf)
 
             k, d = self.__v.detect_features(self.__image, m)
             
