@@ -59,11 +59,11 @@ class Vision:
         else: #IF FAST or ORB
             self.__bfm = cv2.BFMatcher(normType=cv2.NORM_HAMMING)
     
-    def detect_features(self, img):
+    def detect_features(self, img, m = None):
         """
         Detect the feature in an image
         """
-        return self.__detec_and_compute(img)
+        return self.__detec_and_compute(img, m)
     
     def detect_features_in_rect(self, img, rect):
         """

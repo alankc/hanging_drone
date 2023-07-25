@@ -126,9 +126,18 @@ class LandingPipeline:
 
         Saves them and the current position when the features are centralized
         """
+        m = None
+        if ((self.__k_ref_i is None) and (self.__d_ref_i is None)): 
+            pt1, pt2, conf = self.__yd.detect_best(self.__image, confidence=0.4)
+            if not ((pt1 is None) and (pt2 is None)):
+                y1 = int(pt1[1])
+                y2 = int(pt2[1])
+                m = np.zeros((720, 960), np.uint8)
+                m[y1:y2, 0:960] = 255
+                ut.draw_yolo_rectangle(self.__image_s, pt1, pt2, conf)
 
         #detect features in the current image
-        k, d = self.__v.detect_features(self.__image)
+        k, d = self.__v.detect_features(self.__image, m)
 
         #get list of matched features
         k_curr, d_curr, error, _ = self.__v.bf_matching_descriptors(self.__d_ref, k, d, 0.65, (self.__cx, self.__cy))
@@ -205,7 +214,18 @@ class LandingPipeline:
         self.__ed.set_throttle(ctrl_throttle)
 
         if abs(error_cz) < 2 and abs(ctrl_throttle) < 0.1:
-            k, d = self.__v.detect_features(self.__image)
+
+            m = None
+            if ((self.__k_ref_i is None) and (self.__d_ref_i is None)): 
+                pt1, pt2, conf = self.__yd.detect_best(self.__image, confidence=0.4)
+                if not ((pt1 is None) and (pt2 is None)):
+                    y1 = int(pt1[1])
+                    y2 = int(pt2[1])
+                    m = np.zeros((720, 960), np.uint8)
+                    m[y1:y2, 0:960] = 255
+                    ut.draw_yolo_rectangle(self.__image_s, pt1, pt2, conf)
+
+            k, d = self.__v.detect_features(self.__image, m)
             
             #get list of matched features
             k_curr, d_curr, error, matches = self.__v.bf_matching_descriptors(self.__d_start, k, d, 0.65, (self.__cx, self.__cy))
