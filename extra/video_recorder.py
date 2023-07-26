@@ -72,6 +72,7 @@ if __name__ == "__main__":
     alpha = 0.1
     fps = 0
     rec = False
+    t_rec = 0
 
     while(True):
 
@@ -95,18 +96,19 @@ if __name__ == "__main__":
 
         if rec:
             out.write(frame) 
-            ut.draw_big_text(frame, "REC")
+            ut.draw_big_text(frame, f"REC {(time.time()-t_rec):.0f}")
 
         cv2.imshow('Original', frame)
 
         key = cv2.waitKey(1) & 0xFF
-        
+
         if key == 27:
             ed.land()
             break
 
         elif key == ord("r"):
             rec = not rec
+            t_rec = time.time()
 
         elif key == ord("q"):
             ed.land()
