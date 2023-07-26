@@ -4,7 +4,7 @@ Both sides of the artificial branch for:
 - Facing dor open (abdo) - OK
 - Facing dor closed (abdc) - OK
 - Facing Timmo's desk (Wall with a heavy background) (abhb) - OK
-- Facing Joel's desk (Wall with a clean background) (abcb)
+- Facing Joel's desk (Wall with a clean background) (abcb) - OK
 
 - Facing forest in the back of the lab (abfb)
 - In the back of a tree trunk (abtt)
