@@ -1,12 +1,15 @@
 ** PLACES ** 
 
 Both sides of the artificial branch for:
-- Facing dor open (abdo)
-- Facing dor closed (abdc)
-- Facing Timmo's desk (Wall with a heavy background) (abhb) 
+- Facing dor open (abdo) - OK
+- Facing dor closed (abdc) - OK
+- Facing Timmo's desk (Wall with a heavy background) (abhb) - OK
 - Facing Joel's desk (Wall with a clean background) (abcb)
 
 - Facing forest in the back of the lab (abfb)
+- In the back of a tree trunk
+
+Create detection for branch and aluminum frame
 
 Natural Branchs
 - Spruce Tree (nbst)
