@@ -1,0 +1,28 @@
+** PLACES ** 
+
+Both sides of the artificial branch for:
+- Facing dor open (abdo)
+- Facing dor closed (abdc)
+- Facing Timmo's desk (Wall with a heavy background) (abhb) 
+- Facing Joel's desk (Wall with a clean background) (abcb)
+- Facing forest in the back of the lab (abfb)
+
+Natural Branchs
+- Spruce Tree (nbst)
+- Pine Tree (nbpt)
+- Birch tree (nbbt)
+
+
+** VIDEO PROTOCOL **
+
+left top
+left middle
+left down
+
+middle top
+middle middle
+middle down
+
+right top
+right middle
+right down 
