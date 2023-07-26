@@ -15,6 +15,7 @@ class Vision:
         self.__detector = None
         self.__detec_and_compute = None
         self.__detector_type = None
+        self.tracker = None
 
     def set_fast_detector(self, nonmaxSuppression, threshold, type):
         self.__detector_type = Vision.__DETECTOR_TYPE_FAST
@@ -158,6 +159,30 @@ class Vision:
                 good_matches.append(m)
 
         return keypoints1, keypoints2, good_matches
+    
+    T_BOOSTING = 'BOOSTING'
+    T_MIL = 'MIL'
+    T_KCF = 'KCF'
+    T_TLD = 'TLD'
+    T_MEDIANFLOW = 'MEDIANFLOW'
+    T_MOSSE = 'MOSSE'
+    T_CSRT = 'CSRT'
+
+    def set_tracker(self, tracker_type):
+        if tracker_type == self.T_BOOSTING:
+            tracker = cv2.legacy.TrackerBoosting_create()
+        if tracker_type == self.T_MIL:
+            tracker = cv2.TrackerMIL_create() 
+        if tracker_type == self.T_KCF:
+            tracker = cv2.TrackerKCF_create() 
+        if tracker_type == self.T_TLD:
+            tracker = cv2.legacy.TrackerTLD_create() 
+        if tracker_type == self.T_MEDIANFLOW:
+            tracker = cv2.legacy.TrackerMedianFlow_create() 
+        if tracker_type == self.T_MOSSE:
+            tracker = cv2.legacy.TrackerMOSSE_create()
+        if tracker_type == self.T_CSRT:
+            tracker = cv2.TrackerCSRT_create()
    
     def rotateImage(self, input, roll, pitch, yaw, dx, dy, dz, fx, fy, cx, cy):
         """

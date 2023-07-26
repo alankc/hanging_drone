@@ -430,6 +430,8 @@ class GlobalStateMachine:
         elif 'orb' in self.__parameters['Vision']: 
             self.__v.set_orb_detector()
         self.__v.set_bf_matcher()
+        
+        self.__v.set_tracker(self.__parameters['Vision']['tracker'])
 
         self.__s = Stereo()
         sp = self.__parameters['Camera']
