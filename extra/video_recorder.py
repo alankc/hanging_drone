@@ -71,7 +71,8 @@ if __name__ == "__main__":
     time_start = time.time()
     alpha = 0.1
     fps = 0
-    
+    rec = False
+
     while(True):
 
         curr_dt = time.time()-time_start
@@ -91,17 +92,20 @@ if __name__ == "__main__":
             continue
 
         frame = s.rotateImage(frame)
-    
-        out.write(frame) 
-        
-        # The original input frame is shown in the window 
+
+        if rec:
+            out.write(frame) 
+            ut.draw_big_text(frame, "REC")
+
         cv2.imshow('Original', frame)
-  
-        
+
         key = cv2.waitKey(20) & 0xFF
         if key == 27:
             ed.land()
             break
+
+        elif key == ord("r"):
+            rec = not rec
 
         elif key == ord("q"):
             ed.land()
