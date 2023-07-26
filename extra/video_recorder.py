@@ -26,6 +26,12 @@ if __name__ == "__main__":
                         help='Video File'
                         )
     
+    parser.add_argument('-f', '--out_folder',
+                        required=False,
+                        default="out",
+                        help=''
+                        )
+    
     args = parser.parse_args()
 
     if not os.path.exists(args.parameters):
@@ -33,6 +39,10 @@ if __name__ == "__main__":
         print("============= Parameters file required ===============")
         print("======================================================")
         exit(0)
+
+    os.makedirs(args.out_folder, exist_ok=True)
+
+    video_path = str(args.out_folder) + "/" + str(args.video_file) + ".mp4"
 
     with open(f'{args.parameters}','r') as f:
         parameters_file = yaml.safe_load(f)
@@ -49,7 +59,7 @@ if __name__ == "__main__":
 
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(str(args.video_file)+ ".mp4", fourcc, desired_fps, (960, 720))
+    out = cv2.VideoWriter(video_path, fourcc, desired_fps, (960, 720))
     
     # loop runs if capturing has been initialized.
     time_start = time.time()
@@ -103,9 +113,32 @@ if __name__ == "__main__":
             ut.rc_control(key, ed)
     
     # After we release our webcam, we also release the output
-    out.release() 
+    out.release()
+    ed.quit()
     
     # De-allocate any associated memory usage 
     cv2.destroyAllWindows()
 
-    ed.quit()
+    vidcap = cv2.VideoCapture(video_path)
+    num_frames = vidcap.get(cv2.CAP_PROP_FRAME_COUNT)
+
+    success,image = vidcap.read()
+    count = 0
+    f_count = 0
+    while success:
+        
+        if count % 25 == 0:
+            cv2.imwrite(f"{str(args.out_folder)}/{str(args.video_file)}_{f_count}.png", image)     # save frame as JPEG file
+            f_count += 1
+        
+        success,image = vidcap.read()
+        perc = int(10 * count / (num_frames - 1))
+        outstr = "*" * perc
+        while len(outstr) < 10:
+            outstr += " "
+
+        print(f"\rProcessing [{outstr}]",end="")
+        count += 1
+
+    print("\nFinished")
+    
