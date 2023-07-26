@@ -140,7 +140,7 @@ if __name__ == "__main__":
     f_count = int(args.counter_start)
     while success:
         
-        if count % 12 == 0:
+        if count % desired_fps == 0:
             cv2.imwrite(f"{str(args.out_folder)}/{f_count}{str(args.video_file)}.png", image)     # save frame as JPEG file
             f_count += 1
         
