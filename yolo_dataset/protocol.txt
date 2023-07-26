@@ -7,7 +7,7 @@ Both sides of the artificial branch for:
 - Facing Joel's desk (Wall with a clean background) (abcb)
 
 - Facing forest in the back of the lab (abfb)
-- In the back of a tree trunk
+- In the back of a tree trunk (abtt)
 
 Create detection for branch and aluminum frame
 
