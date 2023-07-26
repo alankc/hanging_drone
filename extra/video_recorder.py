@@ -99,7 +99,8 @@ if __name__ == "__main__":
 
         cv2.imshow('Original', frame)
 
-        key = cv2.waitKey(20) & 0xFF
+        key = cv2.waitKey(1) & 0xFF
+        
         if key == 27:
             ed.land()
             break
