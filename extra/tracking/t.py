@@ -30,7 +30,9 @@ frame_height, frame_width = frame.shape[:2]
 if not ret:
     print('cannot read the video')
 # Select the bounding box in the first frame
-bbox = cv2.selectROI(frame, False)
+bbox = cv2.selectROI("SELECTION", frame, False)
+cv2.destroyWindow('SELECTION')
+
 print(bbox) #(xmin,ymin,boxwidth,boxheight)
 ret = tracker.init(frame, bbox)
 # Start tracking
