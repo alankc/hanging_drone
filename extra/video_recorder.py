@@ -127,7 +127,7 @@ if __name__ == "__main__":
     f_count = 0
     while success:
         
-        if count % 25 == 0:
+        if count % 12 == 0:
             cv2.imwrite(f"{str(args.out_folder)}/{str(args.video_file)}_{f_count}.png", image)     # save frame as JPEG file
             f_count += 1
         
