@@ -2,7 +2,7 @@
 import cv2
 
 tracker_types = ['BOOSTING', 'MIL','KCF', 'TLD', 'MEDIANFLOW', 'GOTURN', 'MOSSE', 'CSRT']
-tracker_type = tracker_types[7]
+tracker_type = tracker_types[-2]
 
 if tracker_type == 'BOOSTING':
     tracker = cv2.legacy.TrackerBoosting_create()
@@ -30,8 +30,10 @@ frame_height, frame_width = frame.shape[:2]
 if not ret:
     print('cannot read the video')
 # Select the bounding box in the first frame
+cv2.imshow("Tracking", frame)
 bbox = cv2.selectROI("Tracking", frame, False)
-
+if bbox == (0,0,0,0):
+    exit(0)
 print(bbox) #(xmin,ymin,boxwidth,boxheight)
 ret = tracker.init(frame, bbox)
 # Start tracking
