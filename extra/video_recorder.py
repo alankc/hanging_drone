@@ -32,6 +32,12 @@ if __name__ == "__main__":
                         help=''
                         )
     
+    parser.add_argument('-c', '--counter_start',
+                        required=False,
+                        default=1,
+                        help=''
+                        )
+    
     args = parser.parse_args()
 
     if not os.path.exists(args.parameters):
@@ -124,7 +130,7 @@ if __name__ == "__main__":
 
     success,image = vidcap.read()
     count = 0
-    f_count = 0
+    f_count = int(args.counter_start)
     while success:
         
         if count % 12 == 0:
