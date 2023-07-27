@@ -183,6 +183,8 @@ class Vision:
             tracker = cv2.legacy.TrackerMOSSE_create()
         if tracker_type == self.T_CSRT:
             tracker = cv2.TrackerCSRT_create()
+        
+        self.tracker = tracker
    
     def rotateImage(self, input, roll, pitch, yaw, dx, dy, dz, fx, fy, cx, cy):
         """
