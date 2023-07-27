@@ -110,9 +110,9 @@ class LandingPipeline:
 
                 #Initialize tracker
                 xmin = min(pt1[0], pt2[0])
-                ymin = min(pt1[1], pt2[1])
+                ymin = min(pt1[1], pt2[1]) - 20
                 boxwidth = abs(pt2[0] - pt1[0])
-                boxheight = abs(pt2[1] - pt1[1])
+                boxheight = abs(pt2[1] - pt1[1]) + 40
                 bbox = (xmin, ymin, boxwidth, boxheight)
                 self.__v.tracker.init(self.__image, bbox)
 
