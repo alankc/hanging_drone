@@ -71,7 +71,7 @@ class GlobalStateMachine:
         if res_ssid:
             count = 1
             check = False
-            while not check and count <= 30:
+            while not check and count <= 300:
                 
                 attempt_str = f"Attempt {count} - Connecting to WiFi: {res_ssid}"
                 
