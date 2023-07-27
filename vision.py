@@ -107,8 +107,14 @@ class Vision:
         """
         Matches the descriptors and returns the the variation in X and Y of the reference
         """
-        matches = self.__bfm.knnMatch(d1, d2, k=2)
-        x_ref, y_ref =  ref
+        matches = []
+        if d1 is None:
+            print("D1 NONE")
+        elif d2 is None:
+            print("D2 NONE")
+        else:
+            matches = self.__bfm.knnMatch(d1, d2, k=2)
+            x_ref, y_ref =  ref
         
         error = []
         k_curr = []
