@@ -5,7 +5,7 @@ Vision:
     threshold: 10
   #sift:
   #orb:
-  tracker: MOSSE
+  tracker: CSRT
 Camera:
   fx: 912.8844558325202
   fy: 916.1788304640794
@@ -49,7 +49,7 @@ Control:
       #kd: 0.045
       
       #my PD
-      kp: 0.02
+      kp: 0.03
       ki: 0.000001 #optional
       kd: 0.045
       min: -0.3
