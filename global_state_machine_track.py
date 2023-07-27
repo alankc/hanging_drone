@@ -8,7 +8,7 @@ from easydrone import EasyDrone
 from vision import Vision
 from stereo import Stereo
 from yolo_detector import YOLODetector
-from landing_pipeline import LandingPipeline
+from landing_pipeline_track import LandingPipeline
 from communication import D2RS
 
 class GlobalStateMachine:
@@ -66,7 +66,7 @@ class GlobalStateMachine:
         if res_ssid:
             count = 1
             check = False
-            while not check and count <= 30:
+            while not check and count <= 300:
                 
                 attempt_str = f"Attempt {count} - Connecting to WiFi: {res_ssid}"
                 
@@ -198,12 +198,10 @@ class GlobalStateMachine:
             self.__curr_state_method = self.state_autonomous
 
         elif key == ord("2"): # USe selected rectangle
-            bbox = cv2.selectROI('Camera', self.__image, False)
+            
+            bbox = cv2.selectROI('Camera', self.__image, fromCenter=False, showCrosshair=True)
             
             if bbox != (0,0,0,0):
-
-                self.__v.tracker.init(self.__image, bbox)
-
                 ty = self.__parameters['Control']['ty']
                 dhc = self.__parameters['Control']['drone_hook_center']
                 self.__lp = LandingPipeline(self.__ed, self.__s, self.__v, self.__yd, bbox, self.__image, int(round(self.__cx, 0)), int(round(self.__cy, 0)), self.__out_file, ty, dhc)
@@ -228,12 +226,6 @@ class GlobalStateMachine:
                 self.__ed.save_quaternion()
                 self.__ed.set_destination(x, y, z, yaw)
 
-        elif key == ord(" "):# Clear selected rectangle
-            if not (self.__lp is None):
-                self.__ed.rc_control() #STOPING all controllers
-                self.__ed.PID_reset() #reseting all PIDs
-                self.__state = self.S_AUTONOMOUS
-                self.__curr_state_method = self.state_autonomous
         else:
             ut.rc_control(key, self.__ed)
 
@@ -351,7 +343,7 @@ class GlobalStateMachine:
             exit(0)
 
         elif key == ord(" "):# Change to manual control
-            self.__lp.reset()
+            self.__lp = None
             self.__ed.rc_control() #STOPING all controllers
             self.__ed.PID_reset() #reseting all PIDs
             self.__state = self.S_MANUAL
@@ -435,9 +427,6 @@ class GlobalStateMachine:
         self.__d2rs = D2RS(prs['ip'], prs['port'], pwifi)
 
         self.__desired_fps = self.__parameters['Control']['desired_fps']
-
-        cv2.namedWindow("Camera")
-        cv2.setMouseCallback("Camera", self.mouse_click)
 
     def start(self):
         """

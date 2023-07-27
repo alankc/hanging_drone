@@ -15,7 +15,7 @@ class LandingPipeline:
     RUNNING = 1
     FAIL = -1
 
-    S_YOLO = 0
+    S_CENTRALIZE = 0
     S_FEATURES_1 = 1
     S_FEATURES_2 = 2
     S_ESTIMATION = 3
@@ -34,19 +34,17 @@ class LandingPipeline:
         self.__yd = yd
 
         if bbox:
-            k_ref, d_ref = self.__v.detect_features_in_polygon(frame, np.array(self.__select_rect))
-            self.__k_ref_i = k_ref
-            self.__d_ref_i = d_ref
+            self.__v.tracker.init(frame, bbox)
+            self.__run_yolo = False
         else:
-            self.__k_ref_i = None
-            self.__d_ref_i = None
+            self.__run_yolo = True
 
 
         self.__cx = cx
         self.__cy = cy
         self.__odom_file = odom_file
-        self.__state = self.S_YOLO
-        self.__curr_state_method = self.state_yolo
+        self.__state = self.S_CENTRALIZE
+        self.__curr_state_method = self.state_centralize
         self.__ret_status = self.RUNNING
         self.__ty = ty
         self.__drone_hook_center = drone_hook_center
@@ -55,35 +53,33 @@ class LandingPipeline:
         self.__prev_error_cx = deque(maxlen=10)
         self.__prev_error_cy = deque(maxlen=10)
     
-    def reset(self):
-        """
-        Reset to state 0
-        """
-        self.__state = self.S_YOLO
-        self.__curr_state_method = self.state_yolo
-        self.__ret_status = self.RUNNING
-
     def get_p_start(self):
         return self.__p_start
     
-    def state_yolo(self):
+    def state_centralize(self):
         """
         Uses YOLO to detect possible branches combined with picture-based PIDs 
         to centralize YOLO's rectangle in the midle of the screen
 
         When the rectangle is centralized, it captures the features inside it
         """
+        pt1 = None
+        pt2 = None
+        
+        if self.__run_yolo:
+            pt1, pt2, conf = self.__yd.detect_best(self.__image, confidence=0.4)
+        
+        else:
 
-        #better here than in the reset, 
-        #treats the case that the user selects the rectangle
-        if not ((self.__k_ref_i is None) and (self.__d_ref_i is None)): 
-            self.__k_ref = self.__k_ref_i
-            self.__d_ref = self.__d_ref_i
-            self.__state = self.S_FEATURES_1
-            self.__curr_state_method = self.state_features_1
-            return
+            ret, bbox = self.__v.tracker.update(self.__image)
+            if ret:
+                x1 = int(bbox[0])
+                x2 = int(bbox[0] + bbox[2])
+                y1 = int(bbox[1])
+                y2 = int(bbox[1] + bbox[3])
+                pt1 = (x1, y1)
+                pt2 = (x2, y2)
 
-        pt1, pt2, conf = self.__yd.detect_best(self.__image, confidence=0.4)
         if not ((pt1 is None) and (pt2 is None)):
             #computing error
             error_cx = (pt1[0] + pt2[0]) * 0.5 - self.__cx
@@ -128,7 +124,10 @@ class LandingPipeline:
 
             #drawing the point in image that must be in the center
             ut.draw_dot(self.__image_s, (int(self.__cx + error_cx), int(self.__cy + error_cy)))
-            ut.draw_yolo_rectangle(self.__image_s, pt1, pt2, conf)
+            if self.__run_yolo:
+                ut.draw_yolo_rectangle(self.__image_s, pt1, pt2, conf)
+            else:
+                ut.draw_rectangle(self.__image_s, pt1, pt2)
 
         else:
             self.__ed.set_yaw(0)
@@ -146,15 +145,14 @@ class LandingPipeline:
         Saves them and the current position when the features are centralized
         """
         m = None
-        if ((self.__k_ref_i is None) and (self.__d_ref_i is None)): 
-            ret, bbox = self.__v.tracker.update(self.__image)
-            if ret:
-                y1 = int(bbox[1])
-                y2 = int(bbox[1] + bbox[3])
-                h, w, _ = self.__image_s.shape
-                m = np.zeros((h, w), np.uint8)
-                m[y1:y2, 0:w] = 255
-                ut.draw_rectangle(self.__image_s, (0, y1), (w, y2))
+        ret, bbox = self.__v.tracker.update(self.__image)
+        if ret:
+            y1 = int(bbox[1])
+            y2 = int(bbox[1] + bbox[3])
+            h, w, _ = self.__image_s.shape
+            m = np.zeros((h, w), np.uint8)
+            m[y1:y2, 0:w] = 255
+            ut.draw_rectangle(self.__image_s, (0, y1), (w, y2))
 
         #detect features in the current image
         k, d = self.__v.detect_features(self.__image, m)
@@ -234,15 +232,14 @@ class LandingPipeline:
         self.__ed.set_throttle(ctrl_throttle)
 
         m = None
-        if ((self.__k_ref_i is None) and (self.__d_ref_i is None)): 
-            ret, bbox = self.__v.tracker.update(self.__image)
-            if ret:
-                y1 = int(bbox[1])
-                y2 = int(bbox[1] + bbox[3])
-                h, w, _ = self.__image_s.shape
-                m = np.zeros((h, w), np.uint8)
-                m[y1:y2, 0:w] = 255
-                ut.draw_rectangle(self.__image_s, (0, y1), (w, y2))
+        ret, bbox = self.__v.tracker.update(self.__image)
+        if ret:
+            y1 = int(bbox[1])
+            y2 = int(bbox[1] + bbox[3])
+            h, w, _ = self.__image_s.shape
+            m = np.zeros((h, w), np.uint8)
+            m[y1:y2, 0:w] = 255
+            ut.draw_rectangle(self.__image_s, (0, y1), (w, y2))
         
 
         if abs(error_cz) < 2 and abs(ctrl_throttle) < 0.1:

@@ -1,7 +1,7 @@
 import argparse
 import os
 import yaml
-from global_state_machine import GlobalStateMachine
+from global_state_machine_track import GlobalStateMachine
 
 if __name__ == "__main__":
 
