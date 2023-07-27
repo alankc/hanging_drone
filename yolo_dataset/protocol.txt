@@ -6,12 +6,12 @@ Both sides of the artificial branch for:
 - Facing Timmo's desk (Wall with a heavy background) (abhb) - OK
 - Facing Joel's desk (Wall with a clean background) (abcb) - OK
 
-- Facing forest in the back of the lab (abfb)
-- In the back of a tree trunk (abtt)
+- Facing forest in the back of the lab (abfb) - OK
+- In the back of a tree trunk (abtt) - OK
 
 Create detection for branch and aluminum frame
 
-Natural Branchs
+Natural Branchs - OK
 - Spruce Tree (nbst)
 - Pine Tree (nbpt)
 - Birch tree (nbbt)
