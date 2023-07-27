@@ -118,6 +118,9 @@ class LandingPipeline:
 
                 print("-----------------------------------------------")
                 print(f" STATE {self.__state} END")
+                print(pt1)
+                print(pt2)
+                print(bbox)
                 print("-----------------------------------------------")
 
                 self.__state = self.S_FEATURES_1
