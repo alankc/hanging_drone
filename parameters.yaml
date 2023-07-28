@@ -15,7 +15,7 @@ Camera:
   pitch: -13
   stream: null
 YOLO:
-  path: yolo_dataset/indoor.pt
+  path: /home/x/Documents/landing_pipeline/yolo_dataset/runs/detect/train/weights/best.pt
   #path: yolo_dataset/indoor.pt
 Control:
   pid:
