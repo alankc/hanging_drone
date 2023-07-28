@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-results_path = '/home/x/Documents/landing_pipeline/yolo_dataset/runs/detect/train/results.csv'
+results_path = '/home/x/Documents/landing_pipeline/yolo_dataset/runs/detect/train2/results.csv'
 
 results = pd.read_csv(results_path)
 
@@ -39,10 +39,12 @@ plt.legend()
 
 
 plt.figure()
-plt.plot(results['                  epoch'], results['    metrics/mAP50-95(B)'] * 100)
+plt.plot(results['                  epoch'], results['    metrics/mAP50-95(B)'] * 100, label='mAP50-95')
+plt.plot(results['                  epoch'], results['       metrics/mAP50(B)'] * 100, label='mAP50', c='red')
 plt.grid()
 plt.title('Validation accuracy vs epochs')
 plt.ylabel('accuracy (%)')
 plt.xlabel('epochs')
+plt.legend()
 
 plt.show()
