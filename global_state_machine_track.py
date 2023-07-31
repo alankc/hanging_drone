@@ -191,6 +191,7 @@ class GlobalStateMachine:
         elif key == ord("1"): # Use YOLO
             ty = self.__parameters['Control']['ty']
             dhc = self.__parameters['Control']['drone_hook_center']
+            self.__v.set_tracker(self.__parameters['Vision']['tracker']) #Create new tracker every time, because init works only one time
             self.__lp = LandingPipeline(self.__ed, self.__s, self.__v, self.__yd, None, None, int(round(self.__cx, 0)), int(round(self.__cy, 0)), self.__out_file, ty, dhc)
             self.__ed.PID_reset() #reseting all PIDs
             self.__ed.attitude_reset() #ensure proper positions during the landing
@@ -200,10 +201,11 @@ class GlobalStateMachine:
         elif key == ord("2"): # USe selected rectangle
             
             bbox = cv2.selectROI('Camera', self.__image, fromCenter=False, showCrosshair=True)
-            
+
             if bbox != (0,0,0,0):
                 ty = self.__parameters['Control']['ty']
                 dhc = self.__parameters['Control']['drone_hook_center']
+                self.__v.set_tracker(self.__parameters['Vision']['tracker']) #Create new tracker every time, because init works only one time
                 self.__lp = LandingPipeline(self.__ed, self.__s, self.__v, self.__yd, bbox, self.__image, int(round(self.__cx, 0)), int(round(self.__cy, 0)), self.__out_file, ty, dhc)
                 self.__ed.PID_reset() #reseting all PIDs
                 self.__ed.attitude_reset() #ensure proper positions during the landing
