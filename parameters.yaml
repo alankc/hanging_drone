@@ -5,7 +5,7 @@ Vision:
     threshold: 10
   #sift:
   #orb:
-  tracker: CSRT
+  tracker: MOSSE
 Camera:
   fx: 912.8844558325202
   fy: 916.1788304640794
