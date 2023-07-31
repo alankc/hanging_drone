@@ -120,24 +120,27 @@ class Vision:
         k_curr = []
         d_curr = []
         good_matches = []
-        for m,n in matches:
-            if m.distance < ratio * n.distance:
-                
-                # Getting the matching keypoints row in their lists
-                img2_id = m.trainIdx
+        try:
+            for m,n in matches:
+                if m.distance < ratio * n.distance:
+                    
+                    # Getting the matching keypoints row in their lists
+                    img2_id = m.trainIdx
 
-                # x ares columns
-                # y are rows
-                # Get the coordinates
-                (x2, y2) = k2[img2_id].pt
-                
-                dx = x2 - x_ref
-                dy = y2 - y_ref
-                
-                error.append((dx, dy))
-                k_curr.append(k2[img2_id])
-                d_curr.append(d2[img2_id])
-                good_matches.append(m)
+                    # x ares columns
+                    # y are rows
+                    # Get the coordinates
+                    (x2, y2) = k2[img2_id].pt
+                    
+                    dx = x2 - x_ref
+                    dy = y2 - y_ref
+                    
+                    error.append((dx, dy))
+                    k_curr.append(k2[img2_id])
+                    d_curr.append(d2[img2_id])
+                    good_matches.append(m)
+        except:
+            print("Failure in matching")
 
         
         return np.array(k_curr), np.array(d_curr), np.array(error), np.array(good_matches)
