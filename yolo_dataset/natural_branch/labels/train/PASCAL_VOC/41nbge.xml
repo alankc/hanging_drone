@@ -1,0 +1,14 @@
+<annotation>
+  <folder>/home/x/Documents/landing_pipeline/extra/nb/images/train</folder>
+  <filename>41nbge.png</filename>
+  <path>/home/x/Documents/landing_pipeline/extra/nb/images/train/41nbge.png</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>960</width>
+    <height>720</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+</annotation>
