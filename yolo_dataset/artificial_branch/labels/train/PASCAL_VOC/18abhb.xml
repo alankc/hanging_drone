@@ -1,0 +1,26 @@
+<annotation>
+  <folder>/home/x/Documents/landing_pipeline/extra/ab/images/train</folder>
+  <filename>18abhb.png</filename>
+  <path>/home/x/Documents/landing_pipeline/extra/ab/images/train/18abhb.png</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>960</width>
+    <height>720</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+  <object>
+    <name>branch</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>10</xmin>
+      <ymin>104</ymin>
+      <xmax>335</xmax>
+      <ymax>139</ymax>
+    </bndbox>
+  </object>
+</annotation>

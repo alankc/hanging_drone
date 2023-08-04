@@ -1,0 +1,26 @@
+<annotation>
+  <folder>/home/x/Documents/landing_pipeline/extra/ab/images/valid</folder>
+  <filename>35abdo.png</filename>
+  <path>/home/x/Documents/landing_pipeline/extra/ab/images/valid/35abdo.png</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>960</width>
+    <height>720</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+  <object>
+    <name>branch</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>9</xmin>
+      <ymin>96</ymin>
+      <xmax>246</xmax>
+      <ymax>136</ymax>
+    </bndbox>
+  </object>
+</annotation>
