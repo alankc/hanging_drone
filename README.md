@@ -16,6 +16,7 @@ This work's approach allows a Tello Drone to land in strategic locations for dat
 
 ## Citation
 
+Accepted and awaiting publication.
 ```
 @InProceedings{Cechinel:2023,
     author    = {Cechinel, Alan K. and Röning, Juha and Tikanmaki, Antti and De Pieri, Edson R. and Plentz, Patricia D. M.},
